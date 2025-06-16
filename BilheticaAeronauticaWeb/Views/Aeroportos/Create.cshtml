@@ -1,7 +1,7 @@
-﻿@model BilheticaAeronauticaWeb.Data.Entities.Aeroporto
+﻿@model BilheticaAeronauticaWeb.Models.AeroportosViewModel
 
 @{
-    ViewData["Title"] = "Criar Aeroporto";
+    ViewData["Title"] = "Create";
 }
 
 <h1>Create</h1>
@@ -31,6 +31,16 @@
                 <label asp-for="IATA" class="control-label"></label>
                 <input asp-for="IATA" class="form-control" />
                 <span asp-validation-for="IATA" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" type="file" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="WasDeleted" /> @Html.DisplayNameFor(model => model.WasDeleted)
+                </label>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

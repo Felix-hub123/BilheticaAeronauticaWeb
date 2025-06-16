@@ -1,12 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using BilheticaAeronauticaWeb.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb
 {
@@ -29,6 +30,10 @@ namespace BilheticaAeronauticaWeb
                 {
                     var seedDb = services.GetRequiredService<Data.SeedDb>();
                     seedDb.SeedAsync().Wait();
+                    IdentitySeed.SeedRolesAsync(services).Wait();
+                    IdentitySeed.SeedAdminAsync(services).Wait();
+                    IdentitySeed.SeedFuncionarioAsync(services).Wait();
+
                 }
                 catch (Exception ex)
                 {

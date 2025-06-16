@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,15 +15,25 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required, MaxLength(100)]
         public string Apelido { get; set; }
 
-        public string DocumentoIdentificacao { get; set; }
+        [Required, MaxLength(50)]
+        public string DocumentoIdentificacao { get; set; } 
+
+        [Required, MaxLength(50)]
         public string NumeroDocumento { get; set; }
 
-        public ICollection<Bilhete> Bilhetes { get; set; }
+        public DateTime DataRegisto { get; set; } = DateTime.UtcNow;
+
+        // Histórico de bilhetes comprados pelo cliente
 
         [NotMapped]
         public string NomeCompleto => $"{Nome} {Apelido}";
 
-        public bool WasDeleted { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        // Ligação ao utilizador autenticado (Identity)
+        [Required]
+        public string UserId { get; set; }
+        public User User { get; set; }
+
+        public bool WasDeleted { get; set; }
     }
 }
 

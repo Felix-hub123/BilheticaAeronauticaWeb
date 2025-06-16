@@ -21,21 +21,28 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required, Range(0, 100)]
         public int LugaresExecutiva { get; set; }
 
-        [Required]
+        
+        [Display(Name = "Image")]
         public Guid ImageId { get; set; }
 
-        public bool Disponivel { get; set; }
+        public string ImageFullPath => ImageId == Guid.Empty
+            ? $"/images/aviao/noimage.png"
+            : $"https://bilheticaaeronauticaapp.blob.core.windows.net/avioes/{ImageId}";
+             
 
+
+
+        public bool Disponivel { get; set; } = true;
+
+       
         [NotMapped]
         public int Capacidade => LugaresEconomica + LugaresExecutiva;
 
-        [NotMapped]
-        public string ImageFullPath => ImageId == Guid.Empty
-            ? "/images/noimage.png"
-            : $"/images/aeronaves/{ImageId}";
+       
+      
+        public ICollection<Lugar> Lugares { get; set; } = new List<Lugar>();
 
-        public ICollection<Voo> Voos { get; set; }
-        public ICollection<Lugar> Lugares { get; set; }
-        public bool WasDeleted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+       
+        public bool WasDeleted { get; set; }
     }
 }

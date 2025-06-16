@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using BilheticaAeronauticaWeb.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 

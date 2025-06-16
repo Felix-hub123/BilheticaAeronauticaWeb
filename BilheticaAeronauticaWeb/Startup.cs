@@ -10,6 +10,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using BilheticaAeronauticaWeb.Data;
+using BilheticaAeronauticaWeb.Data.Entities;
+using Microsoft.AspNetCore.Identity;
+using BilheticaAeronauticaWeb.Helper;
+using Microsoft.Extensions.Azure;
+using Azure.Data.Tables;
+using Azure.Storage.Queues;
+using Azure.Storage.Blobs;
+using Azure.Core.Extensions;
 
 namespace BilheticaAeronauticaWeb
 {
@@ -30,9 +38,31 @@ namespace BilheticaAeronauticaWeb
                 cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddIdentity<User, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+            })
+            .AddEntityFrameworkStores<DataContext>()
+            .AddDefaultTokenProviders();
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.AddScoped<IUserHelper, UserHelper>();
+            services.AddScoped<IBlobHelper, BlobHelper>();
+            services.AddScoped<IConverterHelper, ConverterHelper>();
             services.AddTransient<SeedDb>();
             services.AddScoped<IAeroportoRepository, AeroportoRepository>();
-
+            services.AddScoped<IAviaoRepository, AviaoRepository>();
+            services.AddScoped<IPassageiroRepository, PassageiroRepository>();
+            services.AddScoped<IImageHelper, ImageHelper>();
+            services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, BilheticaAeronauticaWeb.Helper.EmailSender>();
 
             services.AddControllersWithViews();
            
@@ -57,13 +87,18 @@ namespace BilheticaAeronauticaWeb
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
+
             app.UseAuthorization();
 
+           
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }

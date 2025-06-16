@@ -7,22 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Helper;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
     public class PassageirosController : Controller
     {
-        private readonly DataContext _context;
+        private readonly IPassageiroRepository _passageiroRepository;
+        private readonly UserHelper _userHelper;
 
-        public PassageirosController(DataContext context)
+        public PassageirosController(IPassageiroRepository passageiroRepository, UserHelper userHelper)
         {
-            _context = context;
+            _passageiroRepository = passageiroRepository;
+            _userHelper = userHelper;
+
         }
 
         // GET: Passageiros
-        public async Task<IActionResult> Index()
+        public  IActionResult Index()
         {
-            return View(await _context.Passageiros.ToListAsync());
+            return View(_passageiroRepository.GetAll().OrderBy(p=> p.Nome));
         }
 
         // GET: Passageiros/Details/5
@@ -33,8 +37,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            var passageiro = await _context.Passageiros
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var passageiro = await _passageiroRepository.GetByIdAsync(id.Value);
             if (passageiro == null)
             {
                 return NotFound();
@@ -54,16 +57,48 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Apelido,DocumentoIdentificacao,NumeroDocumento")] Passageiro passageiro)
+        public async Task<IActionResult> Create(Passageiro passageiro, string email, string password)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(passageiro);
-                await _context.SaveChangesAsync();
+                // 1. Verifica se já existe um utilizador com este email
+                var user = await _userHelper.GetUserByEmailAsync(email);
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true // ou false se quiseres confirmação por email
+                    };
+                    var result = await _userHelper.AddUserAsync(user, password);
+                    if (result.Succeeded)
+                    {
+                        await _userHelper.AddUserToRoleAsync(user, "Cliente");
+                    }
+                    else
+                    {
+                        foreach (var error in result.Errors)
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        return View(passageiro);
+                    }
+                }
+
+                // 2. Associa o UserId ao Passageiro
+                passageiro.UserId = user.Id;
+                passageiro.DataRegisto = DateTime.UtcNow;
+                passageiro.WasDeleted = false;
+
+                await _passageiroRepository.CreateAsync(passageiro);
                 return RedirectToAction(nameof(Index));
             }
             return View(passageiro);
         }
+        
+
+
+
+
 
         // GET: Passageiros/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -73,7 +108,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            var passageiro = await _context.Passageiros.FindAsync(id);
+            var passageiro = await _passageiroRepository.GetByIdAsync(id.Value);
             if (passageiro == null)
             {
                 return NotFound();
@@ -86,7 +121,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Apelido,DocumentoIdentificacao,NumeroDocumento")] Passageiro passageiro)
+        public async Task<IActionResult> Edit(int id,Passageiro passageiro)
         {
             if (id != passageiro.Id)
             {
@@ -97,12 +132,11 @@ namespace BilheticaAeronauticaWeb.Controllers
             {
                 try
                 {
-                    _context.Update(passageiro);
-                    await _context.SaveChangesAsync();
+                   await _passageiroRepository.UpdateAsync(passageiro);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PassageiroExists(passageiro.Id))
+                    if (!await _passageiroRepository.ExistsAsync(passageiro.Id))
                     {
                         return NotFound();
                     }
@@ -124,8 +158,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            var passageiro = await _context.Passageiros
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var passageiro = await _passageiroRepository.GetByIdAsync(id.Value);
             if (passageiro == null)
             {
                 return NotFound();
@@ -139,15 +172,11 @@ namespace BilheticaAeronauticaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var passageiro = await _context.Passageiros.FindAsync(id);
-            _context.Passageiros.Remove(passageiro);
-            await _context.SaveChangesAsync();
+            var passageiro = await _passageiroRepository.GetByIdAsync(id);
+            await _passageiroRepository.DeleteAsync(passageiro);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PassageiroExists(int id)
-        {
-            return _context.Passageiros.Any(e => e.Id == id);
-        }
+     
     }
 }

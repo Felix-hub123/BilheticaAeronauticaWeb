@@ -1,16 +1,16 @@
-﻿@model BilheticaAeronauticaWeb.Data.Entities.Aviao
+﻿@model BilheticaAeronauticaWeb.Models.AvioesViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Criar novo Avião";
 }
 
-<h1>Create</h1>
+<h1>Novo Avião</h1>
 
 <h4>Aviao</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Marca" class="control-label"></label>
@@ -33,9 +33,9 @@
                 <span asp-validation-for="LugaresExecutiva" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ImageId" class="control-label"></label>
-                <input asp-for="ImageId" class="form-control" />
-                <span asp-validation-for="ImageId" class="text-danger"></span>
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" type="file" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
             <div class="form-group form-check">
                 <label class="form-check-label">

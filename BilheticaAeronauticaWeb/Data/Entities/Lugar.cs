@@ -22,7 +22,6 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public int AeronaveId { get; set; }
         public Aviao Aviao { get; set; }
 
-        public ICollection<Bilhete> Bilhetes { get; set; }
 
         [NotMapped]
         public string CodigoAssento => $"{Fila}{Numero}";

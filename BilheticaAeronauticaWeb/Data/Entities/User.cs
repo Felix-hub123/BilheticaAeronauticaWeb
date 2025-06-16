@@ -17,17 +17,13 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [MaxLength(200)]
         public string Address { get; set; }
 
-        public Guid ImageId { get; set; }
+        public string ProfilePhotoUrl { get; set; }
 
-        public ICollection<Bilhete> Bilhetes { get; set; }
-
+       
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
 
-        [NotMapped]
-        public string ImageFullPath => ImageId == Guid.Empty
-            ? "/images/noimage.png"
-            : $"/images/users/{ImageId}";
+    
 
 
     }

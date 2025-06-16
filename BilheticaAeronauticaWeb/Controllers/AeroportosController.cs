@@ -1,25 +1,41 @@
 ﻿using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Helper;
+using BilheticaAeronauticaWeb.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
     public class AeroportosController : Controller
     {
-
+        
         private readonly IAeroportoRepository _aeroportoRepository;
+        private readonly IUserHelper _userHelper;
+        private readonly IBlobHelper _blobHelper;
+        private readonly IConverterHelper _converterHelper;
 
-        public AeroportosController(IAeroportoRepository aeroportoRepository)
+        public AeroportosController( IAeroportoRepository aeroportoRepository,
+            IUserHelper userHelper,
+            IBlobHelper blobHelper,
+            IConverterHelper converterHelper)
         {
+           
             _aeroportoRepository = aeroportoRepository;
+            _userHelper = userHelper;
+            _blobHelper = blobHelper;
+            _converterHelper = converterHelper;
         }
 
         // GET: Aeroportos
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(_aeroportoRepository.GetAll());
+            return View(_aeroportoRepository.GetAll().OrderBy(p => p.Cidade));
         }
 
         // GET: Aeroportos/Details/5
@@ -50,14 +66,27 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Aeroporto aeroporto)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Cidade,Pais,IATA,ImageId,WasDeleted")] AeroportosViewModel model)
         {
             if (ModelState.IsValid)
             {
+                Guid imageId = Guid.Empty;
+
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+
+
+                    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "products");
+
+                }
+
+                var aeroporto = _converterHelper.ToAeroporto(model, imageId, true);
+
                 await _aeroportoRepository.CreateAsync(aeroporto);
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(aeroporto);
+            return View(model);
         }
 
         // GET: Aeroportos/Edit/5
@@ -73,7 +102,9 @@ namespace BilheticaAeronauticaWeb.Controllers
             {
                 return NotFound();
             }
-            return View(aeroporto);
+
+            var model = _converterHelper.ToAeroportosViewModel(aeroporto);
+            return View(model);
         }
 
         // POST: Aeroportos/Edit/5
@@ -81,23 +112,28 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Aeroporto aeroporto)
+        public async Task<IActionResult> Edit( AeroportosViewModel model)
         {
-            if (id != aeroporto.Id)
-            {
-                return NotFound();
-            }
+           
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _aeroportoRepository.UpdateAsync(aeroporto);
+                    Guid imageId = model.ImageId;
 
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    {
+
+                        imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "products");
+
+                    }
+                    var aeroporto = _converterHelper.ToAeroporto(model, imageId, false);
+                    await _aeroportoRepository.UpdateAsync(aeroporto);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _aeroportoRepository.ExistsAsync(aeroporto.Id))
+                    if (!await _aeroportoRepository.ExistsAsync(model.Id))
                     {
                         return NotFound();
                     }
@@ -108,7 +144,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(aeroporto);
+            return View(model);
         }
 
         // GET: Aeroportos/Delete/5
@@ -128,16 +164,16 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(aeroporto);
         }
 
-        // POST: Aeroportos/Delete/5
+        // Fix for CS4014: Added 'await' to the DeleteAsync call to ensure proper asynchronous execution.
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var aeroporto = await _aeroportoRepository.GetByIdAsync(id);
-            await _aeroportoRepository.DeleteAsync(aeroporto); 
+           await _aeroportoRepository.DeleteAsync(aeroporto);
             return RedirectToAction(nameof(Index));
         }
 
-
+       
     }
 }

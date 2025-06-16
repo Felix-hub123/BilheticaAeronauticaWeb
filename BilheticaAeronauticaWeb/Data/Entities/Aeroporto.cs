@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,16 +21,13 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required, MaxLength(3)]
         public string IATA { get; set; }
 
+        public Guid ImageId { get; set; }
 
-        [NotMapped]
-        public string BandeiraUrl => $"/images/bandeiras/{Pais.ToLower().Replace(" ", "_")}.png";
+        public string ImageFullPath => ImageId == Guid.Empty
+        ? $"/images/aeroportos/noimage.png"
+        : $"https://bilheticaaeronauticaapp.blob.core.windows.net/aeroportos/{ImageId}";
 
-        [InverseProperty("Origem")]
-        public ICollection<Voo> VoosOrigem { get; set; }
-
-        [InverseProperty("Destino")]
-        public ICollection<Voo> VoosDestino { get; set; }
-
+     
         public bool WasDeleted { get; set; }
     }
 
