@@ -9,8 +9,10 @@ namespace BilheticaAeronauticaWeb.Data.Entities
     {
         public int Id { get; set; }
 
+
         [Required, MaxLength(100)]
         public string Nome { get; set; }
+
 
         [Required, MaxLength(100)]
         public string Cidade { get; set; }
@@ -24,10 +26,10 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public Guid ImageId { get; set; }
 
         public string ImageFullPath => ImageId == Guid.Empty
-        ? $"/images/aeroportos/noimage.png"
-        : $"https://bilheticaaeronauticaapp.blob.core.windows.net/aeroportos/{ImageId}";
+             ? $"/images/aeroportos/noimage.png"
+             : $"https://bilheticaaeronauticaapp.blob.core.windows.net/aeroportos/{ImageId}";
 
-     
+
         public bool WasDeleted { get; set; }
     }
 

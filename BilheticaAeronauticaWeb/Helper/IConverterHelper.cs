@@ -13,5 +13,11 @@ namespace BilheticaAeronauticaWeb.Helper
         Aeroporto ToAeroporto(AeroportosViewModel model, Guid ImageId, bool isNew);
 
         AeroportosViewModel ToAeroportosViewModel(Aeroporto aeroporto);
+
+        Passageiro ToPassageiro(PassageiroViewModel model, string userId, bool isNew);
+
+        PassageiroViewModel ToPassageirosViewModel(Passageiro passageiro);
+
+
     }
 }

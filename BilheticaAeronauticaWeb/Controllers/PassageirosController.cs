@@ -1,32 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BilheticaAeronauticaWeb.Data;
+using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Helper;
+using BilheticaAeronauticaWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BilheticaAeronauticaWeb.Data;
-using BilheticaAeronauticaWeb.Data.Entities;
-using BilheticaAeronauticaWeb.Helper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
+   
     public class PassageirosController : Controller
     {
+       
         private readonly IPassageiroRepository _passageiroRepository;
-        private readonly UserHelper _userHelper;
+        private readonly IUserHelper _userHelper;
+        private readonly IConverterHelper _converterHelper;
 
-        public PassageirosController(IPassageiroRepository passageiroRepository, UserHelper userHelper)
+        public PassageirosController(
+            IPassageiroRepository passageiroRepository,
+             IUserHelper userHelper,
+             IConverterHelper converterHelper
+            )
         {
             _passageiroRepository = passageiroRepository;
             _userHelper = userHelper;
-
+            _converterHelper = converterHelper;
         }
 
         // GET: Passageiros
-        public  IActionResult Index()
+        public IActionResult Index()
         {
-            return View(_passageiroRepository.GetAll().OrderBy(p=> p.Nome));
+            return View(_passageiroRepository.GetAll().OrderBy(p => p.Nome));
         }
 
         // GET: Passageiros/Details/5
@@ -49,6 +58,8 @@ namespace BilheticaAeronauticaWeb.Controllers
         // GET: Passageiros/Create
         public IActionResult Create()
         {
+            
+            ViewData["UserId"] = new SelectList(_passageiroRepository.GetAll(), "Id", "Id");
             return View();
         }
 
@@ -57,48 +68,17 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Passageiro passageiro, string email, string password)
+        public async Task<IActionResult> Create(PassageiroViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // 1. Verifica se já existe um utilizador com este email
-                var user = await _userHelper.GetUserByEmailAsync(email);
-                if (user == null)
-                {
-                    user = new User
-                    {
-                        UserName = email,
-                        Email = email,
-                        EmailConfirmed = true // ou false se quiseres confirmação por email
-                    };
-                    var result = await _userHelper.AddUserAsync(user, password);
-                    if (result.Succeeded)
-                    {
-                        await _userHelper.AddUserToRoleAsync(user, "Cliente");
-                    }
-                    else
-                    {
-                        foreach (var error in result.Errors)
-                            ModelState.AddModelError(string.Empty, error.Description);
-                        return View(passageiro);
-                    }
-                }
-
-                // 2. Associa o UserId ao Passageiro
-                passageiro.UserId = user.Id;
-                passageiro.DataRegisto = DateTime.UtcNow;
-                passageiro.WasDeleted = false;
-
+                var userId = _userHelper.GetUserId(User);
+                var passageiro = _converterHelper.ToPassageiro(model, userId, true);
                 await _passageiroRepository.CreateAsync(passageiro);
                 return RedirectToAction(nameof(Index));
             }
-            return View(passageiro);
+             return View(model);
         }
-        
-
-
-
-
 
         // GET: Passageiros/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -113,7 +93,9 @@ namespace BilheticaAeronauticaWeb.Controllers
             {
                 return NotFound();
             }
-            return View(passageiro);
+
+            var model = _converterHelper.ToPassageirosViewModel(passageiro);
+            return View(model);
         }
 
         // POST: Passageiros/Edit/5
@@ -121,22 +103,23 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,Passageiro passageiro)
+        public async Task<IActionResult> Edit(PassageiroViewModel model)
         {
-            if (id != passageiro.Id)
-            {
-                return NotFound();
-            }
+          
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                   await _passageiroRepository.UpdateAsync(passageiro);
+                    var userId = _userHelper.GetUserId(User);
+                    var passageiro = _converterHelper.ToPassageiro(model, userId, false);
+                    await _passageiroRepository.UpdateAsync(passageiro);
+                    return RedirectToAction(nameof(Index));
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _passageiroRepository.ExistsAsync(passageiro.Id))
+                    if (!PassageiroExists(model.Id))
                     {
                         return NotFound();
                     }
@@ -145,12 +128,14 @@ namespace BilheticaAeronauticaWeb.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+               
             }
-            return View(passageiro);
+          
+            return View(model);
         }
 
-        // GET: Passageiros/Delete/5
+       
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -164,7 +149,8 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            return View(passageiro);
+            await _passageiroRepository.DeleteAsync(passageiro); 
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Passageiros/Delete/5
@@ -177,6 +163,9 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-     
+        private bool PassageiroExists(int id)
+        {
+            return _passageiroRepository.ExistsAsync(id).Result;
+        }
     }
 }

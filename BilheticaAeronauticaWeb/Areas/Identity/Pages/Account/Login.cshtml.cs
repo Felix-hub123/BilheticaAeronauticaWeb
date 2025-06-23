@@ -86,7 +86,17 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+
+                    // Redirecionar conforme o role
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                        return RedirectToAction("Index", "Admin");
+                    else if (await _userManager.IsInRoleAsync(user, "Funcionario"))
+                        return RedirectToAction("Index", "Funcionarios");
+                    else if (await _userManager.IsInRoleAsync(user, "Passageiro"))
+                        return RedirectToAction("Index", "Passageiros");
+                    else
+                        return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
                 {

@@ -9,23 +9,24 @@ namespace BilheticaAeronauticaWeb.Helper
     {
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var smtpClient = new SmtpClient("smtp.gmail.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential("felixtchilo@gmail.com", "Muachimona1"),
-                EnableSsl = true,
-            };
+            //var smtpClient = new SmtpClient("smtp.gmail.com")
+            //{
+            //    Port = 587,
+            //    Credentials = new NetworkCredential("felixtchilo@gmail.com", "Muachimona1"),
+            //    EnableSsl = true,
+            //};
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress("felixtchilo@gmail.com"),
-                Subject = subject,
-                Body = htmlMessage,
-                IsBodyHtml = true,
-            };
-            mailMessage.To.Add(email);
+            //var mailMessage = new MailMessage
+            //{
+            //    From = new MailAddress("felixtchilo@gmail.com"),
+            //    Subject = subject,
+            //    Body = htmlMessage,
+            //    IsBodyHtml = true,
+            //};
+            //mailMessage.To.Add(email);
 
-            return smtpClient.SendMailAsync(mailMessage);
+            //return smtpClient.SendMailAsync(mailMessage);
+            return Task.CompletedTask;
         }
     }
 }

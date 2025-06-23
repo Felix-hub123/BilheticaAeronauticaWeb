@@ -1,0 +1,42 @@
+﻿@model IEnumerable<BilheticaAeronauticaWeb.Data.Entities.Voo>
+
+@{
+    ViewData["Title"] = "Lista de Voos";
+}
+
+<h1>Lista de Voos</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Criar Novo Voo</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Origem</th>
+            <th>Destino</th>
+            <th>Aviao</th>
+            <th>Partida</th>
+            <th>Chegada</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var voo in Model)
+        {
+            <tr>
+                <td>@voo.Origem?.Nome</td>
+                <td>@voo.Destino?.Nome</td>
+                <td>@voo.Aviao?.Modelo</td>
+                <td>@voo.DataHoraPartida.ToString("g")</td>
+                <td>@voo.DataHoraChegada.ToString("g")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@voo.Id">Detalhes</a> |
+                    <a asp-action="Edit" asp-route-id="@voo.Id">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@voo.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

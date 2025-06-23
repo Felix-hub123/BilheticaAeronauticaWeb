@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Área do Passageiro";
+}
+
+<h1>Área do Passageiro</h1>
+
+<div class="alert alert-info">
+    Bem-vindo! Aqui pode consultar voos, comprar bilhetes e ver o seu histórico de viagens.
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Consultar Voos</h5>
+                <p class="card-text">Veja todos os voos disponíveis e detalhes de horários.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Voos")">Consultar Voos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Comprar Bilhetes</h5>
+                <p class="card-text">Adquira bilhetes para os voos disponíveis.</p>
+                <a class="btn btn-primary" href="@Url.Action("Comprar", "Bilhetes")">Comprar Bilhetes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Histórico de Viagens</h5>
+                <p class="card-text">Consulte os bilhetes já adquiridos e os voos realizados.</p>
+                <a class="btn btn-primary" href="@Url.Action("Historico", "Bilhetes")">Ver Histórico</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <h4>Outras opções</h4>
+    <ul>
+        <li><a href="@Url.Action("Index", "Home")">Voltar ao Início</a></li>
+        <li><a href="@Url.Action("Perfil", "Passageiro")">Ver/Editar Perfil</a></li>
+    </ul>
+</div>

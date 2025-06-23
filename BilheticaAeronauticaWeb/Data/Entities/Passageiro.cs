@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,7 +16,9 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public string Apelido { get; set; }
 
         [Required, MaxLength(50)]
-        public string DocumentoIdentificacao { get; set; } 
+        public string DocumentoIdentificacao { get; set; }
+
+        public DateTime? DataNascimento { get; set; }
 
         [Required, MaxLength(50)]
         public string NumeroDocumento { get; set; }
@@ -29,7 +31,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public string NomeCompleto => $"{Nome} {Apelido}";
 
         // Ligação ao utilizador autenticado (Identity)
-        [Required]
+      
         public string UserId { get; set; }
         public User User { get; set; }
 

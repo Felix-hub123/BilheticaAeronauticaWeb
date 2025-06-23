@@ -32,8 +32,8 @@ namespace BilheticaAeronauticaWeb.Data
             {
                 user = new User
                 {
-                    FirstName = "Admin",
-                    LastName = "Plataforma",
+                    Nome = "Admin",
+                    Apelido = "Plataforma",
                     Email = email,
                     UserName = email,
                     EmailConfirmed = true
@@ -54,8 +54,8 @@ namespace BilheticaAeronauticaWeb.Data
             {
                 user = new User
                 {
-                    FirstName = "Funcionario",
-                    LastName = "Exemplo",
+                    Nome = "Funcionario",
+                    Apelido = "Exemplo",
                     Email = email,
                     UserName = email,
                     EmailConfirmed = false // O funcionário deve receber email para ativar/alterar password

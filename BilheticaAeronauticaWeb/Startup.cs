@@ -52,8 +52,13 @@ namespace BilheticaAeronauticaWeb
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
 
-            services.AddControllersWithViews();
+          
             services.AddRazorPages();
+            services.AddControllersWithViews();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+            });
             services.AddScoped<IUserHelper, UserHelper>();
             services.AddScoped<IBlobHelper, BlobHelper>();
             services.AddScoped<IConverterHelper, ConverterHelper>();
@@ -62,12 +67,12 @@ namespace BilheticaAeronauticaWeb
             services.AddScoped<IAviaoRepository, AviaoRepository>();
             services.AddScoped<IPassageiroRepository, PassageiroRepository>();
             services.AddScoped<IImageHelper, ImageHelper>();
+            services.AddScoped<IVooRepository, VooRepository>();
+
+
             services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, BilheticaAeronauticaWeb.Helper.EmailSender>();
 
-            services.AddControllersWithViews();
-           
-
-
+                   
         }
            
 

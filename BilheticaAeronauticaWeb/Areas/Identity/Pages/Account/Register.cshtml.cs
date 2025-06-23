@@ -54,7 +54,7 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
 
-            [Display(Name = "Address")]
+            [Display(Name = "Endereço")]
             public string Address { get; set; }
 
             [Display(Name = "Profile Photo URL")]
@@ -92,16 +92,17 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
                 {
                     UserName = Input.Email,
                     Email = Input.Email,
-                    FirstName = Input.FirstName,
-                    LastName = Input.LastName,
-                    Address = Input.Address,
-                    ProfilePhotoUrl = Input.ProfilePhotoUrl
+                    Nome = Input.FirstName,
+                    Apelido = Input.LastName,
+                    Endereço = Input.Address,
+                    ImageId = Guid.TryParse(Input.ProfilePhotoUrl, out var parsedGuid) ? parsedGuid : Guid.Empty 
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    await _userManager.AddToRoleAsync(user, "Cliente");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -128,6 +129,8 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
+               
+
             }
 
             // If we got this far, something failed, redisplay form

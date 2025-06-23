@@ -29,15 +29,25 @@
                 <span asp-validation-for="DocumentoIdentificacao" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="DataNascimento" class="control-label"></label>
+                <input asp-for="DataNascimento" class="form-control" />
+                <span asp-validation-for="DataNascimento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="NumeroDocumento" class="control-label"></label>
                 <input asp-for="NumeroDocumento" class="form-control" />
                 <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DataRegisto" class="control-label"></label>
+                <p class="form-control-plaintext">@Model.DataRegisto.ToString("dd/MM/yyyy HH:mm")</p>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>
+   
 </div>
 
 <div>

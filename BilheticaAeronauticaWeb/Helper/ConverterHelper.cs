@@ -62,6 +62,36 @@ namespace BilheticaAeronauticaWeb.Helper
                 IATA = aeroporto.IATA,
                 ImageId = aeroporto.ImageId
             };
+
+        }
+
+        public Passageiro ToPassageiro(PassageiroViewModel model, string userId, bool isNew)
+        {
+            return new Passageiro
+            {
+                Id = isNew ? 0 : model.Id,
+                Nome = model.Nome,
+                Apelido = model.Apelido,
+                DocumentoIdentificacao = model.DocumentoIdentificacao,
+                NumeroDocumento = model.NumeroDocumento,
+                DataNascimento = model.DataNascimento,
+                DataRegisto = DateTime.UtcNow,
+                UserId = userId,
+                WasDeleted = false
+            };
+        }
+
+        public PassageiroViewModel ToPassageirosViewModel(Passageiro passageiro)
+        {
+            return new PassageiroViewModel
+            {
+                Id = passageiro.Id,
+                Nome = passageiro.Nome,
+                Apelido = passageiro.Apelido,
+                DocumentoIdentificacao = passageiro.DocumentoIdentificacao,
+                NumeroDocumento = passageiro.NumeroDocumento,
+                DataNascimento = passageiro.DataNascimento
+            };
         }
     }
 }

@@ -82,27 +82,7 @@ namespace BilheticaAeronauticaWeb.Data
             return user;
         }
 
-        //private void AddBilhetes()
-        //{
-        //    var voo = _context.Voos.FirstOrDefault();
-        //    var lugar = _context.Lugares.FirstOrDefault();
-        //    var passageiro = _context.Passageiros.FirstOrDefault();
-        //    if (voo != null && lugar != null && passageiro != null)
-        //    {
-        //        _context.Bilhetes.Add(new Bilhete
-        //        {
-        //            Tarifa = 100,
-        //            Classe = "Económica",
-        //            PodeAlterar = false,
-        //            DataCompra = DateTime.Now,
-        //            //VooId = voo.Id,
-        //            //LugarId = lugar.Id,
-        //            //PassageiroId = passageiro.Id,
-        //            //UserId = null 
-        //        });
-        //    }
-        //}
-
+       
 
         private void AddAeroportos()
         {
@@ -122,28 +102,80 @@ namespace BilheticaAeronauticaWeb.Data
                 DocumentoIdentificacao = "CC",
                 NumeroDocumento = "12345678",
                 DataRegisto = DateTime.UtcNow,
-                UserId = clienteUser.Id 
+                //UserId = clienteUser.Id 
             });
         }
 
+
+        private void AddVoos()
+        {
+            var aviao = _context.Avioes.FirstOrDefault(); 
+            var origem = _context.Aeroportos.FirstOrDefault();
+            var destino = _context.Aeroportos.Skip(1).FirstOrDefault();
+
+            if (aviao != null && origem != null && destino != null)
+            {
+                _context.Voos.Add(new Voo
+                {
+                    AviaoId = aviao.Id,
+                    OrigemId = origem.Id,
+                    DestinoId = destino.Id,
+                    DataHoraPartida = DateTime.UtcNow.AddDays(1),
+                    DataHoraChegada = DateTime.UtcNow.AddDays(1).AddHours(2)
+                });
+            }
+        }
+
+        private void AddBilhetes(User clienteUser)
+        {
+            var passageiro = _context.Passageiros.FirstOrDefault(p => p.UserId == clienteUser.Id);
+            var voo = _context.Voos.FirstOrDefault();
+            var lugar = _context.Lugares.FirstOrDefault();
+
+            if (passageiro != null && voo != null && lugar != null)
+            {
+                _context.Bilhetes.Add(new Bilhete
+                {
+                    LugarId = lugar.Id,
+                    PassageiroId = passageiro.Id,
+                    DataCompra = DateTime.UtcNow,
+                    Preco = 100
+                });
+                lugar.Disponivel = false;
+            }
+        }
+
+
         private void AddLugares()
         {
-            for (int fila = 1; fila <= 2; fila++)
+            // Gera lugares para cada avião existente
+            foreach (var aviao in _context.Avioes)
             {
-                for (int numero = 1; numero <= 5; numero++)
+                // Lugares de classe económica
+                for (int i = 1; i <= aviao.LugaresEconomica; i++)
                 {
                     _context.Lugares.Add(new Lugar
                     {
-                        Fila = fila.ToString(),
-                        Numero = numero,
-                        Classe = "Económica",
+                        AviaoId = aviao.Id,
+                        Codigo = $"E{i}",
                         Disponivel = true,
-                        AeronaveId = 1 
+                        WasDeleted = false
+                    });
+                }
+
+                // Lugares de classe executiva
+                for (int i = 1; i <= aviao.LugaresExecutiva; i++)
+                {
+                    _context.Lugares.Add(new Lugar
+                    {
+                        AviaoId = aviao.Id,
+                        Codigo = $"X{i}",
+                        Disponivel = true,
+                        WasDeleted = false
                     });
                 }
             }
         }
 
-              
     }
 }

@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Painel de Administração";
+}
+
+<h1>Painel de Administração</h1>
+
+<div class="alert alert-info">
+    Bem-vindo, administrador! Utilize os atalhos abaixo para gerir o sistema.
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Funcionários</h5>
+                <p class="card-text">Adicionar, editar e remover funcionários do sistema.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Funcionarios")">Gerir Funcionários</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Aeroportos</h5>
+                <p class="card-text">Gerir aeroportos e cidades disponíveis.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Aeroportos")">Gerir Aeroportos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Aviões</h5>
+                <p class="card-text">Adicionar e gerir a frota de aeronaves.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Avioes")">Gerir Aviões</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <h4>Outras opções</h4>
+    <ul>
+        <li><a href="@Url.Action("Index", "Passageiros")">Consultar Passageiros</a></li>
+        <li><a href="@Url.Action("Index", "Home")">Voltar ao Início</a></li>
+    </ul>
+</div>
+

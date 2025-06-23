@@ -19,17 +19,20 @@ namespace BilheticaAeronauticaWeb.Controllers
         private readonly IUserHelper _userHelper;
         private readonly IBlobHelper _blobHelper;
         private readonly IConverterHelper _converterHelper;
+        private readonly IImageHelper _imageHelper;
 
         public AeroportosController( IAeroportoRepository aeroportoRepository,
             IUserHelper userHelper,
             IBlobHelper blobHelper,
-            IConverterHelper converterHelper)
+            IConverterHelper converterHelper,
+            IImageHelper imageHelper)
         {
            
             _aeroportoRepository = aeroportoRepository;
             _userHelper = userHelper;
             _blobHelper = blobHelper;
             _converterHelper = converterHelper;
+            _imageHelper = imageHelper;
         }
 
         // GET: Aeroportos
@@ -66,7 +69,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Cidade,Pais,IATA,ImageId,WasDeleted")] AeroportosViewModel model)
+        public async Task<IActionResult> Create( AeroportosViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -76,7 +79,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                 {
 
 
-                    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "products");
+                    imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "aeroportos");
 
                 }
 
@@ -125,7 +128,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                     if (model.ImageFile != null && model.ImageFile.Length > 0)
                     {
 
-                        imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "products");
+                        imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "aeroportos");
 
                     }
                     var aeroporto = _converterHelper.ToAeroporto(model, imageId, false);

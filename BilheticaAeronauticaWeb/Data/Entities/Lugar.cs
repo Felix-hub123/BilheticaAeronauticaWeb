@@ -8,24 +8,20 @@ namespace BilheticaAeronauticaWeb.Data.Entities
     {
         public int Id { get; set; }
 
-        [Required, MaxLength(1)]
-        public string Fila { get; set; } 
-
-        [Required]
-        public int Numero { get; set; } 
-
-        [Required, MaxLength(20)]
-        public string Classe { get; set; } 
+        [Required, MaxLength(10)]
+        public string Codigo { get; set; } // Ex: 12A, 1B, etc.
 
         public bool Disponivel { get; set; } = true;
 
-        public int AeronaveId { get; set; }
+      
+        public int AviaoId { get; set; }
         public Aviao Aviao { get; set; }
 
+       
+        public int? VooId { get; set; }
+        public Voo Voo { get; set; }
 
-        [NotMapped]
-        public string CodigoAssento => $"{Fila}{Numero}";
-
-        public bool WasDeleted { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        // Soft delete
+        public bool WasDeleted { get; set; }
     }
 }

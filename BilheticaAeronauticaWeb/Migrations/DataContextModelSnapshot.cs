@@ -58,7 +58,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Aeroportos");
+                    b.ToTable("Aeroportos", (string)null);
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Aviao", b =>
@@ -96,7 +96,39 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Avioes");
+                    b.ToTable("Avioes", (string)null);
+                });
+
+            modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Bilhete", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCompra")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LugarId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PassageiroId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Preco")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("WasDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LugarId");
+
+                    b.HasIndex("PassageiroId");
+
+                    b.ToTable("Bilhetes", (string)null);
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Lugar", b =>
@@ -107,26 +139,18 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AeronaveId")
+                    b.Property<int>("AviaoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("AviaoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Classe")
+                    b.Property<string>("Codigo")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<bool>("Disponivel")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Fila")
-                        .IsRequired()
-                        .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
-
-                    b.Property<int>("Numero")
+                    b.Property<int?>("VooId")
                         .HasColumnType("int");
 
                     b.Property<bool>("WasDeleted")
@@ -136,7 +160,9 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasIndex("AviaoId");
 
-                    b.ToTable("Lugares");
+                    b.HasIndex("VooId");
+
+                    b.ToTable("Lugares", (string)null);
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Passageiro", b =>
@@ -151,6 +177,9 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("DataNascimento")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DataRegisto")
                         .HasColumnType("datetime2");
@@ -171,7 +200,6 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("WasDeleted")
@@ -181,7 +209,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Passageiros");
+                    b.ToTable("Passageiros", (string)null);
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.User", b =>
@@ -192,9 +220,9 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<string>("Apelido")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -207,21 +235,22 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("Endereço")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("ImageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Nome")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -239,9 +268,6 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("ProfilePhotoUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -264,6 +290,43 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Voo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AviaoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DataHoraChegada")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DataHoraPartida")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DestinoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrigemId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("WasDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AviaoId");
+
+                    b.HasIndex("DestinoId");
+
+                    b.HasIndex("OrigemId");
+
+                    b.ToTable("Voos", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -399,24 +462,76 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Bilhete", b =>
+                {
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Lugar", "Lugar")
+                        .WithMany()
+                        .HasForeignKey("LugarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Passageiro", "Passageiro")
+                        .WithMany()
+                        .HasForeignKey("PassageiroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lugar");
+
+                    b.Navigation("Passageiro");
+                });
+
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Lugar", b =>
                 {
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aviao", "Aviao")
                         .WithMany("Lugares")
-                        .HasForeignKey("AviaoId");
+                        .HasForeignKey("AviaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Voo", "Voo")
+                        .WithMany("Lugares")
+                        .HasForeignKey("VooId");
 
                     b.Navigation("Aviao");
+
+                    b.Navigation("Voo");
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Passageiro", b =>
                 {
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Voo", b =>
+                {
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aviao", "Aviao")
+                        .WithMany()
+                        .HasForeignKey("AviaoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aeroporto", "Destino")
+                        .WithMany()
+                        .HasForeignKey("DestinoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aeroporto", "Origem")
+                        .WithMany()
+                        .HasForeignKey("OrigemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Aviao");
+
+                    b.Navigation("Destino");
+
+                    b.Navigation("Origem");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -471,6 +586,11 @@ namespace BilheticaAeronauticaWeb.Migrations
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Aviao", b =>
+                {
+                    b.Navigation("Lugares");
+                });
+
+            modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Voo", b =>
                 {
                     b.Navigation("Lugares");
                 });

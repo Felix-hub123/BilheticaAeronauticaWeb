@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Painel do Funcionário";
+}
+
+<h1>Painel do Funcionário</h1>
+
+<div class="alert alert-success">
+    Bem-vindo, funcionário! Utilize os atalhos abaixo para gerir voos e consultar informações relevantes.
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Gerir Voos</h5>
+                <p class="card-text">Criar, editar e cancelar voos.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Voos")">Gerir Voos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Lugares</h5>
+                <p class="card-text">Consultar lugares disponíveis e ocupados.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Lugares")">Ver Lugares</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Bilhetes</h5>
+                <p class="card-text">Consultar bilhetes emitidos para os voos.</p>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Bilhetes")">Ver Bilhetes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div>
+    <h4>Outras opções</h4>
+    <ul>
+        <li><a href="@Url.Action("Index", "Home")">Voltar ao Início</a></li>
+    </ul>
+</div>

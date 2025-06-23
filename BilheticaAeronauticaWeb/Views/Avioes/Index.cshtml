@@ -45,13 +45,12 @@
             <td>
                 @Html.DisplayFor(modelItem => item.LugaresExecutiva)
             </td>
-            <td>
-                @if(!string.IsNullOrEmpty(item.ImageFullPath)) 
-                {
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageFullPath))
+                    {
                         <img src="@Url.Content(item.ImageFullPath)" alt="Image" style="width:100px;height:150px;max-width:100%;height:auto" />
-                } 
-    )
-            </td>
+                    }
+                </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Disponivel)
             </td>

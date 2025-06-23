@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "storage2": {
-      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/bilhetica-aeronautica2025/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString1_678B0ED85A, /subscriptions/5a30b307-da33-43d5-aeee-6f10f9ae24b8/resourceGroups/bilhetica-aeronautica2025_group/providers/Microsoft.Web/sites/bilhetica-aeronautica2025/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString1_0F172B7D46",
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/bilhetica-aeronautica2025/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString_BC3C3E2835, /subscriptions/5a30b307-da33-43d5-aeee-6f10f9ae24b8/resourceGroups/bilhetica-aeronautica2025_group/providers/Microsoft.Web/sites/bilhetica-aeronautica2025/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString_618B072E53",
       "secretStore": "AzureAppSettings",
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/bilheticaaeronauticaapp",
       "type": "storage.azure",

@@ -29,13 +29,26 @@
             @Html.DisplayFor(model => model.DocumentoIdentificacao)
         </dd>
         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DataNascimento)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DataNascimento)
+        </dd>
+        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.NumeroDocumento)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.NumeroDocumento)
         </dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.DataRegisto)
+        </dt>
+        <dd class="col-sm-10">@Model.DataRegisto.ToString("dd/MM/yyyy HH:mm")
+        </dd>
+           
+       
     </dl>
 </div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>

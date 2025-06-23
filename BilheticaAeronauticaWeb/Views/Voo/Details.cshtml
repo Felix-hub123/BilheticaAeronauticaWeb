@@ -1,0 +1,25 @@
+﻿@model BilheticaAeronauticaWeb.Data.Entities.Voo
+
+@{
+    ViewData["Title"] = "Detalhes do Voo";
+}
+
+<h1>Detalhes do Voo</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Origem</dt>
+        <dd class="col-sm-10">@Model.Origem?.Nome</dd>
+        <dt class="col-sm-2">Destino</dt>
+        <dd class="col-sm-10">@Model.Destino?.Nome</dd>
+        <dt class="col-sm-2">Avião</dt>
+        <dd class="col-sm-10">@Model.Aviao?.Modelo</dd>
+        <dt class="col-sm-2">Partida</dt>
+        <dd class="col-sm-10">@Model.DataHoraPartida.ToString("g")</dd>
+        <dt class="col-sm-2">Chegada</dt>
+        <dd class="col-sm-10">@Model.DataHoraChegada.ToString("g")</dd>
+    </dl>
+</div>
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+<a asp-action="Index" class="btn btn-secondary">Voltar</a>
+
