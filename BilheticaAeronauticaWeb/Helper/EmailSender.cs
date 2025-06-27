@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -7,26 +10,31 @@ namespace BilheticaAeronauticaWeb.Helper
 {
     public class EmailSender : IEmailSender
     {
-        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        private readonly string _apiKey;
+        private readonly string _fromEmail;
+        private readonly string _fromName;
+
+        public EmailSender(IOptions<EmailSettings> options)
         {
-            //var smtpClient = new SmtpClient("smtp.gmail.com")
-            //{
-            //    Port = 587,
-            //    Credentials = new NetworkCredential("felixtchilo@gmail.com", "Muachimona1"),
-            //    EnableSsl = true,
-            //};
+            _apiKey = options.Value.SendGridApiKey;
+            _fromEmail = options.Value.FromEmail;
+            _fromName = options.Value.FromName;
+        }
 
-            //var mailMessage = new MailMessage
-            //{
-            //    From = new MailAddress("felixtchilo@gmail.com"),
-            //    Subject = subject,
-            //    Body = htmlMessage,
-            //    IsBodyHtml = true,
-            //};
-            //mailMessage.To.Add(email);
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            var client = new SendGridClient(_apiKey);
+            var msg = new SendGridMessage()
+            {
+                From = new EmailAddress(_fromEmail, _fromName),
+                Subject = subject,
+                HtmlContent = htmlMessage
+            };
+            msg.AddTo(new EmailAddress(email));
+            await client.SendEmailAsync(msg);
 
-            //return smtpClient.SendMailAsync(mailMessage);
-            return Task.CompletedTask;
+
         }
     }
+
 }

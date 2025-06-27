@@ -33,12 +33,14 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Passageiros
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public IActionResult Index()
         {
             return View(_passageiroRepository.GetAll().OrderBy(p => p.Nome));
         }
 
         // GET: Passageiros/Details/5
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -52,14 +54,20 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
+            var userId = _userHelper.GetUserId(User);
+            if (passageiro.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Funcionario"))
+                return Forbid();
+
             return View(passageiro);
         }
 
         // GET: Passageiros/Create
         public IActionResult Create()
         {
-            
-            ViewData["UserId"] = new SelectList(_passageiroRepository.GetAll(), "Id", "Id");
+
+            var userId = _userHelper.GetUserId(User);
+            if (_passageiroRepository.GetAll().Any(p => p.UserId == userId))
+                return RedirectToAction("Edit", new { id = _passageiroRepository.GetAll().First(p => p.UserId == userId).Id });
             return View();
         }
 
@@ -94,6 +102,10 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
+            var userId = _userHelper.GetUserId(User);
+            if (passageiro.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Funcionario"))
+                return Forbid();
+
             var model = _converterHelper.ToPassageirosViewModel(passageiro);
             return View(model);
         }
@@ -113,8 +125,13 @@ namespace BilheticaAeronauticaWeb.Controllers
                 {
                     var userId = _userHelper.GetUserId(User);
                     var passageiro = _converterHelper.ToPassageiro(model, userId, false);
+
+                    // Só o dono do perfil ou um admin/funcionário pode editar
+                    if (passageiro.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Funcionario"))
+                        return Forbid();
+
                     await _passageiroRepository.UpdateAsync(passageiro);
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Details), new { id = passageiro.Id });
 
                 }
                 catch (DbUpdateConcurrencyException)
@@ -134,8 +151,9 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
-       
-        
+
+        // Só admins/funcionários podem apagar passageiros
+        [Authorize(Roles = "Admin,Funcionario")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -156,6 +174,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: Passageiros/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Funcionario")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var passageiro = await _passageiroRepository.GetByIdAsync(id);

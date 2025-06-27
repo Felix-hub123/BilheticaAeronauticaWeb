@@ -58,7 +58,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Aeroportos", (string)null);
+                    b.ToTable("Aeroportos");
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Aviao", b =>
@@ -96,7 +96,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Avioes", (string)null);
+                    b.ToTable("Avioes");
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Bilhete", b =>
@@ -128,7 +128,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasIndex("PassageiroId");
 
-                    b.ToTable("Bilhetes", (string)null);
+                    b.ToTable("Bilhetes");
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Lugar", b =>
@@ -162,7 +162,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasIndex("VooId");
 
-                    b.ToTable("Lugares", (string)null);
+                    b.ToTable("Lugares");
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Passageiro", b =>
@@ -209,7 +209,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Passageiros", (string)null);
+                    b.ToTable("Passageiros");
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.User", b =>
@@ -326,7 +326,7 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasIndex("OrigemId");
 
-                    b.ToTable("Voos", (string)null);
+                    b.ToTable("Voos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -490,7 +490,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .IsRequired();
 
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Voo", "Voo")
-                        .WithMany("Lugares")
+                        .WithMany()
                         .HasForeignKey("VooId");
 
                     b.Navigation("Aviao");
@@ -586,11 +586,6 @@ namespace BilheticaAeronauticaWeb.Migrations
                 });
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Aviao", b =>
-                {
-                    b.Navigation("Lugares");
-                });
-
-            modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Voo", b =>
                 {
                     b.Navigation("Lugares");
                 });

@@ -6,9 +6,19 @@
 
 <h1>Lista de Voos</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Criar Novo Voo</a>
-</p>
+
+@{
+    ViewData["Title"] = "Lista de Voos";
+}
+
+<h1>Lista de Voos</h1>
+
+@if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Criar Novo Voo</a>
+    </p>
+}
 
 <table class="table">
     <thead>
@@ -31,12 +41,16 @@
                 <td>@voo.DataHoraPartida.ToString("g")</td>
                 <td>@voo.DataHoraChegada.ToString("g")</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@voo.Id">Detalhes</a> |
-                    <a asp-action="Edit" asp-route-id="@voo.Id">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@voo.Id">Eliminar</a>
+                    <a asp-action="Details" asp-route-id="@voo.Id">Detalhes</a>
+                    @if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
+                    {
+                        @: | <a asp-action="Edit" asp-route-id="@voo.Id">Editar</a>
+                        @: | <a asp-action="Delete" asp-route-id="@voo.Id">Eliminar</a>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
 

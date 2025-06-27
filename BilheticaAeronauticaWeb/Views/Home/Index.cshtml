@@ -1,8 +1,29 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Bem-vindo à Bilhética Aeronáutica";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="jumbotron">
+    <h1 class="display-4">Bem-vindo à BilheticaAeronauticaWeb!</h1>
+    <p class="lead">Consulte voos, compre bilhetes e faça a gestão da sua experiência de voo.</p>
+    <hr class="my-4" />
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <p>
+            <a class="btn btn-primary btn-lg" href="@Url.Page("/Account/Register", new { area = "Identity" })">Registar</a>
+            <a class="btn btn-secondary btn-lg" href="@Url.Page("/Account/Login", new { area = "Identity" })">Login</a>
+        </p>
+    }
+    else if (User.IsInRole("Admin"))
+    {
+        <partial name="_PainelAdmin" />
+    }
+    else if (User.IsInRole("Funcionario"))
+    {
+        <partial name="_PainelFuncionario" />
+    }
+    else if (User.IsInRole("Cliente"))
+    {
+        <partial name="_PainelCliente" />
+    }
 </div>
+

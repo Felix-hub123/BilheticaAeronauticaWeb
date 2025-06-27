@@ -4,14 +4,14 @@
       "type": "appInsights",
       "dynamicId": null
     },
-    "storage2": {
-      "type": "storage",
-      "connectionId": "Blob:ConnectionString",
-      "dynamicId": null
-    },
     "mssql1": {
       "type": "mssql",
       "connectionId": "ConnectionStrings:DefaultConnection",
+      "dynamicId": null
+    },
+    "storage2": {
+      "type": "storage",
+      "connectionId": "Blob:ConnectionString",
       "dynamicId": null
     }
   }

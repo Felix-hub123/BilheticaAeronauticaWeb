@@ -18,6 +18,7 @@ using Azure.Data.Tables;
 using Azure.Storage.Queues;
 using Azure.Storage.Blobs;
 using Azure.Core.Extensions;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace BilheticaAeronauticaWeb
 {
@@ -55,10 +56,6 @@ namespace BilheticaAeronauticaWeb
           
             services.AddRazorPages();
             services.AddControllersWithViews();
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/Identity/Account/Login";
-            });
             services.AddScoped<IUserHelper, UserHelper>();
             services.AddScoped<IBlobHelper, BlobHelper>();
             services.AddScoped<IConverterHelper, ConverterHelper>();
@@ -68,13 +65,20 @@ namespace BilheticaAeronauticaWeb
             services.AddScoped<IPassageiroRepository, PassageiroRepository>();
             services.AddScoped<IImageHelper, ImageHelper>();
             services.AddScoped<IVooRepository, VooRepository>();
-
-
-            services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, BilheticaAeronauticaWeb.Helper.EmailSender>();
-
-                   
-        }
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+            services.AddTransient<IEmailSender, EmailSender>();
            
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/NotAuthorized";
+                options.AccessDeniedPath = "/Account/NotAuthorized";
+            });
+
+
+
+
+        }
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

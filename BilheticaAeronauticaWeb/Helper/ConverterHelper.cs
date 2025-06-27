@@ -93,5 +93,88 @@ namespace BilheticaAeronauticaWeb.Helper
                 DataNascimento = passageiro.DataNascimento
             };
         }
+
+        public Bilhete ToBilhete(BilheteViewModel model, bool isNew)
+        {
+            return new Bilhete
+            {
+                Id = isNew ? 0 : model.Id,
+                LugarId = model.LugarId,
+                PassageiroId = model.PassageiroId,
+                DataCompra = model.DataCompra ?? DateTime.UtcNow,
+                Preco = model.Preco,
+                WasDeleted = false
+            };
+        }
+
+        public BilheteViewModel ToBilheteViewModel(Bilhete bilhete)
+        {
+            return new BilheteViewModel
+            {
+                Id = bilhete.Id,
+                LugarId = bilhete.LugarId,
+                PassageiroId = bilhete.PassageiroId,
+                DataCompra = bilhete.DataCompra,
+                Preco = bilhete.Preco
+            };
+        }
+
+        public Voo TooVoo(VooViewModel model, bool isNew)
+        {
+            return new Voo
+            {
+                Id = isNew ? 0 : model.Id,
+                OrigemId = model.OrigemId, 
+                DestinoId = model.DestinoId,
+                DataHoraPartida = model.DataHoraPartida
+               
+            };
+        }
+
+        public VooViewModel ToVooViewModel(Voo voo)
+        {
+            return new VooViewModel
+            {
+                Id = voo.Id,
+                OrigemNome = voo.Origem?.Nome,
+                DestinoNome = voo.Destino?.Nome,
+                DataHoraPartida = voo.DataHoraPartida
+           
+            };
+        }
+
+        public User ToFuncionario(FuncionarioViewModel model, bool isNew)
+        {
+            var user = new User
+            {
+                Id = isNew ? Guid.NewGuid().ToString() : model.Id,
+                Nome = model.Nome,
+                Email = model.Email,
+                UserName = model.Email
+
+            };
+             return user;
+        }
+
+        public FuncionarioViewModel ToFuncionarioViewModel(User funcionario)
+        {
+            return new FuncionarioViewModel
+            {
+                Id = funcionario.Id,
+                Nome = funcionario.Nome,
+                Email = funcionario.Email
+            };
+
+
+        }
+
+        public void UpdateFuncionarioFromViewModel( User funcionario, FuncionarioViewModel model)
+        {
+            funcionario.Nome = model.Nome;
+            funcionario.Email = model.Email;
+            funcionario.UserName = model.Email;
+           
+        }
+
     }
 }

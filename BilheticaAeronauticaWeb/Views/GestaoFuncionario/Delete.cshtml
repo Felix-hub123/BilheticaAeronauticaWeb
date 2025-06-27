@@ -1,0 +1,24 @@
+﻿@model FuncionarioViewModel
+
+@{
+    ViewData["Title"] = "Eliminar Funcionário";
+}
+
+<h2>Eliminar Funcionário</h2>
+
+<h4>Tem a certeza que deseja eliminar este funcionário?</h4>
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Nome</dt>
+        <dd class="col-sm-10">@Model.Nome</dd>
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+        <dt class="col-sm-2">Cargo</dt>
+    </dl>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

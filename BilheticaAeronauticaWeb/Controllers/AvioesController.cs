@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BilheticaAeronauticaWeb.Data;
+using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Helper;
+using BilheticaAeronauticaWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using BilheticaAeronauticaWeb.Data;
-using BilheticaAeronauticaWeb.Data.Entities;
-using BilheticaAeronauticaWeb.Models;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using BilheticaAeronauticaWeb.Helper;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
@@ -35,12 +36,14 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Avioes
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View(_aviaoRepository.GetAll().OrderBy(p => p.Marca));
         }
 
         // GET: Avioes/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +61,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Avioes/Create
+        [Authorize(Roles = "Funcionario,Admin")]
         public IActionResult Create()
         {
             return View();
@@ -68,6 +72,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Create( AvioesViewModel model )
         {
             if (ModelState.IsValid)
@@ -85,11 +90,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             }
             return View(model);
         }
-       
-       
 
-     
+
+
+
         // GET: Avioes/Edit/5
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -116,6 +122,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Edit(AvioesViewModel model)
         {
           
@@ -151,6 +158,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Avioes/Delete/5
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -170,6 +178,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: Avioes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var aviao = await _aviaoRepository.GetByIdAsync(id);

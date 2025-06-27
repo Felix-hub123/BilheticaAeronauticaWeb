@@ -93,8 +93,8 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
                         return RedirectToAction("Index", "Admin");
                     else if (await _userManager.IsInRoleAsync(user, "Funcionario"))
                         return RedirectToAction("Index", "Funcionarios");
-                    else if (await _userManager.IsInRoleAsync(user, "Passageiro"))
-                        return RedirectToAction("Index", "Passageiros");
+                    else if (await _userManager.IsInRoleAsync(user, "Cliente"))
+                        return RedirectToAction("Index", "Cliente");
                     else
                         return LocalRedirect(returnUrl);
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
@@ -20,7 +21,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required]
         public DateTime DataCompra { get; set; } = DateTime.UtcNow;
 
-        [Required]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Preco { get; set; }
 
         // Soft delete

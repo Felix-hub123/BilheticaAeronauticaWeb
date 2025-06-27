@@ -27,7 +27,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string ImageFullPath => ImageId == Guid.Empty
              ? $"/images/aeroportos/noimage.png"
-             : $"https://bilheticaaeronauticaapp.blob.core.windows.net/aeroportos/{ImageId}";
+             : $"https://bilheticaapp.blob.core.windows.net/aeroportos/{ImageId}";
 
 
         public bool WasDeleted { get; set; }

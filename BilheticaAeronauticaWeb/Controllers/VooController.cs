@@ -1,6 +1,7 @@
 ﻿using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
 using BilheticaAeronauticaWeb.Migrations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -28,12 +29,14 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: VooController
+        [AllowAnonymous]
         public ActionResult Index()
         {
             return View(_vooRepository.GetAll().OrderBy(p => p.Id));
         }
 
         // GET: VooController/Details/5
+        [AllowAnonymous]
         public async Task<ActionResult> Details(int? id)
         {
             if(id == null)
@@ -50,6 +53,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: VooController/Create
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async  Task<ActionResult> Create()
         {
             await PreencherDropDowns();
@@ -69,6 +73,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: VooController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<ActionResult> Create(Voo voo)
         {
             if (!ModelState.IsValid)
@@ -83,6 +88,7 @@ namespace BilheticaAeronauticaWeb.Controllers
 
         // GET: VooController/Edit/5
         [HttpGet]
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
@@ -104,6 +110,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: VooController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<ActionResult> Edit(int id, Voo voo)
         {
             if (id != voo.Id)
@@ -130,6 +137,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: VooController/Delete/5
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async  Task<ActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,7 +145,8 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            var voo = _vooRepository.GetAll();
+            var voo = await  _vooRepository.GetByIdAsync(id.Value);
+            ;
             if (voo == null)
             {
                 return NotFound();
@@ -149,6 +158,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: VooController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             try

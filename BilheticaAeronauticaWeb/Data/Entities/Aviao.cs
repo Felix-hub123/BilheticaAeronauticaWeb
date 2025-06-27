@@ -27,7 +27,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string ImageFullPath => ImageId == Guid.Empty
             ? $"/images/aviao/noimage.png"
-            : $"https://bilheticaaeronauticaapp.blob.core.windows.net/avioes/{ImageId}";
+            : $"https://bilheticaapp.blob.core.windows.net/avioes/{ImageId}";
              
 
 

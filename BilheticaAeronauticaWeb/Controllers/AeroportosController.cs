@@ -2,6 +2,7 @@
 using BilheticaAeronauticaWeb.Data.Entities;
 using BilheticaAeronauticaWeb.Helper;
 using BilheticaAeronauticaWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AeroportosController : Controller
     {
         
@@ -36,29 +38,32 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Aeroportos
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View(_aeroportoRepository.GetAll().OrderBy(p => p.Cidade));
         }
 
         // GET: Aeroportos/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AeroportoNotFound");
             }
 
             var aeroporto = await _aeroportoRepository.GetByIdAsync(id.Value);
             if (aeroporto == null)
             {
-                return NotFound();
+                return  new NotFoundViewResult("AeroportoNotFound");
             }
 
             return View(aeroporto);
         }
 
         // GET: Aeroportos/Create
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public IActionResult Create()
         {
             return View();
@@ -69,6 +74,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<IActionResult> Create( AeroportosViewModel model)
         {
             if (ModelState.IsValid)
@@ -93,17 +99,18 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Aeroportos/Edit/5
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AeroportoNotFound");
             }
 
             var aeroporto = await _aeroportoRepository.GetByIdAsync(id.Value);
             if (aeroporto == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AeroportoNotFound");
             }
 
             var model = _converterHelper.ToAeroportosViewModel(aeroporto);
@@ -115,6 +122,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<IActionResult> Edit( AeroportosViewModel model)
         {
            
@@ -138,7 +146,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                 {
                     if (!await _aeroportoRepository.ExistsAsync(model.Id))
                     {
-                        return NotFound();
+                        return new NotFoundViewResult("AeroportoNotFound");
                     }
                     else
                     {
@@ -151,17 +159,18 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Aeroportos/Delete/5
+        [Authorize(Roles = "FuncionarioOrAdmin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AeroportoNotFound");
             }
 
             var aeroporto = await _aeroportoRepository.GetByIdAsync(id.Value);
             if (aeroporto == null)
             {
-                return NotFound();
+                return new NotFoundViewResult("AeroportoNotFound");
             }
 
             return View(aeroporto);
@@ -177,6 +186,9 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-       
+       public IActionResult AeroportoNotFound()
+       {
+            return View(); 
+       }
     }
 }

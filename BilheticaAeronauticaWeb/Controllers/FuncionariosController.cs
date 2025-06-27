@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
-    [Authorize(Roles = "Funcionario")]
+    [Authorize(Roles = "Funcionario,Admin")]
     public class FuncionariosController : Controller
     {
         public IActionResult Index()
