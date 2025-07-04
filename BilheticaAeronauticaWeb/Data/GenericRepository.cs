@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using BilheticaAeronauticaWeb.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -55,6 +56,9 @@ namespace BilheticaAeronauticaWeb.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
-       
+        public Task<bool> AddItemToBilheteAsync(BilheteTemp bilheteTemp, string userId)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

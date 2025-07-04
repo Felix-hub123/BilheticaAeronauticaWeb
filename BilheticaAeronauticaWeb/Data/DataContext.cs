@@ -15,6 +15,11 @@ namespace BilheticaAeronauticaWeb.Data
         public DbSet<Passageiro> Passageiros { get; set; }
         public DbSet<Bilhete> Bilhetes { get; set; } 
 
+        public DbSet<BilheteDetail> BilheteDetails { get; set; }
+
+        public DbSet<BilheteTemp> BilhetesTemp { get; set; }    
+
+
         public DbSet<Voo> Voos { get; set; }
 
         public DataContext(DbContextOptions<DataContext> options) : base(options)
@@ -25,18 +30,80 @@ namespace BilheticaAeronauticaWeb.Data
         {
             base.OnModelCreating(modelBuilder);
 
+           modelBuilder.Entity<Bilhete>()
+              .Property(b => b.Valor)
+              .HasColumnType("decimal(18,2)");
+
+          modelBuilder.Entity<BilheteTemp>()
+             .Property(b => b.Preco)
+             .HasColumnType("decimal(18,2)");
+
+          modelBuilder.Entity<BilheteDetail>()
+             .Property(b => b.Preco)
+             .HasColumnType("decimal(18,2)");
+
+          modelBuilder.Entity<Lugar>()
+             .Property(l => l.PrecoBase)
+             .HasColumnType("decimal(18,2)");
+
+          modelBuilder.Entity<Voo>()
+             .Property(v => v.TaxaAeroporto)
+             .HasColumnType("decimal(18,2)");
+
             modelBuilder.Entity<Voo>()
-              .HasOne(v => v.Origem)
-              .WithMany()
+             .HasOne(v => v.Origem)
+             .WithMany()
              .HasForeignKey(v => v.OrigemId)
-             .OnDelete(DeleteBehavior.Restrict);
+             .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Voo>()
                 .HasOne(v => v.Destino)
                 .WithMany()
                 .HasForeignKey(v => v.DestinoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<Bilhete>()
+                .HasOne(b => b.Lugar)
+                .WithMany()
+                .HasForeignKey(b => b.LugarId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<Bilhete>()
+                .HasOne(b => b.Passageiro)
+                .WithMany()
+                .HasForeignKey(b => b.PassageiroId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<Bilhete>()
+                .HasOne(b => b.Voo)
+                .WithMany()
+                .HasForeignKey(b => b.VooId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BilheteTemp>()
+                .HasOne(b => b.Lugar)
+                .WithMany()
+                .HasForeignKey(b => b.LugarId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<BilheteTemp>()
+                .HasOne(b => b.Passageiro)
+                .WithMany()
+                .HasForeignKey(b => b.PassageiroId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BilheteTemp>()
+                .HasOne(b => b.Voo)
+                .WithMany()
+                .HasForeignKey(b => b.VooId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Voo>()
+                .Property(v => v.PrecoBase)
+                .HasColumnType("decimal(18,2)");
 
 
 

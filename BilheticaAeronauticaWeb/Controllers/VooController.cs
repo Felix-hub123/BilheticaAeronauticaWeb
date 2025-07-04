@@ -1,6 +1,6 @@
 ﻿using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
-using BilheticaAeronauticaWeb.Migrations;
+using BilheticaAeronauticaWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,25 +14,26 @@ namespace BilheticaAeronauticaWeb.Controllers
 {
     public class VooController : Controller
     {
-        private readonly IVooRepository _vooRepository;
+        private readonly IVooService _vooService;
         private readonly IAeroportoRepository _aeroportoRepository;
         private readonly IAviaoRepository _aviaoRepository;
 
         public VooController(
-            IVooRepository vooRepository,
+            IVooService vooService,
             IAeroportoRepository aeroportoRepository,
             IAviaoRepository aviaoRepository)
         {
-            _vooRepository = vooRepository;
+            _vooService = vooService;
             _aeroportoRepository = aeroportoRepository;
             _aviaoRepository = aviaoRepository;
         }
 
         // GET: VooController
         [AllowAnonymous]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_vooRepository.GetAll().OrderBy(p => p.Id));
+            var voos = await _vooService.ObterVoosDisponiveisAsync();
+            return View(voos.OrderBy(v => v.Id));
         }
 
         // GET: VooController/Details/5
@@ -44,8 +45,8 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            var voo = await _vooRepository.GetByIdAsync(id.Value);
-            if(voo == null)
+            var voo = await _vooService.ObterVooPorIdAsync(id.Value);
+            if (voo == null)
             {
                 return NotFound();
             }
@@ -53,7 +54,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: VooController/Create
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async  Task<ActionResult> Create()
         {
             await PreencherDropDowns();
@@ -73,8 +74,8 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: VooController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "FuncionarioOrAdmin")]
-        public async Task<ActionResult> Create(Voo voo)
+        [Authorize(Roles = "Funcionario,Admin")]
+        public async Task<ActionResult> Create(Voo voo, decimal precoBaseLugar)
         {
             if (!ModelState.IsValid)
             {
@@ -82,13 +83,22 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return View(voo);
             }
 
-            await _vooRepository.CreateAsync(voo);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _vooService.CriarVooAsync(voo, precoBaseLugar);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Erro ao criar voo.");
+                await PreencherDropDowns();
+                return View(voo);
+            }
         }
 
         // GET: VooController/Edit/5
         [HttpGet]
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
@@ -96,21 +106,29 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return NotFound();
             }
 
-            var voo = await _vooRepository.GetByIdAsync(id.Value);
-            if (voo == null)
+            try
             {
-                return NotFound();
-            }
+                var voo = await _vooService.ObterVooPorIdAsync(id.Value);
+                if (voo == null)
+                {
+                    return NotFound();
 
-             await PreencherDropDowns(); 
-            return View(voo);
+                }
+
+                await PreencherDropDowns();
+                return View(voo);
+            }
+            catch (Exception)
+            {
+                return View("Error");
+            }
 
         }
 
         // POST: VooController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<ActionResult> Edit(int id, Voo voo)
         {
             if (id != voo.Id)
@@ -126,52 +144,47 @@ namespace BilheticaAeronauticaWeb.Controllers
 
             try
             {
-                await _vooRepository.UpdateAsync(voo);
+                await _vooService.EditarVooAsync(voo);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception)
             {
+                ModelState.AddModelError("", "Erro ao editar voo.");
                 await PreencherDropDowns();
                 return View(voo);
             }
         }
 
         // GET: VooController/Delete/5
-        [Authorize(Roles = "FuncionarioOrAdmin")]
-        public async  Task<ActionResult> Delete(int? id)
+        [Authorize(Roles = "Funcionario,Admin")]
+        public async Task<ActionResult> Delete(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                await _vooService.EliminarVooAsync(id.Value);
+                return RedirectToAction(nameof(Index));
             }
-
-            var voo = await  _vooRepository.GetByIdAsync(id.Value);
-            ;
-            if (voo == null)
+            catch (Exception)
             {
-                return NotFound();
+                
+                return RedirectToAction(nameof(Index));
             }
-
-            return View(voo);
         }
 
         // POST: VooController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             try
             {
-                var voo = await _vooRepository.GetByIdAsync(id);
-                if (voo == null)
-                    return NotFound();
-
-                await _vooRepository.DeleteAsync(voo);
+                await _vooService.EliminarVooAsync(id);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception)
             {
+                
                 return RedirectToAction(nameof(Index));
             }
         }

@@ -1,6 +1,9 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
 using BilheticaAeronauticaWeb.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
+using System.Collections.Generic;
 
 namespace BilheticaAeronauticaWeb.Helper
 {
@@ -72,9 +75,6 @@ namespace BilheticaAeronauticaWeb.Helper
                 Id = isNew ? 0 : model.Id,
                 Nome = model.Nome,
                 Apelido = model.Apelido,
-                DocumentoIdentificacao = model.DocumentoIdentificacao,
-                NumeroDocumento = model.NumeroDocumento,
-                DataNascimento = model.DataNascimento,
                 DataRegisto = DateTime.UtcNow,
                 UserId = userId,
                 WasDeleted = false
@@ -88,46 +88,22 @@ namespace BilheticaAeronauticaWeb.Helper
                 Id = passageiro.Id,
                 Nome = passageiro.Nome,
                 Apelido = passageiro.Apelido,
-                DocumentoIdentificacao = passageiro.DocumentoIdentificacao,
-                NumeroDocumento = passageiro.NumeroDocumento,
-                DataNascimento = passageiro.DataNascimento
+          
             };
         }
 
-        public Bilhete ToBilhete(BilheteViewModel model, bool isNew)
-        {
-            return new Bilhete
-            {
-                Id = isNew ? 0 : model.Id,
-                LugarId = model.LugarId,
-                PassageiroId = model.PassageiroId,
-                DataCompra = model.DataCompra ?? DateTime.UtcNow,
-                Preco = model.Preco,
-                WasDeleted = false
-            };
-        }
 
-        public BilheteViewModel ToBilheteViewModel(Bilhete bilhete)
-        {
-            return new BilheteViewModel
-            {
-                Id = bilhete.Id,
-                LugarId = bilhete.LugarId,
-                PassageiroId = bilhete.PassageiroId,
-                DataCompra = bilhete.DataCompra,
-                Preco = bilhete.Preco
-            };
-        }
+
 
         public Voo TooVoo(VooViewModel model, bool isNew)
         {
             return new Voo
             {
                 Id = isNew ? 0 : model.Id,
-                OrigemId = model.OrigemId, 
+                OrigemId = model.OrigemId,
                 DestinoId = model.DestinoId,
                 DataHoraPartida = model.DataHoraPartida
-               
+
             };
         }
 
@@ -139,11 +115,11 @@ namespace BilheticaAeronauticaWeb.Helper
                 OrigemNome = voo.Origem?.Nome,
                 DestinoNome = voo.Destino?.Nome,
                 DataHoraPartida = voo.DataHoraPartida
-           
+
             };
         }
 
-        public User ToFuncionario(FuncionarioViewModel model, bool isNew)
+        public User ToFuncionario(UserViewModel model, bool isNew)
         {
             var user = new User
             {
@@ -153,12 +129,12 @@ namespace BilheticaAeronauticaWeb.Helper
                 UserName = model.Email
 
             };
-             return user;
+            return user;
         }
 
-        public FuncionarioViewModel ToFuncionarioViewModel(User funcionario)
+        public UserViewModel ToUserViewModel(User funcionario)
         {
-            return new FuncionarioViewModel
+            return new UserViewModel
             {
                 Id = funcionario.Id,
                 Nome = funcionario.Nome,
@@ -168,13 +144,81 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
-        public void UpdateFuncionarioFromViewModel( User funcionario, FuncionarioViewModel model)
+        public void UpdateFuncionarioFromViewModel(User funcionario, UserViewModel model)
         {
             funcionario.Nome = model.Nome;
             funcionario.Email = model.Email;
             funcionario.UserName = model.Email;
-           
+
         }
 
+       
+
+      
+    
+
+        public Bilhete ToBilhete(BilheteViewModel model, bool isNew)
+        {
+            return new Bilhete
+            {
+                Id = isNew ? 0 : model.Id,
+                VooId = model.VooId,
+                LugarId = model.LugarId,
+                PassageiroId = model.PassageiroId, 
+                Valor = model.Valor,
+                BagagemExtra = model.BagagemExtra,
+                Refeicao = model.Refeicao,
+                DataReserva = model.DataCompra ?? DateTime.Now,
+                WasDeleted = model.WasDeleted
+        
+            };
+        }
+
+        public BilheteViewModel ToBilheteViewModel(Bilhete bilhete)
+        {
+            return new BilheteViewModel
+            {
+                Id = bilhete.Id,
+                VooId = bilhete.VooId,
+                LugarId = bilhete.LugarId,
+                PassageiroId = bilhete.PassageiroId,
+                Valor = bilhete.Valor,
+                BagagemExtra = bilhete.BagagemExtra,
+                Refeicao = bilhete.Refeicao,
+                DataCompra = bilhete.DataReserva,
+                WasDeleted = bilhete.WasDeleted,
+              
+            };
+        }
+
+        public BilheteTemp ToBilheteTemp(BilheteViewModel model, string userId)
+        {
+            return new BilheteTemp
+            {
+                PassageiroId = model.PassageiroId, 
+                VooId = model.VooId,
+                LugarId = model.LugarId,
+                Preco = model.Valor,
+                BagagemExtra = model.BagagemExtra,
+                Refeicao = model.Refeicao,
+                CriadoPorUserId = userId,
+                DataCriacao = DateTime.Now
+            };
+        }
+
+      
+
+        public void ToAdminViewModel(User admin, UserViewModel model)
+        {
+            model.Id = admin.Id;
+            model.Nome = admin.Nome;
+            model.Apelido = admin.Apelido;
+            model.Email = admin.Email;
+            model.UserName = admin.UserName;
+            model.PhoneNumber = admin.PhoneNumber;
+            model.Endereço = admin.Endereço;
+            model.ImageId = admin.ImageId;
+
+        }
     }
 }

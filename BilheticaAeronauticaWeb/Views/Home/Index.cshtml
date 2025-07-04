@@ -15,15 +15,21 @@
     }
     else if (User.IsInRole("Admin"))
     {
-        <partial name="_PainelAdmin" />
+        <a class="btn btn-primary btn-lg" href="@Url.Action("Index", "Admin")">
+            Ir para o Painel de Administração
+        </a>
     }
     else if (User.IsInRole("Funcionario"))
     {
-        <partial name="_PainelFuncionario" />
+        <a class="btn btn-success btn-lg" href="@Url.Action("Index", "Funcionarios")">
+            Ir para o Painel do Funcionário
+        </a>
     }
     else if (User.IsInRole("Cliente"))
     {
-        <partial name="_PainelCliente" />
+        <a class="btn btn-info btn-lg" href="@Url.Action("Index", "Passageiros")">
+            Ir para o Painel do Passageiro
+        </a>
     }
 </div>
 

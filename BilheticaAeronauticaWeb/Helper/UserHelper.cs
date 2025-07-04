@@ -106,6 +106,11 @@ namespace BilheticaAeronauticaWeb.Helper
             return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
         }
 
+        public async Task<User> GetUserAsync(ClaimsPrincipal user)
+        {
+            return await _userManager.GetUserAsync(user);
+        }
+
         public async  Task<string> GenerateEmailConfirmationTokenAsync(User user)
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);

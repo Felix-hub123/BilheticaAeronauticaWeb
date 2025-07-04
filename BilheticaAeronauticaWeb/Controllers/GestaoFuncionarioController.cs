@@ -14,18 +14,21 @@ namespace BilheticaAeronauticaWeb.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConverterHelper _converterHelper;
+        private readonly IBlobHelper _blobHelper;
 
         public GestaoFuncionarioController(UserManager<User> userManager,
-            IConverterHelper converterHelper)
+            IConverterHelper converterHelper,
+            IBlobHelper blobHelper)
         {
             _userManager = userManager;
             _converterHelper = converterHelper;
+            _blobHelper = blobHelper;
         }
         // GET: GestaoFuncionarioController
         public async  Task<ActionResult> Index()
         {
             var funcionarios = await _userManager.GetUsersInRoleAsync("Funcionario");
-            var model = funcionarios.Select(f => _converterHelper.ToFuncionarioViewModel(f)).ToList();
+            var model = funcionarios.Select(f => _converterHelper.ToUserViewModel(f)).ToList();
 
             return View(model);
         }
@@ -37,7 +40,7 @@ namespace BilheticaAeronauticaWeb.Controllers
             if (funcionario == null)
                 return NotFound();
 
-            var model = _converterHelper.ToFuncionarioViewModel(funcionario);
+            var model = _converterHelper.ToUserViewModel(funcionario);
             return View(model);
         }
 
@@ -50,13 +53,20 @@ namespace BilheticaAeronauticaWeb.Controllers
         // POST: GestaoFuncionarioController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async  Task<ActionResult> Create(FuncionarioViewModel model)
+        public async  Task<ActionResult> Create(UserViewModel model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     var user = _converterHelper.ToFuncionario(model, isNew: true);
+
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    {
+             
+                        user.ImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
+                    }
+
                     var result = await _userManager.CreateAsync(user, model.Password);
                     if (result.Succeeded)
                     {
@@ -83,14 +93,14 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return new NotFoundViewResult("Funcionario Not Found");
             }
               
-            var model = _converterHelper.ToFuncionarioViewModel(funcionario);
+            var model = _converterHelper.ToUserViewModel(funcionario);
             return View(model);
         }
 
         // POST: GestaoFuncionarioController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(FuncionarioViewModel model)
+        public async Task<ActionResult> Edit(UserViewModel model)
         {
             try
             {
@@ -103,6 +113,11 @@ namespace BilheticaAeronauticaWeb.Controllers
                     }
 
                     _converterHelper.UpdateFuncionarioFromViewModel(funcionario, model);
+
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    {
+                        funcionario.ImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
+                    }
                     var result = await _userManager.UpdateAsync(funcionario);
                     if (result.Succeeded)
                         return RedirectToAction(nameof(Index));
@@ -134,7 +149,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                     return new NotFoundViewResult("FuncionarioNotFound");
                 }
 
-                var model = _converterHelper.ToFuncionarioViewModel(funcionario);
+                var model = _converterHelper.ToUserViewModel(funcionario);
                 return View(model);
             }
             catch
@@ -162,7 +177,7 @@ namespace BilheticaAeronauticaWeb.Controllers
             {
                 ModelState.AddModelError("", "Ocorreu um erro ao eliminar o funcionário.");
                 var funcionario = await _userManager.FindByIdAsync(id);
-                var model = funcionario != null ? _converterHelper.ToFuncionarioViewModel(funcionario) : null;
+                var model = funcionario != null ? _converterHelper.ToUserViewModel(funcionario) : null;
                 return View("Delete", model);
             }
         }

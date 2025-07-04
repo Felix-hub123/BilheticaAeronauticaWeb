@@ -8,106 +8,137 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BilheticaAeronauticaWeb</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - Bilhetica Aeronáutica</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BilheticaAeronauticaWeb</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                 
+    <!-- NAVBAR DINÂMICA -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #1196ff;">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-plane-departure"></i> Bilhetica Aeronáutica
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-2 mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">
+                            <i class="fa-solid fa-house"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Voo" asp-action="Index">
+                            <i class="fa-solid fa-plane"></i> Voos
+                        </a>
+                    </li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        if (User.IsInRole("Administrador"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Voo" asp-action="Create">
+                                    <i class="fa-solid fa-plus"></i> Criar Voo
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Lugar" asp-action="Index">
+                                    <i class="fa-solid fa-chair"></i> Lugares
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Aeroporto" asp-action="Index">
+                                    <i class="fa-solid fa-building"></i> Aeroportos
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Funcionario" asp-action="Index">
+                                    <i class="fa-solid fa-users-gear"></i> Funcionários
+                                </a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Funcionario"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Voo" asp-action="Create">
+                                    <i class="fa-solid fa-plus"></i> Criar Voo
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Lugar" asp-action="Index">
+                                    <i class="fa-solid fa-chair"></i> Lugares
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Cliente"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Bilhete" asp-action="AdicionarReserva">
+                                    <i class="fa-solid fa-ticket"></i> Comprar Bilhete
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Bilhete" asp-action="Historico">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> Histórico
+                                </a>
+                            </li>
+                        }
+
+                    }
+                </ul>
+                <div class="flex-grow-1"></div>
+                <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
+                    @if (User.Identity.IsAuthenticated)
+                    {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <span class="nav-link text-white">
+                                <i class="fa-solid fa-user"></i> Olá, @User.Identity.Name!
+                            </span>
                         </li>
-                      
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Voo" asp-action="Index">Voos</a>
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                                <button type="submit" class="nav-link btn btn-link text-white px-0" style="cursor:pointer;">
+                                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                                </button>
+                            </form>
                         </li>
-                     
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                        
-                            @if (User.IsInRole("Cliente"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Bilhetes" asp-action="Index">Meus Bilhetes</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Passageiros" asp-action="Index">Meu Perfil</a>
-                                </li>
-                            }
-                            <!-- Funcionário -->
-                            @if (User.IsInRole("Funcionario"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Voo" asp-action="Create">Criar Voo</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Lugares" asp-action="Index">Lugares</a>
-                                </li>
-                            }
-                            <!-- Admin -->
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Aeroportos" asp-action="Index">Aeroportos</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Avioes" asp-action="Index">Avioes</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Passageiros" asp-action="Index">Passageiros</a>
-                                </li>
-                            }
-                        }
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">Olá, @User.Identity.Name!</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm" class="form-inline">
-                                    <button type="submit" class="nav-link btn btn-link text-dark" style="cursor:pointer;">Logout</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Registar</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Login">
+                                <i class="fa-solid fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Register">
+                                <i class="fa-solid fa-user-plus"></i> Registar
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
-        </nav>
-    </header>
-    <div class="container">
+        </div>
+    </nav>
+
+    <!-- RenderBody é obrigatório! -->
+    <div class="container mt-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - BilheticaAeronauticaWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+    <footer class="border-top footer text-muted mt-4 py-3 bg-light">
+        <div class="container text-center">
+            &copy; 2025 - Bilhetica Aeronáutica
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+

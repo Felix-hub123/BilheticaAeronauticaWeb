@@ -9,9 +9,9 @@
       "connectionId": "ConnectionStrings:DefaultConnection",
       "dynamicId": null
     },
-    "storage2": {
+    "storage1": {
       "type": "storage",
-      "connectionId": "Blob:ConnectionString",
+      "connectionId": "Blob:ConnectionString1",
       "dynamicId": null
     }
   }

@@ -1,0 +1,83 @@
+﻿@using BilheticaAeronauticaWeb.Data.Entities
+@model Bilhete
+
+@{
+    ViewData["Title"] = "Detalhes do Bilhete";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            <i class="fa-solid fa-ticket"></i> Detalhes do Bilhete
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3"><i class="fa-solid fa-plane"></i> Voo</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Voo != null)
+                    {
+                        <span>@Model.Voo.Numero - @Model.Voo.Origem?.Nome → @Model.Voo.Destino?.Nome</span>
+                    }
+                    else
+                    {
+                        <span>@Model.VooId</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3"><i class="fa-solid fa-user"></i> Passageiro</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Passageiro != null)
+                    {
+                        <span>@Model.Passageiro.FullName (@Model.Passageiro.FullName)</span>
+                    }
+                    else
+                    {
+                        <span>@Model.PassageiroId</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3"><i class="fa-solid fa-chair"></i> Lugar</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Lugar != null)
+                    {
+                        <span>@Model.Lugar.Codigo</span>
+                    }
+                    else
+                    {
+                        <span>@Model.LugarId</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3"><i class="fa-solid fa-euro-sign"></i> Preço</dt>
+                <dd class="col-sm-9">@Model.Valor.ToString("C")</dd>
+
+                <dt class="col-sm-3"><i class="fa-solid fa-box"></i> Extras</dt>
+                <dd class="col-sm-9">
+                    @if (Model.BagagemExtra)
+                    {
+                        <span class="badge bg-secondary">Bagagem Extra</span>
+                    }
+                    @if (Model.Refeicao)
+                    {
+                        <span class="badge bg-info text-dark">Refeição</span>
+                    }
+                    @if (!Model.BagagemExtra && !Model.Refeicao)
+                    {
+                        <span>Sem extras</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3"><i class="fa-solid fa-calendar"></i> Data de Compra</dt>
+                <dd class="col-sm-9">@Model.DataCompra.ToShortDateString()</dd>
+            </dl>
+            <a asp-action="Historico" class="btn btn-secondary mt-3">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+</div>
+
+

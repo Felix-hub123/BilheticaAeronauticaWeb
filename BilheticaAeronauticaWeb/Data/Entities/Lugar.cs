@@ -9,7 +9,9 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public int Id { get; set; }
 
         [Required, MaxLength(10)]
-        public string Codigo { get; set; } // Ex: 12A, 1B, etc.
+        public string Codigo { get; set; } 
+
+        public decimal PrecoBase { get; set; } = 100.00M; 
 
         public bool Disponivel { get; set; } = true;
 

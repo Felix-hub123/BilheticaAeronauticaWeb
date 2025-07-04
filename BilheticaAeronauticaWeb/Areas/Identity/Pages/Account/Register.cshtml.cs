@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using BilheticaAeronauticaWeb.Data;
 
 namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
 {
@@ -24,17 +25,20 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
         private readonly UserManager<User> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IPassageiroRepository _passageiroRepository;
 
         public RegisterModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IPassageiroRepository passageiroRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _passageiroRepository = passageiroRepository;
         }
 
         [BindProperty]
@@ -74,6 +78,8 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+          
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -103,6 +109,17 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
                     await _userManager.AddToRoleAsync(user, "Cliente");
+                    var passageiro = new Passageiro
+                    {
+                        UserId = user.Id,
+                        Nome = Input.FirstName,
+                        Apelido = Input.LastName,
+                       
+
+
+
+                    };
+                    await _passageiroRepository.CreateAsync(passageiro);
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

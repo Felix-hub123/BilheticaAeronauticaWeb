@@ -12,6 +12,7 @@ namespace BilheticaAeronauticaWeb.Helper
 
         Task<List<User>> GetUsersByRoleAsync(string roleName);
 
+        Task<User> GetUserAsync(ClaimsPrincipal user);
 
         Task<IdentityResult> AddUserAsync(User User, string password);
         Task AddUserToRoleAsync(User user, string roleName);

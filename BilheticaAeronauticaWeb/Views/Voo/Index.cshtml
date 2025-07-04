@@ -4,53 +4,59 @@
     ViewData["Title"] = "Lista de Voos";
 }
 
-<h1>Lista de Voos</h1>
-
-
-@{
-    ViewData["Title"] = "Lista de Voos";
-}
-
-<h1>Lista de Voos</h1>
+<h2 class="mb-4">
+    <i class="fa-solid fa-plane text-primary"></i> Lista de Voos
+</h2>
 
 @if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
 {
     <p>
-        <a asp-action="Create" class="btn btn-primary">Criar Novo Voo</a>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fa-solid fa-plus"></i> Criar Novo Voo
+        </a>
     </p>
 }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Origem</th>
-            <th>Destino</th>
-            <th>Aviao</th>
-            <th>Partida</th>
-            <th>Chegada</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var voo in Model)
-        {
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
             <tr>
-                <td>@voo.Origem?.Nome</td>
-                <td>@voo.Destino?.Nome</td>
-                <td>@voo.Aviao?.Modelo</td>
-                <td>@voo.DataHoraPartida.ToString("g")</td>
-                <td>@voo.DataHoraChegada.ToString("g")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@voo.Id">Detalhes</a>
-                    @if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
-                    {
-                        @: | <a asp-action="Edit" asp-route-id="@voo.Id">Editar</a>
-                        @: | <a asp-action="Delete" asp-route-id="@voo.Id">Eliminar</a>
-                    }
-                </td>
+                <th>Origem</th>
+                <th>Destino</th>
+                <th>Avião</th>
+                <th>Partida</th>
+                <th>Chegada</th>
+                <th>Ações</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var voo in Model)
+            {
+                <tr>
+                    <td>@voo.Origem?.Nome</td>
+                    <td>@voo.Destino?.Nome</td>
+                    <td>@voo.Aviao?.Modelo</td>
+                    <td>@voo.DataHoraPartida.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@voo.DataHoraChegada.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@voo.Id" class="btn btn-info btn-sm me-1" title="Detalhes">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </a>
+                        @if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@voo.Id" class="btn btn-warning btn-sm me-1" title="Editar">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@voo.Id" class="btn btn-danger btn-sm" title="Eliminar">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
 
 

@@ -1,0 +1,70 @@
+﻿@model UserViewModel
+
+@{
+    ViewData["Title"] = "Editar Administrador";
+}
+
+<h2 class="mb-4">
+    <i class="fa-solid fa-user-pen text-primary"></i> Editar Administrador
+</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" autocomplete="off">
+            <input type="hidden" asp-for="Id" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Nome" class="form-label">
+                    <i class="fa-solid fa-user"></i> Nome
+                </label>
+                <input asp-for="Nome" class="form-control" />
+                <span asp-validation-for="Nome" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">
+                    <i class="fa-solid fa-envelope"></i> Email
+                </label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ImageFullPath))
+            {
+                <div class="mb-3 text-center">
+                    <img src="@Model.ImageFullPath"
+                         alt="Fotografia do Administrador"
+                         class="img-thumbnail shadow"
+                         style="max-width: 200px; max-height: 200px;" />
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="ImageFile" class="form-label">
+                    <i class="fa-solid fa-image"></i> Nova Fotografia
+                </label>
+                <input asp-for="ImageFile" type="file" class="form-control" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-ban"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+

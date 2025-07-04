@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
     public class Voo : IEntity
     {
         public int Id { get; set; }
+
+        public string Numero { get; set; }
 
         // FK para Aeroporto de Origem
         [Required]
@@ -23,14 +26,22 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public int AviaoId { get; set; }
         public Aviao Aviao { get; set; }
 
+        public decimal TaxaAeroporto { get; set; }
+
         [Required]
         public DateTime DataHoraPartida { get; set; }
 
         [Required]
         public DateTime DataHoraChegada { get; set; }
 
-        // Lugares associados ao voo
-      //  public ICollection<Lugar> Lugares { get; set; } = new List<Lugar>();
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal PrecoBase { get; set; }
+
+
+
+
+        public ICollection<Lugar> Lugares { get; set; } = new List<Lugar>();
 
         // Soft delete
         public bool WasDeleted { get; set; }

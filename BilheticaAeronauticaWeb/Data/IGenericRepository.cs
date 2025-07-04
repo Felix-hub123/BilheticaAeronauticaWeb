@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BilheticaAeronauticaWeb.Data.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@ namespace BilheticaAeronauticaWeb.Data
         Task DeleteAsync(T entity);
 
         Task<bool> ExistsAsync(int id);
+        Task<bool> AddItemToBilheteAsync(BilheteTemp bilheteTemp, string userId);
     }
     
     

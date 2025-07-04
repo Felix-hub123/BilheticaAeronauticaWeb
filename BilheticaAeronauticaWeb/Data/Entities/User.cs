@@ -8,6 +8,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 {
     public class User : IdentityUser
     {
+        
 
         [MaxLength(100)]
         public string Nome { get; set; }
@@ -15,14 +16,22 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [MaxLength(100)]
         public string Apelido { get; set; }
 
+
+
         [MaxLength(200)]
         public string Endereço { get; set; }
+
+        [MaxLength(200)]
+        public string Password { get; set; }
+
 
         [Display(Name = "Image")]
         public Guid ImageId { get; set; }
 
+       
+
         public string ImageFullPath => ImageId == Guid.Empty
-            ? $"/images/aviao/noimage.png"
+            ? $"/images/users/noimage.png"
             : $"https://bilheticaaeronauticaapp.blob.core.windows.net/Users/{ImageId}";
 
 

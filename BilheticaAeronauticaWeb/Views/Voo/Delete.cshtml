@@ -4,26 +4,43 @@
     ViewData["Title"] = "Eliminar Voo";
 }
 
-<h1>Eliminar Voo</h1>
-<h3>Tem a certeza que pretende eliminar este voo?</h3>
-<div>
-    <dl class="row">
-        <dt class="col-sm-2">Origem</dt>
-        <dd class="col-sm-10">@Model.Origem?.Nome</dd>
-        <dt class="col-sm-2">Destino</dt>
-        <dd class="col-sm-10">@Model.Destino?.Nome</dd>
-        <dt class="col-sm-2">Avião</dt>
-        <dd class="col-sm-10">@Model.Aviao?.Modelo</dd>
-        <dt class="col-sm-2">Partida</dt>
-        <dd class="col-sm-10">@Model.DataHoraPartida.ToString("g")</dd>
-        <dt class="col-sm-2">Chegada</dt>
-        <dd class="col-sm-10">@Model.DataHoraChegada.ToString("g")</dd>
-    </dl>
+<h2 class="mb-4 text-danger">
+    <i class="fa-solid fa-plane-slash"></i> Eliminar Voo
+</h2>
+
+<div class="alert alert-warning mb-4">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    Tem a certeza que pretende eliminar este voo? Esta ação não pode ser desfeita.
 </div>
-<form asp-action="DeleteConfirmed" method="post">
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Origem</dt>
+            <dd class="col-sm-9">@Model.Origem?.Nome</dd>
+            <dt class="col-sm-3">Destino</dt>
+            <dd class="col-sm-9">@Model.Destino?.Nome</dd>
+            <dt class="col-sm-3">Avião</dt>
+            <dd class="col-sm-9">@Model.Aviao?.Modelo</dd>
+            <dt class="col-sm-3">Partida</dt>
+            <dd class="col-sm-9">@Model.DataHoraPartida.ToString("dd/MM/yyyy HH:mm")</dd>
+            <dt class="col-sm-3">Chegada</dt>
+            <dd class="col-sm-9">@Model.DataHoraChegada.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post" class="mt-3">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Eliminar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-trash"></i> Eliminar
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Cancelar
+        </a>
+    </div>
 </form>
+
 
 

@@ -1,59 +1,59 @@
 ﻿@model BilheticaAeronauticaWeb.Data.Entities.Passageiro
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Passageiro";
 }
 
-<h1>Edit</h1>
+<h2 class="mb-4">
+    <i class="fa-solid fa-user-pen text-primary"></i> Editar Passageiro
+</h2>
 
-<h4>Passageiro</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Edit" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
+
+            <div class="mb-3">
+                <label asp-for="Nome" class="form-label">
+                    <i class="fa-solid fa-user"></i> Nome
+                </label>
                 <input asp-for="Nome" class="form-control" />
                 <span asp-validation-for="Nome" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Apelido" class="control-label"></label>
+
+            <div class="mb-3">
+                <label asp-for="Apelido" class="form-label">
+                    <i class="fa-solid fa-user-tag"></i> Apelido
+                </label>
                 <input asp-for="Apelido" class="form-control" />
                 <span asp-validation-for="Apelido" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="DocumentoIdentificacao" class="control-label"></label>
-                <input asp-for="DocumentoIdentificacao" class="form-control" />
-                <span asp-validation-for="DocumentoIdentificacao" class="text-danger"></span>
+
+             <div class="mb-3">
+                <label class="form-label">
+                    <i class="fa-solid fa-calendar-check"></i> Data de Registo
+                </label>
+                <dd class="col-sm-9">
+                    @(Model.DataRegisto != DateTime.MinValue ? Model.DataRegisto.ToString("dd/MM/yyyy") : "-")
+                </dd>
             </div>
-            <div class="form-group">
-                <label asp-for="DataNascimento" class="control-label"></label>
-                <input asp-for="DataNascimento" class="form-control" />
-                <span asp-validation-for="DataNascimento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NumeroDocumento" class="control-label"></label>
-                <input asp-for="NumeroDocumento" class="form-control" />
-                <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DataRegisto" class="control-label"></label>
-                <p class="form-control-plaintext">@Model.DataRegisto.ToString("dd/MM/yyyy HH:mm")</p>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar à lista
+                </a>
             </div>
         </form>
     </div>
-   
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
+

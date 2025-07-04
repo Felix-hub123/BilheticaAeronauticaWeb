@@ -4,22 +4,33 @@
     ViewData["Title"] = "Detalhes do Voo";
 }
 
-<h1>Detalhes do Voo</h1>
+<h2 class="mb-4">
+    <i class="fa-solid fa-plane text-primary"></i> Detalhes do Voo
+</h2>
 
-<div>
-    <dl class="row">
-        <dt class="col-sm-2">Origem</dt>
-        <dd class="col-sm-10">@Model.Origem?.Nome</dd>
-        <dt class="col-sm-2">Destino</dt>
-        <dd class="col-sm-10">@Model.Destino?.Nome</dd>
-        <dt class="col-sm-2">Avião</dt>
-        <dd class="col-sm-10">@Model.Aviao?.Modelo</dd>
-        <dt class="col-sm-2">Partida</dt>
-        <dd class="col-sm-10">@Model.DataHoraPartida.ToString("g")</dd>
-        <dt class="col-sm-2">Chegada</dt>
-        <dd class="col-sm-10">@Model.DataHoraChegada.ToString("g")</dd>
-    </dl>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Origem</dt>
+            <dd class="col-sm-9">@Model.Origem?.Nome</dd>
+            <dt class="col-sm-3">Destino</dt>
+            <dd class="col-sm-9">@Model.Destino?.Nome</dd>
+            <dt class="col-sm-3">Avião</dt>
+            <dd class="col-sm-9">@Model.Aviao?.Modelo</dd>
+            <dt class="col-sm-3">Partida</dt>
+            <dd class="col-sm-9">@Model.DataHoraPartida.ToString("dd/MM/yyyy HH:mm")</dd>
+            <dt class="col-sm-3">Chegada</dt>
+            <dd class="col-sm-9">@Model.DataHoraChegada.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+    </div>
 </div>
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
-<a asp-action="Index" class="btn btn-secondary">Voltar</a>
+
+<div class="d-flex gap-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+        <i class="fa-solid fa-pen-to-square"></i> Editar
+    </a>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+    </a>
+</div>
 

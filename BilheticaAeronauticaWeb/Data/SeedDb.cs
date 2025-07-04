@@ -100,8 +100,6 @@ namespace BilheticaAeronauticaWeb.Data
             {
                 Nome = "Ana",
                 Apelido = "Silva",
-                DocumentoIdentificacao = "CC",
-                NumeroDocumento = "12345678",
                 DataRegisto = DateTime.UtcNow,
                 //UserId = clienteUser.Id 
             });
@@ -166,20 +164,26 @@ namespace BilheticaAeronauticaWeb.Data
         {
             var passageiro = _context.Passageiros.FirstOrDefault(p => p.UserId == clienteUser.Id);
             var voo = _context.Voos.FirstOrDefault();
-            var lugar = _context.Lugares.FirstOrDefault();
+            var lugar = _context.Lugares.FirstOrDefault(l => l.Disponivel);
 
             if (passageiro != null && voo != null && lugar != null)
             {
                 _context.Bilhetes.Add(new Bilhete
                 {
-                    LugarId = lugar.Id,
-                    PassageiroId = passageiro.Id,
+                    Passageiro = passageiro,
+                    Voo = voo,
+                    Lugar = lugar,
                     DataCompra = DateTime.UtcNow,
-                    Preco = 100
+                    Valor = 100,
+                    CriadoPorUserId = clienteUser.Id, 
+                    WasDeleted = false
                 });
+
                 lugar.Disponivel = false;
+                _context.SaveChanges(); 
             }
         }
+
 
 
         private void AddLugares()

@@ -1,59 +1,41 @@
 ﻿@model BilheticaAeronauticaWeb.Data.Entities.Aeroporto
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalhes do Aeroporto";
 }
 
-<h1>Details</h1>
+<h1 class="mb-4">
+    <i class="fa-solid fa-building-circle-exclamation text-primary"></i> Detalhes do Aeroporto
+</h1>
 
-<div>
-    <h4>Aeroporto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nome)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nome)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cidade)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cidade)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Pais)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Pais)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IATA)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IATA)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.WasDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.WasDeleted)
-        </dd>
-    </dl>
-</div>
-<div class="col-md-4">
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3"><i class="fa-solid fa-building text-secondary"></i> Nome</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Nome)</dd>
 
-    <img src="@Url.Content(Model.ImageFullPath)" alt="Image" style="width:300px;height:450px;max-width:100%;height:auto" />
-    }
+            <dt class="col-sm-3"><i class="fa-solid fa-city text-secondary"></i> Cidade</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Cidade)</dd>
+
+            <dt class="col-sm-3"><i class="fa-solid fa-earth-europe text-secondary"></i> País</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Pais)</dd>
+
+            <dt class="col-sm-3"><i class="fa-solid fa-code text-secondary"></i> Código IATA</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.IATA)</dd>
+
+            <dt class="col-sm-3"><i class="fa-solid fa-image text-secondary"></i> Imagem</dt>
+            <dd class="col-sm-9">
+                <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do aeroporto" style="max-width:200px; height:auto;" class="img-thumbnail" />
+            </dd>
+        </dl>
+        <div class="d-flex gap-2 mt-4">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fa-solid fa-pen-to-square"></i> Editar
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Voltar à Lista
+            </a>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+

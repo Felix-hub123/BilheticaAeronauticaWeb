@@ -11,7 +11,11 @@ namespace BilheticaAeronauticaWeb.Models
         public string DestinoNome { get; set; }
         public DateTime DataHoraPartida { get; set; }
 
-       
+        public DateTime DataHoraChegada { get; set; }
+
+        public decimal TaxaAeroporto { get; set; }
+
+
         public string DisplayName
         {
             get

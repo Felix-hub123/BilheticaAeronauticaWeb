@@ -1,24 +1,41 @@
-﻿@model FuncionarioViewModel
+﻿@model UserViewModel
 
 @{
-    ViewData["Title"] = "Eliminar Funcionário";
+    ViewData["Title"] = "Detalhes do Funcionário";
 }
 
-<h2>Eliminar Funcionário</h2>
+<h2 class="mb-4">
+    <i class="fa-solid fa-user-tie text-success"></i> Detalhes do Funcionário
+</h2>
 
-<h4>Tem a certeza que deseja eliminar este funcionário?</h4>
-<div>
-    <dl class="row">
-        <dt class="col-sm-2">Nome</dt>
-        <dd class="col-sm-10">@Model.Nome</dd>
-        <dt class="col-sm-2">Email</dt>
-        <dd class="col-sm-10">@Model.Email</dd>
-        <dt class="col-sm-2">Cargo</dt>
-    </dl>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Nome</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+            @* Podes adicionar mais campos conforme necessário *@
+        </dl>
+        @if (!string.IsNullOrEmpty(Model.ImageFullPath))
+        {
+            <div class="mt-3 text-center">
+                <img src="@Model.ImageFullPath"
+                     alt="Fotografia do Funcionário"
+                     class="img-thumbnail shadow"
+                     style="max-width: 200px; max-height: 200px;" />
+            </div>
+        }
+    </div>
 </div>
 
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Eliminar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
+<div class="d-flex gap-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+        <i class="fa-solid fa-pen-to-square"></i> Editar
+    </a>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Voltar à lista
+    </a>
+</div>
+
+

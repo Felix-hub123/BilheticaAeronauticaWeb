@@ -53,7 +53,7 @@
               "location": "[parameters('resourceLocation')]",
               "name": "bilheticaserver",
               "type": "Microsoft.Sql/servers",
-              "apiVersion": "2017-10-01-preview"
+              "apiVersion": "2022-02-01-preview"
             },
             {
               "sku": {

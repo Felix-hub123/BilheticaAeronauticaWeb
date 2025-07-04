@@ -1,61 +1,69 @@
 ﻿@model BilheticaAeronauticaWeb.Models.AeroportosViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Aeroporto";
 }
 
-<h1>Edit</h1>
+<h1 class="mb-4">
+    <i class="fa-solid fa-building-circle-check text-primary"></i> Editar Aeroporto
+</h1>
 
-<h4>Aeroporto</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" enctype="multipart/form-data">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form asp-action="Edit" enctype="multipart/form-data" autocomplete="off">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <input type="hidden" asp-for="Id" />
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="Nome" class="form-label"><i class="fa-solid fa-building"></i> Nome</label>
+                        <input asp-for="Nome" class="form-control" placeholder="Nome do aeroporto" />
+                        <span asp-validation-for="Nome" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Cidade" class="form-label"><i class="fa-solid fa-city"></i> Cidade</label>
+                        <input asp-for="Cidade" class="form-control" placeholder="Cidade" />
+                        <span asp-validation-for="Cidade" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Pais" class="form-label"><i class="fa-solid fa-earth-europe"></i> País</label>
+                        <input asp-for="Pais" class="form-control" placeholder="País" />
+                        <span asp-validation-for="Pais" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="IATA" class="form-label"><i class="fa-solid fa-code"></i> Código IATA</label>
+                        <input asp-for="IATA" class="form-control" placeholder="Ex: LIS" maxlength="3" />
+                        <span asp-validation-for="IATA" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ImageFile" class="form-label"><i class="fa-solid fa-image"></i> Nova Imagem</label>
+                        <input asp-for="ImageFile" class="form-control" type="file" />
+                        <span asp-validation-for="ImageFile" class="text-danger"></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-floppy-disk"></i> Guardar
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar à Lista
+                        </a>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="Cidade" class="control-label"></label>
-                <input asp-for="Cidade" class="form-control" />
-                <span asp-validation-for="Cidade" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Pais" class="control-label"></label>
-                <input asp-for="Pais" class="form-control" />
-                <span asp-validation-for="Pais" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IATA" class="control-label"></label>
-                <input asp-for="IATA" class="form-control" />
-                <span asp-validation-for="IATA" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageFile" class="control-label"></label>
-                <input asp-for="ImageFile" class="form-control" type="file" />
-                <span asp-validation-for="ImageFile" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-    <div class="col-md-4">
-
-        <img src="@Url.Content(Model.ImageFullPath)" alt="Image" style="width:300px;height:450px;max-width:100%;height:auto" />
-
-
-    </div>
-    <div>
-        <a asp-action="Index">Back to List</a>
+    <div class="col-md-6 d-flex flex-column align-items-center">
+        <div class="mb-2 fw-bold">
+            <i class="fa-solid fa-image"></i> Imagem Atual
+        </div>
+        <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do aeroporto" class="img-thumbnail mb-3" style="max-width: 300px; height: auto;" />
     </div>
 </div>
 
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
+

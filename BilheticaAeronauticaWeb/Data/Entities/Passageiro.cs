@@ -12,16 +12,11 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required, MaxLength(100)]
         public string Nome { get; set; }
 
+        public string FullName => $"{Nome} {Apelido}";
+
         [Required, MaxLength(100)]
         public string Apelido { get; set; }
 
-        [Required, MaxLength(50)]
-        public string DocumentoIdentificacao { get; set; }
-
-        public DateTime? DataNascimento { get; set; }
-
-        [Required, MaxLength(50)]
-        public string NumeroDocumento { get; set; }
 
         public DateTime DataRegisto { get; set; } = DateTime.UtcNow;
 

@@ -23,16 +23,20 @@ namespace BilheticaAeronauticaWeb.Helper
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var client = new SendGridClient(_apiKey);
-            var msg = new SendGridMessage()
+            var client = new SendGrid.SendGridClient(_apiKey);
+            var msg = new SendGrid.Helpers.Mail.SendGridMessage()
             {
-                From = new EmailAddress(_fromEmail, _fromName),
+                From = new SendGrid.Helpers.Mail.EmailAddress(_fromEmail, _fromName),
                 Subject = subject,
                 HtmlContent = htmlMessage
             };
-            msg.AddTo(new EmailAddress(email));
-            await client.SendEmailAsync(msg);
-
+            msg.AddTo(new SendGrid.Helpers.Mail.EmailAddress(email));
+            var response = await client.SendEmailAsync(msg);
+            // Opcional:-verifique resposta
+            if (response.StatusCode != System.Net.HttpStatusCode.Accepted)
+            {
+                // opcional: lançar uma exceção ou log
+            }
 
         }
     }

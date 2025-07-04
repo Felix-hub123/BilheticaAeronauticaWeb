@@ -63,7 +63,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Aeroportos/Create
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public IActionResult Create()
         {
             return View();
@@ -74,7 +74,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Create( AeroportosViewModel model)
         {
             if (ModelState.IsValid)
@@ -99,7 +99,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Aeroportos/Edit/5
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -122,7 +122,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Edit( AeroportosViewModel model)
         {
            
@@ -159,7 +159,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Aeroportos/Delete/5
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

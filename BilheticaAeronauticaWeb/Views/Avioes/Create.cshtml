@@ -4,55 +4,61 @@
     ViewData["Title"] = "Criar novo Avião";
 }
 
-<h1>Novo Avião</h1>
+<h1 class="mb-4">
+    <i class="fa-solid fa-plane-circle-check text-primary"></i> Criar novo Avião
+</h1>
 
-<h4>Aviao</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Marca" class="control-label"></label>
-                <input asp-for="Marca" class="form-control" />
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Create" enctype="multipart/form-data" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Marca" class="form-label"><i class="fa-solid fa-industry"></i> Marca</label>
+                <input asp-for="Marca" class="form-control" placeholder="Marca do avião" />
                 <span asp-validation-for="Marca" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Modelo" class="control-label"></label>
-                <input asp-for="Modelo" class="form-control" />
+            <div class="mb-3">
+                <label asp-for="Modelo" class="form-label"><i class="fa-solid fa-plane"></i> Modelo</label>
+                <input asp-for="Modelo" class="form-control" placeholder="Modelo do avião" />
                 <span asp-validation-for="Modelo" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="LugaresEconomica" class="control-label"></label>
-                <input asp-for="LugaresEconomica" class="form-control" />
+            <div class="mb-3">
+                <label asp-for="LugaresEconomica" class="form-label"><i class="fa-solid fa-chair"></i> Lugares Económica</label>
+                <input asp-for="LugaresEconomica" class="form-control" placeholder="Nº de lugares em económica" />
                 <span asp-validation-for="LugaresEconomica" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="LugaresExecutiva" class="control-label"></label>
-                <input asp-for="LugaresExecutiva" class="form-control" />
+            <div class="mb-3">
+                <label asp-for="LugaresExecutiva" class="form-label"><i class="fa-solid fa-couch"></i> Lugares Executiva</label>
+                <input asp-for="LugaresExecutiva" class="form-control" placeholder="Nº de lugares em executiva" />
                 <span asp-validation-for="LugaresExecutiva" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ImageFile" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="ImageFile" class="form-label"><i class="fa-solid fa-image"></i> Imagem</label>
                 <input asp-for="ImageFile" class="form-control" type="file" />
                 <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Disponivel" /> @Html.DisplayNameFor(model => model.Disponivel)
+            <div class="form-check mb-3">
+                <input class="form-check-input" asp-for="Disponivel" />
+                <label class="form-check-label" asp-for="Disponivel">
+                    <i class="fa-solid fa-toggle-on"></i> Disponível
                 </label>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-plus"></i> Criar
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar à Lista
+                </a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
+

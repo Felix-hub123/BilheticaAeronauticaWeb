@@ -1,31 +1,39 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
     public class Bilhete : IEntity
     {
         public int Id { get; set; }
+        public DateTime DataCompra { get; set; }
 
-        // FK para Lugar
-        [Required]
-        public int LugarId { get; set; }
-        public Lugar Lugar { get; set; }
-
-        // FK para Passageiro
-        [Required]
         public int PassageiroId { get; set; }
+
         public Passageiro Passageiro { get; set; }
 
-        [Required]
-        public DateTime DataCompra { get; set; } = DateTime.UtcNow;
+        public int VooId { get; set; }  
+        public Voo Voo { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Preco { get; set; }
+        public int LugarId { get; set; } 
+        public Lugar Lugar { get; set; }
 
-        // Soft delete
+        [Precision(18, 2)]
+        public decimal Valor { get; set; }
+
+        public bool BagagemExtra { get; set; }
+
+        public bool Refeicao { get; set; }
+
+        public DateTime DataReserva { get; set; } = DateTime.Now;
+
+        public string CriadoPorUserId { get; set; }
         public bool WasDeleted { get; set; }
+
 
     }
     

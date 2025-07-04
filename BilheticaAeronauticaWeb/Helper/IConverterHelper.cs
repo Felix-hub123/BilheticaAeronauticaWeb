@@ -18,23 +18,22 @@ namespace BilheticaAeronauticaWeb.Helper
 
         PassageiroViewModel ToPassageirosViewModel(Passageiro passageiro);
 
-        Bilhete ToBilhete(BilheteViewModel model, bool isNew);
-        BilheteViewModel ToBilheteViewModel(Bilhete bilhete);
-
         Voo TooVoo(VooViewModel model, bool isNew);
 
         public VooViewModel ToVooViewModel(Voo voo);
 
 
-        User ToFuncionario(FuncionarioViewModel model, bool isNew);
+        User ToFuncionario(UserViewModel model, bool isNew);
 
-        FuncionarioViewModel ToFuncionarioViewModel(User funcionario);
+        UserViewModel ToUserViewModel(User user);
 
         //ApplicationUser ToAdmin(AdminViewModel model, bool isNew);
         //AdminViewModel ToAdminViewModel(ApplicationUser admin);
+        public BilheteTemp ToBilheteTemp(BilheteViewModel model, string userId);
 
-       void UpdateFuncionarioFromViewModel(User funcionario, FuncionarioViewModel model);
+        BilheteViewModel ToBilheteViewModel(Bilhete bilhete);
 
-
+        public void UpdateFuncionarioFromViewModel(User funcionario, UserViewModel model);
+        public void ToAdminViewModel(User admin, UserViewModel model);
     }
 }

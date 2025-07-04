@@ -1,11 +1,16 @@
 ﻿using BilheticaAeronauticaWeb.Data;
+using BilheticaAeronauticaWeb.Data.Entities;
 using BilheticaAeronauticaWeb.Helper;
 using BilheticaAeronauticaWeb.Models;
+using BilheticaAeronauticaWeb.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using SendGrid.Helpers.Mail;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,199 +19,210 @@ namespace BilheticaAeronauticaWeb.Controllers
     public class BilheteController : Controller
     {
         private readonly IBilheteRepository _bilheteRepository;
-        private readonly IVooRepository _vooRepository;
         private readonly IPassageiroRepository _passageiroRepository;
         private readonly IConverterHelper _converterHelper;
         private readonly ILugarRepository _lugarRepository;
+        private readonly IVooService _vooService;
         private readonly IUserHelper _userHelper;
-
+        private readonly IBilheteService _bilheteService;
         public BilheteController(
             IBilheteRepository bilheteRepository,
             IVooRepository vooRepository,
             IPassageiroRepository passageiroRepository,
             IConverterHelper converterHelper,
             IUserHelper userHelper,
-            ILugarRepository lugarRepository)
+            IBilheteService bilheteService,
+            ILugarRepository lugarRepository,
+            IVooService vooService)
         {
+            _bilheteService = bilheteService;
             _bilheteRepository = bilheteRepository;
-            _vooRepository = vooRepository;
             _passageiroRepository = passageiroRepository;
             _converterHelper = converterHelper;
             _lugarRepository = lugarRepository;
+            _vooService = vooService;
             _userHelper = userHelper;
         }
 
-        // GET: BilheteController
-
-        public   ActionResult Index()
+       
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> Carrinho()
         {
-            return View (  _bilheteRepository.GetAll().OrderBy(b => b.DataCompra));
+            var user = await _userHelper.GetUserAsync(User);
+            var reservas = await _bilheteRepository.GetBilheteTempsByUserAsync(user.Id);
+            return View(reservas);
         }
 
-        // GET: BilheteController/Details/5
-        public async Task<ActionResult> Details(int? id)
+       
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> AdicionarReserva()
         {
-            if (id == null)
-            {
-                return new NotFoundViewResult("BilheteNotFound");
-            }
-            var bilhete = await _bilheteRepository.GetByIdAsync(id.Value);
-            if (bilhete == null)
-            {
-                return new NotFoundViewResult("BilheteNotFound");
-            }
-            return View(bilhete);
-        }
+            var user = await _userHelper.GetUserAsync(User);
 
-        // GET: BilheteController/Create
-        public async Task <ActionResult> Create()
-        {
-            var model = new BilheteViewModel();
-            await CarregarDropdownsAsync(model);
+
+            var passageiro = await _passageiroRepository.GetByUserIdAsync(user.Id);
+            if (passageiro == null)
+            {
+               
+                ModelState.AddModelError("", "Não existe passageiro associado a este utilizador.");
+                return View("Erro");
+            }
+
+            var model = new BilheteViewModel
+            {
+                NomeCliente = user.FullName ?? user.UserName,
+                PassageiroId = passageiro.Id, 
+                Voos = await _bilheteService.GetVoosSelectListAsync(),
+                Lugares = new List<SelectListItem>()
+            };
             return View(model);
 
         }
 
-        private async Task CarregarDropdownsAsync(BilheteViewModel model)
-        {
-            // Voos
-            model.Voos = _vooRepository.GetAll()
-                .ToList()
-                .Select(v => _converterHelper.ToVooViewModel(v))
-                .Select(vm => new SelectListItem
-                {
-                    Value = vm.Id.ToString(),
-                    Text = vm.DisplayName
-                }).ToList();
 
+        [HttpPost]
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> ComprarSelecionado(int idBilheteSelecionado)
+        {
+            var user = await _userHelper.GetUserAsync(User);
            
-            var passageiros = await _userHelper.GetUsersByRoleAsync("Passageiro"); // Assuming this returns a collection of 'User'
-            model.Passageiros = passageiros.Select(p => new SelectListItem
-            {
-                Value = p.Id,
-                Text = p.Nome // or p.UserName, depending on your entity
-            }).ToList();
-
-            // Available seats
-            model.Lugares = _lugarRepository.GetAll()
-                .Where(l => l.Disponivel && !l.WasDeleted)
-                .Select(l => new SelectListItem
-                {
-                    Value = l.Id.ToString(),
-                    Text = l.Codigo
-                }).ToList();
-        }
-        
-
-        [HttpPost]        [ValidateAntiForgeryToken]        public async Task<ActionResult> Create(BilheteViewModel model)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    var bilhete = _converterHelper.ToBilhete(model, true);
-                    await _bilheteRepository.CreateAsync(bilhete);
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch
-            {
-                ModelState.AddModelError("", "Ocorreu um erro ao criar o bilhete. Tente novamente.");
-            }
-
-            await CarregarDropdownsAsync(model);
-            return View(model);
+            var sucesso = await _bilheteRepository.ConfirmBilheteTempAsync(user.Id, idBilheteSelecionado);
+            if (sucesso)
+                return RedirectToAction("Historico");
+            TempData["ErrorMessage"] = "Não foi possível confirmar o bilhete. Verifique o seu carrinho.";
+            return RedirectToAction("Carrinho");
         }
 
 
-        // GET: BilheteController/Edit/5
-        public async Task<ActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new NotFoundViewResult("BilheteNotFound");
-            }
-
-            var bilhete = await _bilheteRepository.GetByIdAsync(id.Value);
-            if (bilhete == null)
-            {
-                return new NotFoundViewResult("BilheteNotFound");
-            }
-
-            var model = _converterHelper.ToBilheteViewModel(bilhete);
-            await CarregarDropdownsAsync(model);
-            return View(model);
-        }
-
-        // POST: BilheteController/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task <ActionResult> Edit(int id, BilheteViewModel model)
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> AdicionarReserva(BilheteViewModel model)
         {
-            if (id != model.Id)
+            if (!ModelState.IsValid)
             {
-                return new NotFoundViewResult("BilheteNotFound");
-            }
-             
-
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    var bilhete = _converterHelper.ToBilhete(model, false);
-                    await _bilheteRepository.UpdateAsync(bilhete);
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch
-            {
-                ModelState.AddModelError("", "Ocorreu um erro ao editar o bilhete. Tente novamente.");
+                model.Voos = await _bilheteService.GetVoosSelectListAsync();
+                model.Lugares = await _bilheteService.GetLugaresSelectListAsync(model.VooId);
+                return View(model);
             }
 
-            await CarregarDropdownsAsync(model);
+            var user = await _userHelper.GetUserAsync(User);
+            var lugar = await _bilheteService.GetLugarByIdAsync(model.LugarId);
+            var voo = await _bilheteService.GetVooByIdAsync(model.VooId);
+
+            model.Valor = _bilheteService.CalcularPrecoBilhete(lugar, voo, model.BagagemExtra, model.Refeicao);
+
+            var bilheteTemp = _converterHelper.ToBilheteTemp(model, user.Id);
+
+            var result = await _bilheteRepository.AddBilheteTempAsync(bilheteTemp, user.Id);
+            if (result)
+                return RedirectToAction("Carrinho");
+
+            ModelState.AddModelError("", "Já existe uma reserva para este lugar neste voo.");
+            model.Voos = await _bilheteService.GetVoosSelectListAsync();
+            model.Lugares = await _bilheteService.GetLugaresSelectListAsync(model.VooId);
             return View(model);
         }
 
-        // GET: BilheteController/Delete/5
-        public async Task<ActionResult> Delete(int? id)
+
+        [HttpGet]
+        public async Task<JsonResult> LugaresDisponiveis(int vooId)
+        {
+            var lugares = await _bilheteService.GetLugaresSelectListAsync(vooId);
+            return Json(lugares);
+        }
+
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> RemoverReserva(int? id)
         {
             if (id == null)
             {
-                 return new NotFoundViewResult("BilheteNotFound");
+                return NotFound();
+            }
+                
+            await _bilheteRepository.DeleteBilheteTempAsync(id.Value);
+            return RedirectToAction("Carrinho");
+        }
+
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> Comprar()
+        {
+            var user = await _userHelper.GetUserAsync(User);
+            var sucesso = await _bilheteRepository.ConfirmBilheteAsync(user.Id);
+            if (sucesso)
+                return RedirectToAction("Historico");
+            TempData["ErrorMessage"] = "Não foi possível confirmar os bilhetes. Verifique o seu carrinho.";
+            return RedirectToAction("Carrinho");
+        }
+
+  
+        [Authorize(Roles = "Cliente,Admin,Funcionario")]
+        public async Task<IActionResult> Historico()
+        {
+            var user = await _userHelper.GetUserAsync(User);
+            var bilhetes = await _bilheteRepository.GetBilhetesByUserAsync(user.Id);
+            var viewModels = bilhetes.Select(b => _converterHelper.ToBilheteViewModel(b)).ToList();
+
+            return View(viewModels);
+        }
+
+   
+        public async Task<IActionResult> Detalhes(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
             }
                
-
-            var bilhete = await _bilheteRepository.GetByIdAsync(id.Value);
+            var bilhete = await _bilheteRepository.GetBilheteAsync(id.Value);
             if (bilhete == null)
             {
-                 return new NotFoundViewResult("BilheteNotFound");
+                return NotFound();
             }
-               
 
             return View(bilhete);
         }
 
-        // POST: BilheteController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async  Task<ActionResult> DeleteConfirmed(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Editar(int? id)
         {
-            try
+            if (id == null)
             {
-                var bilhete = await _bilheteRepository.GetByIdAsync(id);
-                if (bilhete != null)
-                {
-                    bilhete.WasDeleted = true; // Soft delete
-                    await _bilheteRepository.UpdateAsync(bilhete);
-                }
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            catch
-            {
-                ModelState.AddModelError("", "Ocorreu um erro ao eliminar o bilhete.");
-                var bilhete = await _bilheteRepository.GetByIdAsync(id);
-                return View(bilhete);
-            }
+
+        
+            var bilhete = await _bilheteRepository.GetBilheteAsync(id.Value);
+            if (bilhete == null)
+                return NotFound();
+
+ 
+            var model = _converterHelper.ToBilheteViewModel(bilhete);
+            model.Voos = await _bilheteService.GetVoosSelectListAsync();
+            model.Lugares = await _bilheteService.GetLugaresSelectListAsync(model.VooId);
+
+
+            return View(model);
         }
+
+      
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Anular(int? id)
+        {
+            if (id == null)
+                return NotFound();
+            await _bilheteRepository.SoftDeleteBilheteAsync(id.Value);
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> CalcularPreco(int vooId, int lugarId, bool bagagemExtra, bool refeicao)
+        {
+            var voo = await _vooService.ObterVooPorIdAsync(vooId);
+            var lugar = await _bilheteService.GetLugarByIdAsync(lugarId);
+            decimal preco = _bilheteService.CalcularPrecoBilhete(lugar, voo, bagagemExtra, refeicao);
+            return Json(preco);
+        }
+
+
     }
 }

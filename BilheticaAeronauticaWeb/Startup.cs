@@ -19,6 +19,7 @@ using Azure.Storage.Queues;
 using Azure.Storage.Blobs;
 using Azure.Core.Extensions;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using BilheticaAeronauticaWeb.Services;
 
 namespace BilheticaAeronauticaWeb
 {
@@ -31,7 +32,6 @@ namespace BilheticaAeronauticaWeb
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(cfg =>
@@ -65,9 +65,13 @@ namespace BilheticaAeronauticaWeb
             services.AddScoped<IPassageiroRepository, PassageiroRepository>();
             services.AddScoped<IImageHelper, ImageHelper>();
             services.AddScoped<IVooRepository, VooRepository>();
+            services.AddScoped<ILugarRepository, LugarRepository>();
+            services.AddScoped<IBilheteRepository, BilheteRepository>();
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.AddTransient<IEmailSender, EmailSender>();
-           
+            services.AddScoped<IBilheteService, BilheteService>();
+            services.AddScoped<IVooService, VooService>();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Account/NotAuthorized";

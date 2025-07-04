@@ -1,4 +1,4 @@
-﻿@model FuncionarioViewModel
+﻿@model UserViewModel
 
 @{
     ViewData["Title"] = "Editar Funcionário";
@@ -6,7 +6,7 @@
 
 <h2>Editar Funcionário</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
         <label asp-for="Nome"></label>
@@ -17,6 +17,20 @@
         <label asp-for="Email"></label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+   
+    @if (!string.IsNullOrEmpty(Model.ImageFullPath))
+    {
+        <div class="mb-3">
+            <img src="@Model.ImageFullPath" alt="Fotografia do Funcionário" style="max-width: 200px; max-height: 200px;" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label asp-for="ImageFile"></label>
+        <input asp-for="ImageFile" type="file" class="form-control" />
+        <span asp-validation-for="ImageFile" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Guardar</button>
     <a asp-action="Index" class="btn btn-secondary">Cancelar</a>

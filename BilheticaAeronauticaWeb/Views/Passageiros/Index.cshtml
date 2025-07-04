@@ -4,40 +4,50 @@
     ViewData["Title"] = "Passageiros";
 }
 
-<h1>Index</h1>
+<h2 class="mb-4">
+    <i class="fa-solid fa-users text-primary"></i> Passageiros
+</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="fa-solid fa-user-plus"></i> Criar Novo Passageiro
+    </a>
 </p>
-<table class="table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Nome)</th>
-            <th>@Html.DisplayNameFor(model => model.Apelido)</th>
-            <th>@Html.DisplayNameFor(model => model.DocumentoIdentificacao)</th>
-            <th>@Html.DisplayNameFor(model => model.DataNascimento)</th>
-            <th>@Html.DisplayNameFor(model => model.NumeroDocumento)</th>
-            <th>@Html.DisplayNameFor(model => model.DataRegisto)</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.Nome</td>
-            <td>@item.Apelido</td>
-            <td>@item.DocumentoIdentificacao</td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DataNascimento)
-                </td>
-            <td>@item.NumeroDocumento</td>
-            <td>@item.DataRegisto.ToString("dd/MM/yyyy HH:mm")</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalhes</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome</th>
+                <th>Apelido</th>
+                <th>Documento de Identificação</th>
+                <th>Data de Nascimento</th>
+                <th>Número do Documento</th>
+                <th>Data de Registo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nome</td>
+                    <td>@item.Apelido</td>
+                    <td>@item.DataRegisto.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm me-1" title="Editar">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm me-1" title="Detalhes">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Eliminar">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

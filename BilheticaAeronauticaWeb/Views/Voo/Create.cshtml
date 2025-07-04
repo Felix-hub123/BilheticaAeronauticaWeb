@@ -4,30 +4,73 @@
     ViewData["Title"] = "Criar Voo";
 }
 
-<h1>Criar Voo</h1>
+<h2 class="mb-4">
+    <i class="fa-solid fa-plane-departure text-primary"></i> Criar Voo
+</h2>
 
-<form asp-action="Create">
-    <div class="form-group">
-        <label asp-for="OrigemId"></label>
-        <select asp-for="OrigemId" class="form-control" asp-items="ViewBag.OrigemId"></select>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Create" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="OrigemId" class="form-label">
+                    <i class="fa-solid fa-location-dot"></i> Origem
+                </label>
+                <select asp-for="OrigemId" class="form-select" asp-items="ViewBag.OrigemId"></select>
+                <span asp-validation-for="OrigemId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DestinoId" class="form-label">
+                    <i class="fa-solid fa-location-dot"></i> Destino
+                </label>
+                <select asp-for="DestinoId" class="form-select" asp-items="ViewBag.DestinoId"></select>
+                <span asp-validation-for="DestinoId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="AviaoId" class="form-label">
+                    <i class="fa-solid fa-plane"></i> Avião
+                </label>
+                <select asp-for="AviaoId" class="form-select" asp-items="ViewBag.AviaoId"></select>
+                <span asp-validation-for="AviaoId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DataHoraPartida" class="form-label">
+                    <i class="fa-solid fa-clock"></i> Data/Hora Partida
+                </label>
+                <input asp-for="DataHoraPartida" class="form-control" type="datetime-local" />
+                <span asp-validation-for="DataHoraPartida" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DataHoraChegada" class="form-label">
+                    <i class="fa-solid fa-clock"></i> Data/Hora Chegada
+                </label>
+                <input asp-for="DataHoraChegada" class="form-control" type="datetime-local" />
+                <span asp-validation-for="DataHoraChegada" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PrecoBase" class="form-label">Preço do Voo</label>
+                <input asp-for="PrecoBase" class="form-control" type="number" min="0" step="0.01" />
+            </div>
+
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-plus"></i> Criar
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label asp-for="DestinoId"></label>
-        <select asp-for="DestinoId" class="form-control" asp-items="ViewBag.DestinoId"></select>
-    </div>
-    <div class="form-group">
-        <label asp-for="AviaoId"></label>
-        <select asp-for="AviaoId" class="form-control" asp-items="ViewBag.AviaoId"></select>
-    </div>
-    <div class="form-group">
-        <label asp-for="DataHoraPartida"></label>
-        <input asp-for="DataHoraPartida" class="form-control" type="datetime-local" />
-    </div>
-    <div class="form-group">
-        <label asp-for="DataHoraChegada"></label>
-        <input asp-for="DataHoraChegada" class="form-control" type="datetime-local" />
-    </div>
-    <button type="submit" class="btn btn-success">Criar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
 

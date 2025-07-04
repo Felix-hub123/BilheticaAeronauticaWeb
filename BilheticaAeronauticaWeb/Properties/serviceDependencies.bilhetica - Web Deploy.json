@@ -8,13 +8,18 @@
       "connectionId": "ConnectionStrings:DefaultConnection",
       "dynamicId": null
     },
-    "storage2": {
-      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString_BC3C3E2835, /subscriptions/e09d2ade-66f7-4f17-977b-5e64f63575ee/resourceGroups/bilhetica/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString_618B072E53",
+    "storage1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString1_678B0ED85A, /subscriptions/e09d2ade-66f7-4f17-977b-5e64f63575ee/resourceGroups/bilhetica/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString1_0F172B7D46",
       "secretStore": "AzureAppSettings",
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/bilheticaapp",
       "type": "storage.azure",
-      "connectionId": "Blob:ConnectionString",
+      "connectionId": "Blob:ConnectionString1",
       "dynamicId": null
+    },
+    "storage2": {
+      "ignored": "true",
+      "type": "storage",
+      "connectionId": "Blob:ConnectionString"
     }
   }
 }

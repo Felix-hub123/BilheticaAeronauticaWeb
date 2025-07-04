@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
-   
+    [Authorize(Roles = "Cliente")]
     public class PassageirosController : Controller
     {
        
@@ -33,7 +33,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
         // GET: Passageiros
-        [Authorize(Roles = "FuncionarioOrAdmin")]
+        [Authorize(Roles = "Admin,Funcionario")]
         public IActionResult Index()
         {
             return View(_passageiroRepository.GetAll().OrderBy(p => p.Nome));
@@ -86,6 +86,64 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return RedirectToAction(nameof(Index));
             }
              return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateFromReserva([FromBody] Passageiro model)
+        {
+            var user = await _userHelper.GetUserAsync(User);
+            model.UserId = user.Id;
+            await _passageiroRepository.CreateAsync(model);
+            // Retorna o novo passageiro para o JavaScript adicionar ao dropdown
+            return Json(new { id = model.Id, nome = model.Nome });
+        }
+
+        [Authorize(Roles = "Cliente")]
+        public async Task<IActionResult> Perfil()
+        {
+            var user = await _userHelper.GetUserAsync(User);
+            var passageiro = await _passageiroRepository.GetByUserIdAsync(user.Id);
+
+            if (passageiro == null)
+            {
+                // Se não existir, redireciona para criar perfil
+                return RedirectToAction("Create");
+            }
+
+            var model = new PassageiroViewModel
+            {
+                Id = passageiro.Id,
+                Nome = passageiro.Nome,
+                Apelido = passageiro.Apelido,
+           
+            };
+            return View(model); // Views/Passageiros/Perfil.cshtml
+        }
+
+
+        [HttpPost]
+        [Authorize(Roles = "Cliente")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Perfil(PassageiroViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userHelper.GetUserAsync(User);
+            var passageiro = await _passageiroRepository.GetByIdAsync(model.Id);
+
+            if (passageiro == null || passageiro.UserId != user.Id)
+                return Forbid();
+
+            // Atualiza os dados
+            passageiro.Nome = model.Nome;
+            passageiro.Apelido = model.Apelido;
+     
+
+            await _passageiroRepository.UpdateAsync(passageiro);
+
+            TempData["SuccessMessage"] = "Perfil atualizado com sucesso!";
+            return RedirectToAction("Perfil");
         }
 
         // GET: Passageiros/Edit/5
