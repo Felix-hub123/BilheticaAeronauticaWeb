@@ -1,4 +1,5 @@
 ﻿@model BilheticaAeronauticaWeb.Data.Entities.Voo
+@using Syncfusion.EJ2
 
 @{
     ViewData["Title"] = "Criar Voo";
@@ -38,22 +39,31 @@
                 <label asp-for="DataHoraPartida" class="form-label">
                     <i class="fa-solid fa-clock"></i> Data/Hora Partida
                 </label>
-                <input asp-for="DataHoraPartida" class="form-control" type="datetime-local" />
+                <ejs-datetimepicker id="DataHoraPartida"
+                                    name="DataHoraPartida"
+                                    format="dd/MM/yyyy HH:mm"
+                                    value="@(Model?.DataHoraPartida ?? DateTime.Now)">
+                </ejs-datetimepicker>
                 <span asp-validation-for="DataHoraPartida" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="DataHoraChegada" class="form-label">
                     <i class="fa-solid fa-clock"></i> Data/Hora Chegada
                 </label>
-                <input asp-for="DataHoraChegada" class="form-control" type="datetime-local" />
+                <ejs-datetimepicker id="DataHoraChegada"
+                                    name="DataHoraChegada"
+                                    format="dd/MM/yyyy HH:mm"
+                                    value="@(Model?.DataHoraChegada ?? DateTime.Now)">
+                </ejs-datetimepicker>
                 <span asp-validation-for="DataHoraChegada" class="text-danger"></span>
             </div>
-
             <div class="mb-3">
-                <label asp-for="PrecoBase" class="form-label">Preço do Voo</label>
+                <label asp-for="PrecoBase" class="form-label">
+                    <i class="fa-solid fa-euro-sign"></i> Preço do Voo
+                </label>
                 <input asp-for="PrecoBase" class="form-control" type="number" min="0" step="0.01" />
+                <span asp-validation-for="PrecoBase" class="text-danger"></span>
             </div>
-
 
             <div class="d-flex gap-2 mt-4">
                 <button type="submit" class="btn btn-success">
@@ -72,5 +82,6 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
 
 

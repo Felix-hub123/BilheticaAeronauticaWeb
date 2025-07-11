@@ -61,24 +61,7 @@ namespace BilheticaAeronauticaWeb.Helper
 
        
 
-        public async Task<SignInResult> LoginAsync(LoginViewModel model)
-        {
-            return await _signInManager.PasswordSignInAsync(
-          model.Username,
-          model.Password,
-          model.RememberMe,
-          false);
-        }
-
-        public async Task LogOutAsync()
-        {
-            await _signInManager.SignOutAsync();
-        }
-
-        public async Task RemoveUserFromRoleAsync(User user, string roleName)
-        {
-            await _userManager.RemoveFromRoleAsync(user, roleName);
-        }
+       
 
         public async Task<IdentityResult> UpdateUserAsync(User user)
         {

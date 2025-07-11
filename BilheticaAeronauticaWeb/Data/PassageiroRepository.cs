@@ -19,5 +19,9 @@ namespace BilheticaAeronauticaWeb.Data
         {
             return await _context.Passageiros.FirstOrDefaultAsync(p => p.UserId == userId);
         }
+
+
+       
+
     }
 }

@@ -20,6 +20,10 @@ namespace BilheticaAeronauticaWeb.Data
         Task<Bilhete> GetByVooAndLugarAsync(int vooId, int lugarId);
 
         Task<bool> ConfirmBilheteTempAsync(string userId, int idBilheteTemp);
+
+        Task<IEnumerable<Bilhete>> GetAllBilhetesAsync();
+
+        Task UpdateBilheteAsync(Bilhete bilhete);
     }
        
 }

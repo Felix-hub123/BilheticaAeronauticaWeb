@@ -35,6 +35,9 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public bool WasDeleted { get; set; }
 
 
+        public string UserId { get; set; }
+        public User User { get; set; }
+
     }
     
 }

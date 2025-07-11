@@ -44,8 +44,46 @@ namespace BilheticaAeronauticaWeb.Controllers
             _userHelper = userHelper;
         }
 
-       
-        [Authorize(Roles = "Cliente")]
+
+        [Authorize(Roles = "Admin,Funcionario")]
+        public async Task<IActionResult> Index()
+        {
+            var bilhetes = await _bilheteRepository.GetAllBilhetesAsync();
+            return View(bilhetes);
+        }
+
+        [Authorize(Roles = "Passageiro,Admin,Funcionario")]
+        public async Task<IActionResult> Detalhes(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+              
+
+            var bilhete = await _bilheteRepository.GetBilheteAsync(id.Value);
+            if (bilhete == null)
+            {
+                 return NotFound();
+            }
+             
+
+            var user = await _userHelper.GetUserAsync(User);
+            var passageiro = await _passageiroRepository.GetByUserIdAsync(user.Id);
+            if (bilhete.PassageiroId != passageiro.Id && !User.IsInRole("Admin") && !User.IsInRole("Funcionario"))
+            {
+                ViewBag.ErrorMessage = "Não tem permissão para ver este bilhete.";
+                return View("Erro");
+            }
+
+            return View(bilhete); 
+        }
+        
+
+
+
+
+        [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> Carrinho()
         {
             var user = await _userHelper.GetUserAsync(User);
@@ -54,7 +92,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
        
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> AdicionarReserva()
         {
             var user = await _userHelper.GetUserAsync(User);
@@ -81,7 +119,7 @@ namespace BilheticaAeronauticaWeb.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> ComprarSelecionado(int idBilheteSelecionado)
         {
             var user = await _userHelper.GetUserAsync(User);
@@ -93,16 +131,38 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction("Carrinho");
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Editar(BilheteViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PreencherSelectLists(model);
+                return View(model);
+            }
+
+            var bilhete = await _bilheteRepository.GetBilheteAsync(model.Id);
+            if (bilhete == null)
+                return NotFound();
+
+            
+            bilhete = _converterHelper.UpdateBilheteFromViewModel(bilhete, model);
+
+            await _bilheteRepository.UpdateBilheteAsync(bilhete);
+            return RedirectToAction("Index");
+        }
+
+
 
         [HttpPost]
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> AdicionarReserva(BilheteViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                model.Voos = await _bilheteService.GetVoosSelectListAsync();
-                model.Lugares = await _bilheteService.GetLugaresSelectListAsync(model.VooId);
+                await PreencherSelectLists(model);
                 return View(model);
+     
             }
 
             var user = await _userHelper.GetUserAsync(User);
@@ -124,6 +184,8 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
+
+
         [HttpGet]
         public async Task<JsonResult> LugaresDisponiveis(int vooId)
         {
@@ -131,7 +193,7 @@ namespace BilheticaAeronauticaWeb.Controllers
             return Json(lugares);
         }
 
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> RemoverReserva(int? id)
         {
             if (id == null)
@@ -143,7 +205,7 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction("Carrinho");
         }
 
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> Comprar()
         {
             var user = await _userHelper.GetUserAsync(User);
@@ -155,7 +217,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
   
-        [Authorize(Roles = "Cliente,Admin,Funcionario")]
+        [Authorize(Roles = "Passageiro,Admin,Funcionario")]
         public async Task<IActionResult> Historico()
         {
             var user = await _userHelper.GetUserAsync(User);
@@ -166,21 +228,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
    
-        public async Task<IActionResult> Detalhes(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-               
-            var bilhete = await _bilheteRepository.GetBilheteAsync(id.Value);
-            if (bilhete == null)
-            {
-                return NotFound();
-            }
-
-            return View(bilhete);
-        }
+      
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Editar(int? id)
@@ -205,7 +253,7 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
       
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Anular(int? id)
         {
             if (id == null)
@@ -214,6 +262,7 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction("Index");
         }
 
+
         [HttpGet]
         public async Task<JsonResult> CalcularPreco(int vooId, int lugarId, bool bagagemExtra, bool refeicao)
         {
@@ -221,6 +270,42 @@ namespace BilheticaAeronauticaWeb.Controllers
             var lugar = await _bilheteService.GetLugarByIdAsync(lugarId);
             decimal preco = _bilheteService.CalcularPrecoBilhete(lugar, voo, bagagemExtra, refeicao);
             return Json(preco);
+        }
+
+        private async Task PreencherSelectLists(BilheteViewModel model)
+        {
+            model.Voos = await _bilheteService.GetVoosSelectListAsync();
+            model.Lugares = await _bilheteService.GetLugaresSelectListAsync(model.VooId);
+        }
+
+        [Authorize(Roles = "Passageiro,Admin")]
+        public async Task<IActionResult> Cancelar(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+               
+
+            var bilhete = await _bilheteRepository.GetBilheteAsync(id.Value);
+            if (bilhete == null)
+            {
+                 return NotFound();
+            }
+                
+
+            
+            var user = await _userHelper.GetUserAsync(User);
+            var isOwner = bilhete.Passageiro?.UserId == user.Id;
+            var isAdmin = User.IsInRole("Admin");
+            if (!isOwner && !isAdmin)
+                return Forbid();
+
+            bilhete.WasDeleted = true;
+            await _bilheteRepository.UpdateBilheteAsync(bilhete);
+
+            TempData["SuccessMessage"] = "Bilhete anulado com sucesso.";
+            return RedirectToAction("Historico");
         }
 
 

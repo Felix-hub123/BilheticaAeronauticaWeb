@@ -1,0 +1,37 @@
+﻿@model IEnumerable<BilheteViewModel>
+
+@{
+    ViewData["Title"] = "Lista de Bilhetes";
+}
+
+<h2>Lista de Bilhetes</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Voo</th>
+            <th>Lugar</th>
+            <th>Preço</th>
+            <th>Estado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bilhete in Model)
+        {
+            <tr>
+                <td>
+                    @($"{bilhete.OrigemNome} → {bilhete.DestinoNome} ({bilhete.VooNumero})")
+                </td>
+             
+                <td>
+                    <a asp-action="Detalhes" asp-route-id="@bilhete.Id" class="btn btn-info btn-sm">Detalhes</a>
+                    <a asp-action="Editar" asp-route-id="@bilhete.Id" class="btn btn-warning btn-sm">Editar</a>
+                    <a asp-action="Anular" asp-route-id="@bilhete.Id" class="btn btn-danger btn-sm">Anular</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

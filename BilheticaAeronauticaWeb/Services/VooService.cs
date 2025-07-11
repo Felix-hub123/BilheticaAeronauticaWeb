@@ -100,6 +100,19 @@ namespace BilheticaAeronauticaWeb.Services
             return await _vooRepository.GetVooWithIncludesAsync(id);
         }
 
-       
+        public async Task<List<Voo>> PesquisarVoosAsync(DateTime? data, int? origemAeroportoId, int? destinoAeroportoId)
+        {
+            var voos = await _vooRepository.GetAllVoosWithIncludesAsync();
+
+            if (data.HasValue)
+                voos = voos.Where(v => v.DataHoraPartida.Date == data.Value.Date).ToList();
+            if (origemAeroportoId.HasValue)
+                voos = voos.Where(v => v.OrigemId == origemAeroportoId.Value).ToList();
+            if (destinoAeroportoId.HasValue)
+                voos = voos.Where(v => v.DestinoId == destinoAeroportoId.Value).ToList();
+
+            return voos;
+        }
+
     }
 }

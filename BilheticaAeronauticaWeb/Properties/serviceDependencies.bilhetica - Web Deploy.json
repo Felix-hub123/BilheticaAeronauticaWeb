@@ -1,13 +1,5 @@
 {
   "dependencies": {
-    "mssql1": {
-      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsDefaultConnection_514A7B2575",
-      "secretStore": "AzureAppSettings",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/bilheticaserver/databases/bilhetica",
-      "type": "mssql.azure",
-      "connectionId": "ConnectionStrings:DefaultConnection",
-      "dynamicId": null
-    },
     "storage1": {
       "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('serviceConnectorResourceGroupName')]/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString1_678B0ED85A, /subscriptions/e09d2ade-66f7-4f17-977b-5e64f63575ee/resourceGroups/bilhetica/providers/Microsoft.Web/sites/bilhetica/providers/Microsoft.ServiceLinker/linkers/BlobConnectionString1_0F172B7D46",
       "secretStore": "AzureAppSettings",
@@ -20,6 +12,12 @@
       "ignored": "true",
       "type": "storage",
       "connectionId": "Blob:ConnectionString"
+    },
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "type": "mssql.onprem",
+      "connectionId": "ConnectionStrings:DefaultConnection",
+      "dynamicId": null
     }
   }
 }

@@ -1,19 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BilheticaAeronauticaWeb.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IVooRepository _vooRepository;
+    
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IVooRepository vooRepository)
         {
             _logger = logger;
+            _vooRepository = vooRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var voos = await _vooRepository.GetAllVoosAsync();
+            ViewBag.NumeroVoos = voos.Count;
+            ViewBag.ListaVoos = voos.Take(5).ToList();
+
+
             return View();
         }
 

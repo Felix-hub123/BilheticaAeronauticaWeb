@@ -102,7 +102,7 @@ namespace BilheticaAeronauticaWeb.Data
             .Include(b => b.Passageiro)
             .Include(b => b.Voo)
             .Include(b => b.Lugar)
-            .Where(b => b.CriadoPorUserId == userId && !b.WasDeleted)
+            .Where(b => b.Passageiro.UserId == userId)
             .ToListAsync();
 
 
@@ -186,7 +186,15 @@ namespace BilheticaAeronauticaWeb.Data
             return true;
         }
 
+        public async Task<IEnumerable<Bilhete>> GetAllBilhetesAsync()
+        {
+            return await _context.Bilhetes
+           .Include(b => b.Voo)
+           .Include(b => b.Lugar)
+           .Include(b => b.Passageiro)
+           .ToListAsync();
 
+        }
     }
 
 }

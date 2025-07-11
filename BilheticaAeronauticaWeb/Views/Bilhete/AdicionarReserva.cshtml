@@ -54,9 +54,13 @@
                     <label asp-for="Valor" class="form-label">Preço</label>
                     <input asp-for="Valor" class="form-control" id="Valor" readonly />
                 </div>
-                <button type="submit" class="btn btn-success">
-                    <i class="fa-solid fa-plus"></i> Reservar
-                </button>
+
+                <form asp-action="AdicionarReserva" method="post">
+                    <button type="submit" class="btn btn-success mt-3 mb-5">
+                        <i class="fa-solid fa-plus"></i> Reservar
+                    </button>
+                </form>
+
             </form>
         </div>
     </div>

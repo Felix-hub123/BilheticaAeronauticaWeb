@@ -35,5 +35,7 @@ namespace BilheticaAeronauticaWeb.Helper
 
         public void UpdateFuncionarioFromViewModel(User funcionario, UserViewModel model);
         public void ToAdminViewModel(User admin, UserViewModel model);
+
+        Bilhete UpdateBilheteFromViewModel(Bilhete bilhete, BilheteViewModel model);
     }
 }

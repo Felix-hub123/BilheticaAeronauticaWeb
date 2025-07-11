@@ -1,25 +1,27 @@
+using Azure.Core.Extensions;
+using Azure.Data.Tables;
+using Azure.Storage.Blobs;
+using Azure.Storage.Queues;
+using BilheticaAeronauticaWeb.Data;
+using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Helper;
+using BilheticaAeronauticaWeb.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using MudBlazor.Services;
+using Syncfusion.Blazor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using BilheticaAeronauticaWeb.Data;
-using BilheticaAeronauticaWeb.Data.Entities;
-using Microsoft.AspNetCore.Identity;
-using BilheticaAeronauticaWeb.Helper;
-using Microsoft.Extensions.Azure;
-using Azure.Data.Tables;
-using Azure.Storage.Queues;
-using Azure.Storage.Blobs;
-using Azure.Core.Extensions;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using BilheticaAeronauticaWeb.Services;
 
 namespace BilheticaAeronauticaWeb
 {
@@ -71,6 +73,9 @@ namespace BilheticaAeronauticaWeb
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IBilheteService, BilheteService>();
             services.AddScoped<IVooService, VooService>();
+            services.AddMudServices();
+            services.AddSyncfusionBlazor();
+
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -113,6 +118,13 @@ namespace BilheticaAeronauticaWeb
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<SeedDb>();
+                seeder.SeedAsync().Wait();
+            }
         }
     }
 }

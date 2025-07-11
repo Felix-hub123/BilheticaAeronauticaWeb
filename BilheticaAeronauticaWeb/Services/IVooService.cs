@@ -1,4 +1,5 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,5 +18,7 @@ namespace BilheticaAeronauticaWeb.Services
         Task<IEnumerable<Voo>> ObterHistoricoVoosAsync(int utilizadorId);
 
         Task<Voo> ObterVooPorIdAsync(int id);
+
+        Task<List<Voo>> PesquisarVoosAsync(DateTime? data, int? origemAeroportoId, int? destinoAeroportoId);
     }
 }

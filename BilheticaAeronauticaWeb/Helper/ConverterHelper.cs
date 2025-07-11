@@ -220,5 +220,15 @@ namespace BilheticaAeronauticaWeb.Helper
             model.ImageId = admin.ImageId;
 
         }
+
+        public Bilhete UpdateBilheteFromViewModel(Bilhete bilhete, BilheteViewModel model)
+        {
+            bilhete.VooId = model.VooId;
+            bilhete.LugarId = model.LugarId;
+            bilhete.BagagemExtra = model.BagagemExtra;
+            bilhete.Refeicao = model.Refeicao;
+            bilhete.Valor = model.Valor;
+            return bilhete;
+        }
     }
 }

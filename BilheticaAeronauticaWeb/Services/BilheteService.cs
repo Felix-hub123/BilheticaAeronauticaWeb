@@ -76,6 +76,8 @@ namespace BilheticaAeronauticaWeb.Services
             };
 
             await _bilheteRepository.CreateAsync(bilhete);
+            lugar.Disponivel = false;
+            await _lugarRepository.UpdateAsync(lugar);
             return bilhete;
         }
 

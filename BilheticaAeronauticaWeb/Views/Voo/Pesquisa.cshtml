@@ -1,0 +1,97 @@
+﻿@model PesquisaVoosViewModel
+@using System.Globalization
+
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="bi bi-search"></i> Pesquisa Avançada de Voos</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Pesquisa" method="post" class="mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="bi bi-calendar-event"></i> Data de Partida</label>
+                        <input asp-for="DataPartida" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="bi bi-airplane"></i> Aeroporto de Origem</label>
+                        <select asp-for="OrigemId" asp-items="Model.Aeroportos" class="form-select">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold"><i class="bi bi-geo-alt"></i> Aeroporto de Destino</label>
+                        <select asp-for="DestinoId" asp-items="Model.Aeroportos" class="form-select">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success btn-lg px-4">
+                        <i class="bi bi-search"></i> Pesquisar
+                    </button>
+                </div>
+            </form>
+
+            @if (Model.Resultados != null && Model.Resultados.Any())
+            {
+                <div class="alert alert-success mb-3">
+                    <i class="bi bi-check-circle"></i> Foram encontrados <b>@Model.Resultados.Count</b> voos.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle shadow-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="bi bi-airplane"></i> Origem</th>
+                                <th><i class="bi bi-geo-alt"></i> Destino</th>
+                                <th><i class="bi bi-calendar-event"></i> Partida</th>
+                                <th><i class="bi bi-calendar-check"></i> Chegada</th>
+                                <th><i class="bi bi-currency-euro"></i> Preço</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var voo in Model.Resultados)
+                            {
+                                <tr>
+                                    <td>@voo.Origem?.Nome</td>
+                                    <td>@voo.Destino?.Nome</td>
+                                    <td>@voo.DataHoraPartida.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture)</td>
+                                    <td>@voo.DataHoraChegada.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture)</td>
+                                    <td>
+                                        @if (voo.PrecoBase > 0)
+                                        {
+                                            @voo.PrecoBase.ToString("C", CultureInfo.CurrentCulture)
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Consultar</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@voo.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-info-circle"></i> Detalhes
+                                        </a>
+                                        <a asp-action="Comprar" asp-route-id="@voo.Id" class="btn btn-success btn-sm ms-2">
+                                            <i class="bi bi-cart-plus"></i> Comprar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else if (Model.Resultados != null)
+            {
+                <div class="alert alert-warning mt-4">
+                    <i class="bi bi-exclamation-triangle"></i> Nenhum voo encontrado com os critérios selecionados.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+

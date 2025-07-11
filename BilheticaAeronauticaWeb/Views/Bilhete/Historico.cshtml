@@ -87,11 +87,11 @@
                                 </td>
                                 <td>
                                     @(bilhete.DataCompra.HasValue
-                                                                    ? bilhete.DataCompra.Value.ToShortDateString()
-                                                                    : "N/A")
+                                    ? bilhete.DataCompra.Value.ToShortDateString()
+                                    : "N/A")
                             </td>
                             <td>
-                                @if (bilhete.Anulado)
+                                @if (bilhete.WasDeleted)
                                         {
                                             <span class="badge bg-danger">Anulado</span>
                                         }
@@ -104,13 +104,18 @@
                                         <a asp-action="Detalhes" asp-route-id="@bilhete.Id" class="btn btn-info btn-sm" title="Detalhes">
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
-                                        @if (User.IsInRole("Admin") && !bilhete.Anulado)
+                                        @if (!bilhete.WasDeleted)
                                         {
-                                            <a asp-action="Anular" asp-route-id="@bilhete.Id" class="btn btn-danger btn-sm ms-1" title="Anular">
-                                                <i class="fa-solid fa-ban"></i>
-                                            </a>
+                                            <form asp-action="Cancelar" asp-route-id="@bilhete.Id" method="post" style="display:inline">
+                                                <button type="submit" class="btn btn-danger btn-sm ms-1" title="Anular"
+                                                        onclick="return confirm('Tem a certeza que quer anular este bilhete?');">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </button>
+                                            </form>
                                         }
+                                      
                                     </td>
+
                                 </tr>
                             }
                         </tbody>

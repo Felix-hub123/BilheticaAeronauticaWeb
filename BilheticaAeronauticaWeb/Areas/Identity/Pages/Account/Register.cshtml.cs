@@ -108,7 +108,7 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-                    await _userManager.AddToRoleAsync(user, "Cliente");
+                    await _userManager.AddToRoleAsync(user, "Passageiro");
                     var passageiro = new Passageiro
                     {
                         UserId = user.Id,
@@ -119,7 +119,16 @@ namespace BilheticaAeronauticaWeb.Areas.Identity.Pages.Account
 
 
                     };
-                    await _passageiroRepository.CreateAsync(passageiro);
+                    try
+                    {
+                        await _passageiroRepository.CreateAsync(passageiro);
+                    }
+                    catch (Exception ex)
+                    {
+                       
+                        _logger.LogError(ex, "Erro ao criar passageiro");
+                        throw;
+                    }
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

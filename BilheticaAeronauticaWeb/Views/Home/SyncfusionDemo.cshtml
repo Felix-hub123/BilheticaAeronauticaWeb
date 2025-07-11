@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Demo Syncfusion";
+}
+
+@section Styles {
+    <link href="https://cdn.syncfusion.com/ej2/24.1.41/material.css" rel="stylesheet" />
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Exemplo de DatePicker Syncfusion</h2>
+    <input id="datepicker" />
+</div>
+
+@section Scripts {
+    <script src="https://cdn.syncfusion.com/ej2/24.1.41/dist/ej2.min.js"></script>
+    <script>
+        var datepicker = new ej.calendars.DatePicker({
+            placeholder: 'Escolha uma data'
+        });
+        datepicker.appendTo('#datepicker');
+    </script>
+}
+

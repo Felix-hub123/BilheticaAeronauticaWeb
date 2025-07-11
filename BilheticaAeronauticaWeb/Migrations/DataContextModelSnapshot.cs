@@ -128,6 +128,9 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.Property<bool>("Refeicao")
                         .HasColumnType("bit");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("Valor")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -143,6 +146,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.HasIndex("LugarId");
 
                     b.HasIndex("PassageiroId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("VooId");
 
@@ -572,6 +577,10 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Voo", "Voo")
                         .WithMany()
                         .HasForeignKey("VooId")
@@ -581,6 +590,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.Navigation("Lugar");
 
                     b.Navigation("Passageiro");
+
+                    b.Navigation("User");
 
                     b.Navigation("Voo");
                 });

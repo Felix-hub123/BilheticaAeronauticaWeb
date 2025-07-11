@@ -1,35 +1,111 @@
-﻿@{
+﻿@await Html.PartialAsync("_GraficoIndicadores")
+
+@using BilheticaAeronauticaWeb.Data.Entities
+@{
     ViewData["Title"] = "Bem-vindo à Bilhética Aeronáutica";
 }
 
-<div class="jumbotron">
-    <h1 class="display-4">Bem-vindo à BilheticaAeronauticaWeb!</h1>
-    <p class="lead">Consulte voos, compre bilhetes e faça a gestão da sua experiência de voo.</p>
-    <hr class="my-4" />
+<link rel="stylesheet" href="~/css/site-home.css" />
+
+<div class="jumbotron bg-light p-5 rounded shadow-sm text-center welcome-section">
+    <h1 class="display-4 welcome-title">Bem-vindo à Bilhética Aeronáutica!</h1>
+    <p class="lead welcome-subtitle">
+        Consulte voos, compre bilhetes e faça a gestão da sua experiência de voo com facilidade e segurança.
+    </p>
+
     @if (!User.Identity.IsAuthenticated)
     {
-        <p>
-            <a class="btn btn-primary btn-lg" href="@Url.Page("/Account/Register", new { area = "Identity" })">Registar</a>
-            <a class="btn btn-secondary btn-lg" href="@Url.Page("/Account/Login", new { area = "Identity" })">Login</a>
+        <p class="mt-4">
+            <a class="btn btn-primary btn-lg me-2 animated-button" href="@Url.Page("/Account/Register", new { area = "Identity" })">
+                <i class="fa-solid fa-user-plus"></i> Registar
+            </a>
+            <a class="btn btn-outline-primary btn-lg animated-button" href="@Url.Page("/Account/Login", new { area = "Identity" })">
+                <i class="fa-solid fa-right-to-bracket"></i> Login
+            </a>
         </p>
     }
-    else if (User.IsInRole("Admin"))
+    else if (User.IsInRole("Administrador"))
     {
-        <a class="btn btn-primary btn-lg" href="@Url.Action("Index", "Admin")">
-            Ir para o Painel de Administração
+        <a class="btn btn-dark btn-lg animated-button" href="@Url.Action("Index", "Admin")">
+            <i class="fa-solid fa-user-shield"></i> Painel de Administração
         </a>
     }
     else if (User.IsInRole("Funcionario"))
     {
-        <a class="btn btn-success btn-lg" href="@Url.Action("Index", "Funcionarios")">
-            Ir para o Painel do Funcionário
+        <a class="btn btn-success btn-lg animated-button" href="@Url.Action("Index", "Funcionarios")">
+            <i class="fa-solid fa-user-tie"></i> Painel do Funcionário
         </a>
     }
-    else if (User.IsInRole("Cliente"))
+    else if (User.IsInRole("Passageiro"))
     {
-        <a class="btn btn-info btn-lg" href="@Url.Action("Index", "Passageiros")">
-            Ir para o Painel do Passageiro
+        <a class="btn btn-info btn-lg animated-button" href="@Url.Action("Index", "Passageiros")">
+            <i class="fa-solid fa-user"></i> Painel do Passageiro
         </a>
     }
 </div>
+
+
+
+<a asp-controller="Voo" asp-action="Pesquisa" class="btn btn-primary btn-primary-custom btn-grow btn-shadow">
+    <i class="fa-solid fa-plane"></i> Pesquisar Voos
+</a>
+
+<div id="mainCarousel" class="carousel slide mt-5 shadow rounded position-relative" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="~/images/carrossel/voo1.jpg" class="d-block w-100" alt="Imagem 1" />
+            <div class="carousel-caption-custom">
+                <h2>Viaje com Segurança</h2>
+                <p>Conforto, pontualidade e atendimento premium com a AeroTickets.</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="~/images/carrossel/voo2.jpg" class="d-block w-100" alt="Imagem 2" />
+            <div class="carousel-caption-custom">
+                <h2>Descubra Novos Destinos</h2>
+                <p>Conectando Portugal ao mundo com excelência.</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="~/images/carrossel/voo3.jpg" class="d-block w-100" alt="Imagem 3" />
+            <div class="carousel-caption-custom">
+                <h2>Compromisso com Você</h2>
+                <p>Experiência de voo que supera expectativas.</p>
+            </div>
+        </div>
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Próximo</span>
+    </button>
+</div>
+
+
+<section class="benefits-section text-center mt-5 mb-5 fade-slide-in">
+    <h2 class="section-title">Por que escolher <span class="highlight">AeroTickets</span>?</h2>
+    <p class="section-subtitle">Oferecemos a melhor experiência de viagem com segurança, conforto e preços competitivos</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-3 col-sm-6 benefit-item">
+            <div class="benefit-icon bg-primary"></div>
+            <h5 class="benefit-title">Segurança Garantida</h5>
+            <p class="benefit-text">Frota moderna e manutenção rigorosa para sua tranquilidade</p>
+        </div>
+        <div class="col-md-3 col-sm-6 benefit-item">
+            <div class="benefit-icon bg-primary"></div>
+            <h5 class="benefit-title">Pontualidade</h5>
+            <p class="benefit-text">95% dos nossos voos chegam no horário programado</p>
+        </div>
+        <div class="col-md-3 col-sm-6 benefit-item">
+            <div class="benefit-icon bg-primary"></div>
+            <h5 class="benefit-title">Atendimento Premium</h5>
+            <p class="benefit-text">Equipe dedicada ao seu conforto e satisfação</p>
+        </div>
+    </div>
+</section>
 

@@ -28,27 +28,26 @@ namespace BilheticaAeronauticaWeb.Data
         {
             await _context.Database.EnsureCreatedAsync();
 
-            // 1. Garante que as roles existem
+          
             await EnsureRoleAsync("Admin");
             await EnsureRoleAsync("Funcionario");
-            await EnsureRoleAsync("Cliente");
+            await EnsureRoleAsync("Passageiro");
 
-            // 2. Cria utilizadores e associa roles
+          
             var adminUser = await EnsureUserAsync("admin@aero.com", "Admin123!", "Admin");
             var funcUser = await EnsureUserAsync("func@aero.com", "Funcionario123!", "Funcionario");
-            var clienteUser = await EnsureUserAsync("cliente@aero.com", "Cliente123!", "Cliente");
+            var passageiroUser = await EnsureUserAsync("cliente@aero.com", "Passageiro123!", "Passageiro");
 
-            // 3. Cria entidades de domínio associadas aos utilizadores
+           
             if (!_context.Aeroportos.Any())
                 AddAeroportos();
 
             if (!_context.Passageiros.Any())
-                AddPassageiros(clienteUser);
+                AddPassageiros(passageiroUser);
 
             if (!_context.Lugares.Any())
                 AddLugares();
 
-           
 
             await _context.SaveChangesAsync();
         }
@@ -101,7 +100,7 @@ namespace BilheticaAeronauticaWeb.Data
                 Nome = "Ana",
                 Apelido = "Silva",
                 DataRegisto = DateTime.UtcNow,
-                //UserId = clienteUser.Id 
+                //UserId = passageiroUser.Id 
             });
         }
 
@@ -132,7 +131,7 @@ namespace BilheticaAeronauticaWeb.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
             
-            string[] roles = { "Admin", "Funcionario", "Cliente" };
+            string[] roles = { "Admin", "Funcionario", "Passageiro" };
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -188,7 +187,7 @@ namespace BilheticaAeronauticaWeb.Data
 
         private void AddLugares()
         {
-            // Gera lugares para cada avião existente
+            
             foreach (var aviao in _context.Avioes)
             {
                 // Lugares de classe económica
@@ -203,7 +202,7 @@ namespace BilheticaAeronauticaWeb.Data
                     });
                 }
 
-                // Lugares de classe executiva
+              
                 for (int i = 1; i <= aviao.LugaresExecutiva; i++)
                 {
                     _context.Lugares.Add(new Lugar

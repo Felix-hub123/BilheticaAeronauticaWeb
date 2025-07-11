@@ -1,5 +1,6 @@
 ﻿using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Models;
 using BilheticaAeronauticaWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -188,5 +190,30 @@ namespace BilheticaAeronauticaWeb.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Pesquisa()
+        {
+            var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
+
+            var model = new PesquisaVoosViewModel
+            {
+                Aeroportos = aeroportos.Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nome }).ToList(),
+                Resultados = new List<Voo>()
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Pesquisa(PesquisaVoosViewModel model)
+        {
+            var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
+            model.Aeroportos = aeroportos.Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nome }).ToList();
+
+            model.Resultados = await _vooService.PesquisarVoosAsync(model.DataPartida, model.OrigemId, model.DestinoId);
+            return View(model);
+        }
     }
 }
+
