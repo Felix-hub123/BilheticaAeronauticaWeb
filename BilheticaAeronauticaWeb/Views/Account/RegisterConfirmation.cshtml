@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Confirmação de Registo";
+}
+
+<div class="alert alert-success mt-3">
+    @ViewBag.Message ?? "Registo realizado com sucesso! Por favor, verifica o teu email para confirmar a conta."
+</div>
+<div class="alert alert-success mt-4">
+    <br />
+    (Será redirecionado para a página principal em alguns segundos.)
+</div>
+
+<a class="btn btn-primary mt-2" asp-controller="Home" asp-action="Index">Ir para Home agora</a>
+
+<script>
+    
+    setTimeout(function () {
+        window.location.href = '@Url.Action("Index", "Home")';
+    }, 4000); // tempo em milissegundos
+</script>
+

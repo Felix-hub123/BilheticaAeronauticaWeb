@@ -4,34 +4,85 @@
     ViewData["Title"] = "Lista de Bilhetes";
 }
 
-<h2>Lista de Bilhetes</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Cliente</th>
-            <th>Voo</th>
-            <th>Lugar</th>
-            <th>Preço</th>
-            <th>Estado</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var bilhete in Model)
-        {
-            <tr>
-                <td>
-                    @($"{bilhete.OrigemNome} → {bilhete.DestinoNome} ({bilhete.VooNumero})")
-                </td>
-             
-                <td>
-                    <a asp-action="Detalhes" asp-route-id="@bilhete.Id" class="btn btn-info btn-sm">Detalhes</a>
-                    <a asp-action="Editar" asp-route-id="@bilhete.Id" class="btn btn-warning btn-sm">Editar</a>
-                    <a asp-action="Anular" asp-route-id="@bilhete.Id" class="btn btn-danger btn-sm">Anular</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<h2 class="mb-4">
+    <i class="fa-solid fa-ticket text-success"></i> Lista de Bilhetes
+</h2>
 
+<div class="table-responsive">
+    <table class="table table-striped align-middle shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Voo</th>
+                <th>Lugar</th>
+                <th>Valor</th>
+                <th>Bagagem Extra</th>
+                <th>Refeição</th>
+                <th>Estado</th>
+                <th class="text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Nenhum bilhete encontrado.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var bilhete in Model)
+                {
+                    <tr class="@(bilhete.WasDeleted || bilhete.Anulado ? "table-danger" : "")">
+                        <td>@bilhete.Id</td>
+                        <td>@bilhete.NomeCliente</td>
+                        <td>
+                            @($"{bilhete.OrigemNome} → {bilhete.DestinoNome} ({bilhete.VooNumero})")
+                        </td>
+                        <td>
+                            <span class="badge bg-dark">@bilhete.LugarCodigo</span>
+                        </td>
+                        <td>
+                            @bilhete.Valor.ToString("C2")
+                        </td>
+                        <td>
+                            @(bilhete.BagagemExtra ? "Sim" : "Não")
+                        </td>
+                        <td>
+                            @(bilhete.Refeicao ? "Sim" : "Não")
+                        </td>
+                        <td>
+                            @if (bilhete.WasDeleted || bilhete.Anulado)
+                            {
+                                <span class="badge bg-danger">Cancelado</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Ativo</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Detalhes" asp-route-id="@bilhete.Id" class="btn btn-info btn-sm me-1" title="Ver detalhes">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </a>
+                            <a asp-action="Editar" asp-route-id="@bilhete.Id" class="btn btn-warning btn-sm me-1" title="Editar bilhete">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a asp-action="Anular" asp-route-id="@bilhete.Id" class="btn btn-danger btn-sm"
+                               title="Anular bilhete"
+                               onclick="return confirm('Tem a certeza que pretende anular este bilhete?');">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 

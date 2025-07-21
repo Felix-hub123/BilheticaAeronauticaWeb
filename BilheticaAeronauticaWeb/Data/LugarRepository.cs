@@ -17,10 +17,21 @@ namespace BilheticaAeronauticaWeb.Data
 
         public async Task<IEnumerable<Lugar>> GetLugaresDisponiveisByVooIdAsync(int vooId)
         {
+     
+            var voo = await _context.Voos.FirstOrDefaultAsync(v => v.Id == vooId);
+            if (voo == null)
+                return Enumerable.Empty<Lugar>();
+
             return await _context.Lugares
-          .Where(l => l.VooId == vooId && l.Disponivel == true)
-          .OrderBy(l => l.Codigo) 
-          .ToListAsync();
+                .Where(l => l.AviaoId == voo.AviaoId) 
+                .OrderBy(l => l.Codigo)
+                .ToListAsync();
         }
+
+        public async Task<List<Lugar>> GetLugaresByAviaoIdAsync(int aviaoId)
+        {
+            return await _context.Lugares.Where(l => l.AviaoId == aviaoId).ToListAsync();
+        }
+
     }
 }

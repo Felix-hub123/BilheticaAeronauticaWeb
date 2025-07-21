@@ -1,0 +1,31 @@
+﻿@model BilheticaAeronauticaWeb.Models.BilheteViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Bilhete PDF</title>
+ </head>
+<body>
+    <div class="box">
+        <div class="header">Bilhete de Voo</div>
+        <p><span class="label">Passageiro:</span> @Model.PassageiroNome</p>
+        <p><span class="label">Origem:</span> @Model.OrigemNome</p>
+        <p><span class="label">Destino:</span> @Model.DestinoNome</p>
+        <p><span class="label">Voo:</span> @Model.VooNumero</p>
+        <p><span class="label">Data Partida:</span> @Model.DataPartida.ToString("yyyy/MM/dd HH:mm")</p>
+        <p><span class="label">Lugar:</span> @Model.LugarCodigo</p>
+        <p><span class="label">Preço:</span> @Model.Valor.ToString("C")</p>
+        <p>
+            <span class="label">Extras:</span>
+            @(Model.BagagemExtra ? "Bagagem " : "")
+            @(Model.Refeicao ? "Refeição" : "")
+            @(!Model.BagagemExtra && !Model.Refeicao ? "Sem extras" : "")
+        </p>
+        <hr />
+        <div style="font-size:.9em;"><span class="label">Bilhete #</span> @Model.Id</div>
+    </div>
+</body>
+</html>
+
+

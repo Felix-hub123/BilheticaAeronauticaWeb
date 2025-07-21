@@ -1,125 +1,94 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using BilheticaAeronauticaWeb.Data.Entities
+@using BilheticaAeronauticaWeb.Data.Entities 
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 
+@{
+    User currentUser = null;
+    if (User.Identity.IsAuthenticated)
+    {
+        currentUser = await UserManager.GetUserAsync(User);
+    }
+}
 <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Bilhética Aeronáutica</title>
-    <link rel="icon" href="~/favicon.png" type="image/png" /> 
+    <title>@ViewData["Title"] - AeroTicket</title>
+    <link rel="icon" href="~/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_green.css">
+    <link href="https://cdn.syncfusion.com/ej2/22.1.34/fluent.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://cdn.syncfusion.com/ej2/23.1.36/material.css" rel="stylesheet" />
-
     <link rel="stylesheet" href="~/css/site.css" />
-    @RenderSection("Styles", required: false) 
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <nav class="navbar navbar-expand-lg" style="background-color: #1196ff;">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-white" asp-area="" asp-controller="Home" asp-action="Index">
-                <i class="fa-solid fa-plane-departure"></i> Bilhética Aeronáutica
+            @{
+                var ctrl = "Home";
+                if (User.Identity.IsAuthenticated)
+                    ctrl = User.IsInRole("Admin") ? "Admin" :
+                    User.IsInRole("Funcionario") ? "Funcionarios" :
+                    User.IsInRole("Passageiro") ? "Passageiros" :
+                    "Home";
+            }
+            <a class="navbar-brand fw-bold text-white"
+               asp-controller="@ctrl"
+               asp-action="Index">
+                <i class="fa-solid fa-plane-departure"></i> AEROTICKET
             </a>
+
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                     aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav ms-2 mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">
-                            <i class="fa-solid fa-house"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" asp-area="" asp-controller="Voo" asp-action="Index">
-                            <i class="fa-solid fa-plane"></i> Voos
-                        </a>
-                    </li>
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        if (User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Voo" asp-action="Create">
-                                    <i class="fa-solid fa-plus"></i> Criar Voo
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Lugar" asp-action="Index">
-                                    <i class="fa-solid fa-chair"></i> Lugares
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Aeroporto" asp-action="Index">
-                                    <i class="fa-solid fa-building"></i> Aeroportos
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Funcionario" asp-action="Index">
-                                    <i class="fa-solid fa-users-gear"></i> Funcionários
-                                </a>
-                            </li>
-                        }
-                        else if (User.IsInRole("Funcionario"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Voo" asp-action="Create">
-                                    <i class="fa-solid fa-plus"></i> Criar Voo
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Lugar" asp-action="Index">
-                                    <i class="fa-solid fa-chair"></i> Lugares
-                                </a>
-                            </li>
-                        }
-                        @if (User.IsInRole("Passageiro"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Bilhete" asp-action="AdicionarReserva">
-                                    <i class="fa-solid fa-ticket"></i> Comprar Bilhete
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Bilhete" asp-action="Historico">
-                                    <i class="fa-solid fa-clock-rotate-left"></i> Histórico
-                                </a>
-                            </li>
-                        }
-                    }
-                </ul>
-                <div class="flex-grow-1"></div>
                 <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
-                    @if (User.Identity.IsAuthenticated)
+
+                    @if (User.Identity.IsAuthenticated && currentUser != null)
                     {
-                        <li class="nav-item">
-                            <span class="nav-link text-white">
-                                <i class="fa-solid fa-user"></i> Olá, @User.Identity.Name!
-                            </span>
-                        </li>
-                        <li class="nav-item">
-                            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
-                                <button type="submit" class="nav-link btn btn-link text-white px-0" style="cursor:pointer;">
-                                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                                </button>
-                            </form>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown" role="button">
+                                <img src="@(currentUser.ImageFullPath)?v=@DateTime.Now.Ticks"
+                                     alt="Foto de Perfil"
+                                     class="rounded-circle me-2"
+                                     style="width:32px; height:32px; object-fit:cover;" />
+                                <span>Olá, @((currentUser.Nome + " " + currentUser.Apelido).Trim())!</span>
+                            </a>
+                            
+
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Account" asp-action="EditProfile">
+                                        <i class="fa-solid fa-id-badge me-2"></i>Ver/Editar Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </li>
                     }
                     else
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Login">
+                            <a class="nav-link text-white" asp-controller="Account" asp-action="Login">
                                 <i class="fa-solid fa-sign-in-alt"></i> Login
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Register">
+                            <a class="nav-link text-white" asp-controller="Account" asp-action="Register">
                                 <i class="fa-solid fa-user-plus"></i> Registar
                             </a>
                         </li>
@@ -141,7 +110,6 @@
         </div>
     </footer>
 
-    <!-- Toast para mensagens globais -->
     <div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
         <div id="globalToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
@@ -153,7 +121,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
           var toastEl = document.getElementById('globalToast');
@@ -161,7 +128,6 @@
             var toast = new bootstrap.Toast(toastEl);
             var toastBody = toastEl.querySelector('.toast-body');
             toastBody.textContent = '@TempData["Mensagem"]';
-
             if (toastBody.textContent.trim().length > 0) {
               toast.show();
             }
@@ -170,8 +136,9 @@
     </script>
     @await RenderSectionAsync("Scripts", required: false)
     <script src="https://cdn.syncfusion.com/ej2/23.1.36/dist/ej2.min.js"></script>
-
 </body>
 </html>
+
+
 
 

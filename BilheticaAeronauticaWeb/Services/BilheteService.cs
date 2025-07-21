@@ -29,8 +29,7 @@ namespace BilheticaAeronauticaWeb.Services
         public decimal CalcularPrecoBilhete(Lugar lugar, Voo voo, bool bagagemExtra, bool refeicao)
         {
             decimal preco = lugar.PrecoBase;
-            preco += voo.TaxaAeroporto;
-            if (bagagemExtra)
+               if (bagagemExtra)
                 preco += 30;
             if (refeicao)
                 preco += 20;
@@ -95,15 +94,21 @@ namespace BilheticaAeronauticaWeb.Services
 
         public async Task<IEnumerable<SelectListItem>> GetLugaresSelectListAsync(int vooId)
         {
-            var lugares = await _lugarRepository.GetAll().ToListAsync();
-            return lugares
-                .Where(l => l.Disponivel && l.VooId == vooId)
-                .Select(l => new SelectListItem
-                {
-                    Value = l.Id.ToString(),
-                    Text = l.Codigo
-                });
+            var voo = await _vooRepository.GetByIdAsync(vooId);
+            if (voo == null)
+                return new List<SelectListItem>();
+
+            var lugares = await _lugarRepository.GetLugaresByAviaoIdAsync(voo.AviaoId);
+            var ocupados = (await _bilheteRepository.GetByVooIdAsync(vooId)).Select(b => b.LugarId).ToHashSet();
+
+            return lugares.Select(l => new SelectListItem
+            {
+                Value = l.Id.ToString(),
+                Text = ocupados.Contains(l.Id) ? $"{l.Codigo} (ocupado)" : l.Codigo,
+                Disabled = ocupados.Contains(l.Id)
+            });
         }
+
 
         public async Task<Lugar> GetLugarByIdAsync(int lugarId)
         {

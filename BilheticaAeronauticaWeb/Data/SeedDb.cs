@@ -33,25 +33,83 @@ namespace BilheticaAeronauticaWeb.Data
             await EnsureRoleAsync("Funcionario");
             await EnsureRoleAsync("Passageiro");
 
-          
-            var adminUser = await EnsureUserAsync("admin@aero.com", "Admin123!", "Admin");
-            var funcUser = await EnsureUserAsync("func@aero.com", "Funcionario123!", "Funcionario");
-            var passageiroUser = await EnsureUserAsync("cliente@aero.com", "Passageiro123!", "Passageiro");
 
-           
+
+
+            var adminUser = await EnsureUserWithRoleAsync("admin@aero.com", "Admin123!", "Admin", "Administrador Completo", criarPassageiro: false);
+            var funcUser = await EnsureUserWithRoleAsync("func@aero.com", "Funcionario123!", "Funcionario", "Funcionário-Teste", criarPassageiro: false);
+            var passageiroUser = await EnsureUserWithRoleAsync("passageiro@aero.com", "Passageiro123!", "Passageiro", "Paulo Henrique", criarPassageiro: true);
+
+            // 3. Outros seeds (apenas seed se não houver)
             if (!_context.Aeroportos.Any())
                 AddAeroportos();
-
-            if (!_context.Passageiros.Any())
-                AddPassageiros(passageiroUser);
 
             if (!_context.Lugares.Any())
                 AddLugares();
 
+        
 
             await _context.SaveChangesAsync();
         }
 
+
+
+
+        /// <summary>
+        /// Cria user, atribui role e, se for passageiro, cria registo na tabela Passageiros.
+        /// </summary>
+        private async Task<User> EnsureUserWithRoleAsync(
+            string email,
+            string password,
+            string role,
+            string nome,
+            bool criarPassageiro)
+        {
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                user = new User
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true,
+                    Nome = nome
+                };
+                var result = await _userHelper.AddUserAsync(user, password);
+                if (result.Succeeded)
+                {
+                    await _userHelper.AddUserToRoleAsync(user, role);
+                }
+            }
+            else
+            {
+                if (!await _userHelper.IsUserInRoleAsync(user, role))
+                    await _userHelper.AddUserToRoleAsync(user, role);
+            }
+
+            // Só para a role Passageiro: cria também na tabela Passageiros (ligação obrigatória)
+            if (criarPassageiro)
+            {
+                if (!_context.Passageiros.Any(p => p.UserId == user.Id))
+                {
+                    _context.Passageiros.Add(new Passageiro
+                    {
+                        Nome = "Paulo",
+                        Apelido = "Henrique",
+                        DataRegisto = DateTime.UtcNow,
+                        UserId = user.Id
+                    });
+                }
+            }
+
+            return user;
+        }
+
+
+        /// <summary>
+        /// Garante/cria role na tabela AspNetRoles
+        /// </summary>
         private async Task EnsureRoleAsync(string roleName)
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
@@ -59,30 +117,7 @@ namespace BilheticaAeronauticaWeb.Data
         }
 
 
-        private async Task<User> EnsureUserAsync(string email, string password, string role)
-        {
-            var user = await _userHelper.GetUserByEmailAsync(email);
-            if (user == null)
-            {
-                user = new User
-                {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true
-                };
-                var result = await _userHelper.AddUserAsync(user, password);
-                if (result.Succeeded)
-                    await _userHelper.AddUserToRoleAsync(user, role);
-            }
-            else
-            {
-                if (!await _userHelper.IsUserInRoleAsync(user, role))
-                    await _userHelper.AddUserToRoleAsync(user, role);
-            }
-            return user;
-        }
 
-       
 
         private void AddAeroportos()
         {
@@ -93,38 +128,12 @@ namespace BilheticaAeronauticaWeb.Data
             );
         }
 
-        private void AddPassageiros(User clienteUser)
-        {
-            _context.Passageiros.Add(new Passageiro
-            {
-                Nome = "Ana",
-                Apelido = "Silva",
-                DataRegisto = DateTime.UtcNow,
-                //UserId = passageiroUser.Id 
-            });
-        }
-
-
-        private void AddVoos()
-        {
-            var aviao = _context.Avioes.FirstOrDefault(); 
-            var origem = _context.Aeroportos.FirstOrDefault();
-            var destino = _context.Aeroportos.Skip(1).FirstOrDefault();
-
-            if (aviao != null && origem != null && destino != null)
-            {
-                _context.Voos.Add(new Voo
-                {
-                    AviaoId = aviao.Id,
-                    OrigemId = origem.Id,
-                    DestinoId = destino.Id,
-                    DataHoraPartida = DateTime.UtcNow.AddDays(1),
-                    DataHoraChegada = DateTime.UtcNow.AddDays(1).AddHours(2)
-                });
-            }
-        }
-
        
+
+
+
+
+
         public static async Task SeedRolesAndAdminAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -159,62 +168,22 @@ namespace BilheticaAeronauticaWeb.Data
         }
 
 
-        private void AddBilhetes(User clienteUser)
-        {
-            var passageiro = _context.Passageiros.FirstOrDefault(p => p.UserId == clienteUser.Id);
-            var voo = _context.Voos.FirstOrDefault();
-            var lugar = _context.Lugares.FirstOrDefault(l => l.Disponivel);
-
-            if (passageiro != null && voo != null && lugar != null)
-            {
-                _context.Bilhetes.Add(new Bilhete
-                {
-                    Passageiro = passageiro,
-                    Voo = voo,
-                    Lugar = lugar,
-                    DataCompra = DateTime.UtcNow,
-                    Valor = 100,
-                    CriadoPorUserId = clienteUser.Id, 
-                    WasDeleted = false
-                });
-
-                lugar.Disponivel = false;
-                _context.SaveChanges(); 
-            }
-        }
-
-
 
         private void AddLugares()
         {
-            
-            foreach (var aviao in _context.Avioes)
+            for (int i = 1; i <= 5; i++)
             {
-                // Lugares de classe económica
-                for (int i = 1; i <= aviao.LugaresEconomica; i++)
+                _context.Lugares.Add(new Lugar
                 {
-                    _context.Lugares.Add(new Lugar
-                    {
-                        AviaoId = aviao.Id,
-                        Codigo = $"E{i}",
-                        Disponivel = true,
-                        WasDeleted = false
-                    });
-                }
-
-              
-                for (int i = 1; i <= aviao.LugaresExecutiva; i++)
-                {
-                    _context.Lugares.Add(new Lugar
-                    {
-                        AviaoId = aviao.Id,
-                        Codigo = $"X{i}",
-                        Disponivel = true,
-                        WasDeleted = false
-                    });
-                }
+                    Codigo = $"E{i}",
+                    Disponivel = true,
+                    WasDeleted = false
+                });
             }
         }
+
+
+
 
     }
 }

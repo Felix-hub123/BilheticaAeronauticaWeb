@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace BilheticaAeronauticaWeb.Models
@@ -24,5 +25,10 @@ namespace BilheticaAeronauticaWeb.Models
         [Display(Name = "Data de Nascimento")]
         [DataType(DataType.Date)]
         public DateTime? DataNascimento { get; set; }
+
+
+        [Display(Name = "Image")]
+        public IFormFile ImageFile { get; set; }
+        public Guid ImageId { get; internal set; }
     }
 }

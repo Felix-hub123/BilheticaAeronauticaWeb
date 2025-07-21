@@ -25,25 +25,46 @@ namespace BilheticaAeronauticaWeb.Services
 
         public async Task CriarVooAsync(Voo voo, decimal precoBaseLugar)
         {
-            await _vooRepository.CreateAsync(voo);
-            var lugaresModelo = await _lugarRepository.GetAll()
-                  .Where(l => l.AviaoId == voo.AviaoId && l.VooId == null)
-                  .ToListAsync();
-
-            foreach (var lugar in lugaresModelo)
+            try
             {
-                var novoLugar = new Lugar
+               
+                await _vooRepository.CreateAsync(voo);
+
+                
+                var aviao = await _aviaoRepository.GetByIdAsync(voo.AviaoId);
+                if (aviao == null)
                 {
-                    Codigo = lugar.Codigo,
-                    PrecoBase = precoBaseLugar,
-                    Disponivel = true,
-                    AviaoId = lugar.AviaoId,
-                    VooId = voo.Id, 
-                    WasDeleted = false
-                };
-                await _lugarRepository.CreateAsync(novoLugar);
+                    throw new Exception("Avião não encontrado.");
+                }
+                   
+
+                if (aviao.Capacidade <= 0)
+                {
+                    throw new Exception("Avião sem capacidade definida.");
+                }
+                  
+
+                // Gerar automaticamente os lugares (ex: L1 a L100)
+                for (int i = 1; i <= aviao.Capacidade; i++)
+                {
+                    var lugar = new Lugar
+                    {
+                        Codigo = $"L{i:D3}", // ex: L001, L002, ...
+                        PrecoBase = precoBaseLugar,
+                        Disponivel = true,
+                        AviaoId = aviao.Id,
+                        VooId = voo.Id,
+                        WasDeleted = false
+                    };
+                    await _lugarRepository.CreateAsync(lugar);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro ao criar voo: {ex.Message}", ex);
             }
         }
+
 
         public async Task EditarVooAsync(Voo voo)
         {
@@ -69,30 +90,7 @@ namespace BilheticaAeronauticaWeb.Services
             return await _vooRepository.GetAllVoosAsync();
         }
 
-        private List<Lugar> GerarLugaresParaVoo(Voo voo, Aviao aviao)
-        {
-            var lugares = new List<Lugar>();
-            int lugaresPorFila = 6; // Exemplo: 6 lugares por fila (A-F)
-            char[] letras = { 'A', 'B', 'C', 'D', 'E', 'F' };
-            int totalLugares = aviao.Capacidade;
-            int totalFilas = (int)Math.Ceiling((double)totalLugares / lugaresPorFila);
-
-            int lugarAtual = 0;
-            for (int fila = 1; fila <= totalFilas; fila++)
-            {
-                for (int l = 0; l < lugaresPorFila && lugarAtual < totalLugares; l++)
-                {
-                    lugares.Add(new Lugar
-                    {
-                        Codigo = $"{fila}{letras[l]}",
-                        VooId = voo.Id,
-                        Disponivel = false
-                    });
-                    lugarAtual++;
-                }
-            }
-            return lugares;
-        }
+      
 
         public async Task<Voo> ObterVooPorIdAsync(int id)
         {
@@ -113,6 +111,8 @@ namespace BilheticaAeronauticaWeb.Services
 
             return voos;
         }
+
+       
 
     }
 }

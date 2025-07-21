@@ -79,6 +79,17 @@ namespace BilheticaAeronauticaWeb.Helper
             await _signInManager.SignOutAsync();
         }
 
+        public async Task<SignInResult> LoginAsync(LoginViewModel model)
+        {
+            return await _signInManager.PasswordSignInAsync(
+                model.Email,
+                model.Password,
+                model.RememberMe,
+                false
+            );
+        }
+
+
         public string GetUserId(ClaimsPrincipal user)
         {
             return user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -118,6 +129,11 @@ namespace BilheticaAeronauticaWeb.Helper
         {
             var users = await _userManager.GetUsersInRoleAsync(roleName);
             return users.ToList();
+        }
+
+        public async Task<bool> IsEmailConfirmedAsync(User user)
+        {
+            return await _userManager.IsEmailConfirmedAsync(user);
         }
     }
 }

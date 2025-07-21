@@ -33,10 +33,10 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string CriadoPorUserId { get; set; }
         public bool WasDeleted { get; set; }
-
-
-        public string UserId { get; set; }
-        public User User { get; set; }
+                      
+        public bool PagamentoConfirmado { get; set; } = false;
+        public DateTime? DataEmissao { get; set; }
+        public string Estado { get; set; } = "Reservado";
 
     }
     

@@ -645,3 +645,56 @@ a {
     font-size: 0.95rem;
     color: #6c757d;
 }
+
+body {
+    font-family: Arial, sans-serif;
+    color: #232323;
+}
+
+.box {
+    border: 1px solid #666;
+    padding: 20px;
+    width: 350px;
+    margin: 20px auto;
+}
+
+.header {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.label {
+    font-weight: bold;
+}
+/* Aplicar largura moderada e aspeto moderno a dropdowns do form de voo */
+.form-select.custom-width {
+    min-width: 170px;
+    max-width: 290px;
+    width: auto;
+    display: inline-block;
+    font-size: 1rem;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+}
+
+.dropdown-container {
+    max-width: 330px;
+}
+
+/* Estilos Flatpickr para inputs do datetime */
+input.datetimepicker {
+    max-width: 220px;
+    display: inline-block;
+    font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+    .form-select.custom-width,
+    .dropdown-container,
+    input.datetimepicker {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+

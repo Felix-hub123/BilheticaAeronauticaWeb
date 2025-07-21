@@ -75,7 +75,11 @@ namespace BilheticaAeronauticaWeb.Helper
                 Id = isNew ? 0 : model.Id,
                 Nome = model.Nome,
                 Apelido = model.Apelido,
+                DocumentoIdentificacao = model.DocumentoIdentificacao,
+                NumeroDocumento = model.NumeroDocumento,
+                DataNascimento = model.DataNascimento,
                 DataRegisto = DateTime.UtcNow,
+                ImageId = model.ImageId,
                 UserId = userId,
                 WasDeleted = false
             };
@@ -88,7 +92,12 @@ namespace BilheticaAeronauticaWeb.Helper
                 Id = passageiro.Id,
                 Nome = passageiro.Nome,
                 Apelido = passageiro.Apelido,
-          
+                DocumentoIdentificacao = passageiro.DocumentoIdentificacao,
+                NumeroDocumento = passageiro.NumeroDocumento,
+                DataNascimento = passageiro.DataNascimento,
+                ImageId = passageiro.ImageId,
+      
+
             };
         }
 
@@ -187,7 +196,8 @@ namespace BilheticaAeronauticaWeb.Helper
                 Refeicao = bilhete.Refeicao,
                 DataCompra = bilhete.DataReserva,
                 WasDeleted = bilhete.WasDeleted,
-              
+                DataPartida = bilhete.Voo?.DataHoraPartida ?? DateTime.MinValue,
+
             };
         }
 

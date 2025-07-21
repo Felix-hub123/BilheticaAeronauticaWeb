@@ -1,4 +1,5 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -8,6 +9,8 @@ namespace BilheticaAeronauticaWeb.Helper
 {
     public interface IUserHelper
     {
+        Task<bool> IsEmailConfirmedAsync(User user);
+        Task<SignInResult> LoginAsync(LoginViewModel model);
         Task<User> GetUserByEmailAsync(string email);
 
         Task<List<User>> GetUsersByRoleAsync(string roleName);

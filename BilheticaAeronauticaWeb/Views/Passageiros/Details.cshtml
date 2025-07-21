@@ -1,34 +1,21 @@
-﻿@model BilheticaAeronauticaWeb.Data.Entities.Passageiro
+﻿@using BilheticaAeronauticaWeb.Data.Entities
+@model Passageiro
 
-@{
-    ViewData["Title"] = "Detalhes do Passageiro";
-}
+<h2>Detalhes do Passageiro</h2>
+<dl class="row">
+    <dt class="col-sm-2">Nome</dt>
+    <dd class="col-sm-10">@Model.Nome</dd>
+    <dt class="col-sm-2">Apelido</dt>
+    <dd class="col-sm-10">@Model.Apelido</dd>
+    <dt class="col-sm-2">Documento</dt>
+    <dd class="col-sm-10">@Model.DocumentoIdentificacao @Model.NumeroDocumento</dd>
+    <dt class="col-sm-2">Data Nascimento</dt>
+    <dd class="col-sm-10">@Model.DataNascimento?.ToShortDateString()</dd>
+    <dt class="col-sm-2">Foto</dt>
+    <dd class="col-sm-10">
+        <img src="@Url.Content(Model.ImageFullPath)" alt="Foto" width="120" class="rounded" />
+    </dd>
+    <dt class="col-sm-2">Email</dt>
+    <dd class="col-sm-10">@Model.User?.Email</dd>
+</dl>
 
-<h2 class="mb-4">
-    <i class="fa-solid fa-user text-primary"></i> Detalhes do Passageiro
-</h2>
-
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Nome</dt>
-            <dd class="col-sm-9">@Model.Nome</dd>
-            <dt class="col-sm-3">Apelido</dt>
-            <dd class="col-sm-9">@Model.Apelido</dd>
-            <dt class="col-sm-3">Documento de Identificação</dt>
-            <dt class="col-sm-3">Data de Registo</dt>
-            <dd class="col-sm-9">
-                @(Model.DataRegisto != DateTime.MinValue ? Model.DataRegisto.ToString("dd/MM/yyyy") : "-")
-            </dd>
-        </dl>
-    </div>
-</div>
-
-<div class="d-flex gap-2">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-        <i class="fa-solid fa-pen-to-square"></i> Editar
-    </a>
-    <a asp-action="Index" class="btn btn-outline-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Voltar à lista
-    </a>
-</div>

@@ -2,13 +2,13 @@
 
 @using BilheticaAeronauticaWeb.Data.Entities
 @{
-    ViewData["Title"] = "Bem-vindo à Bilhética Aeronáutica";
+    ViewData["Title"] = "Bem-vindo à AeroTicket";
 }
 
 <link rel="stylesheet" href="~/css/site-home.css" />
 
 <div class="jumbotron bg-light p-5 rounded shadow-sm text-center welcome-section">
-    <h1 class="display-4 welcome-title">Bem-vindo à Bilhética Aeronáutica!</h1>
+    <h1 class="display-4 welcome-title">Bem-vindo à AEROTICKET!</h1>
     <p class="lead welcome-subtitle">
         Consulte voos, compre bilhetes e faça a gestão da sua experiência de voo com facilidade e segurança.
     </p>
@@ -16,10 +16,10 @@
     @if (!User.Identity.IsAuthenticated)
     {
         <p class="mt-4">
-            <a class="btn btn-primary btn-lg me-2 animated-button" href="@Url.Page("/Account/Register", new { area = "Identity" })">
+            <a class="btn btn-primary btn-lg me-2 animated-button" asp-controller="Account" asp-action="Register">
                 <i class="fa-solid fa-user-plus"></i> Registar
             </a>
-            <a class="btn btn-outline-primary btn-lg animated-button" href="@Url.Page("/Account/Login", new { area = "Identity" })">
+            <a class="btn btn-outline-primary btn-lg animated-button" asp-controller="Account" asp-action="Login">
                 <i class="fa-solid fa-right-to-bracket"></i> Login
             </a>
         </p>
@@ -38,7 +38,7 @@
     }
     else if (User.IsInRole("Passageiro"))
     {
-        <a class="btn btn-info btn-lg animated-button" href="@Url.Action("Index", "Passageiros")">
+        <a class="btn btn-info btn-lg animated-button" href="@Url.Action("Index", "Passageiro")">
             <i class="fa-solid fa-user"></i> Painel do Passageiro
         </a>
     }

@@ -108,6 +108,19 @@ namespace BilheticaAeronauticaWeb.Data
 
         }
 
+
+        public async Task<List<Bilhete>> GetBilhetesFuturosByUserAsync(int utilizadorId)
+        {
+            var agora = DateTime.Now;
+            return await _context.Bilhetes
+                .Include(b => b.Voo).ThenInclude(v => v.Origem)
+                .Include(b => b.Voo).ThenInclude(v => v.Destino)
+                .Include(b => b.Lugar)
+                .Where(b => b.PassageiroId == utilizadorId && b.Voo.DataHoraPartida >= agora)
+                .ToListAsync();
+        }
+
+
         public async Task<List<Bilhete>> GetBilhetesByVooAsync(int vooId)
         {
             return await _context.Bilhetes
@@ -126,8 +139,8 @@ namespace BilheticaAeronauticaWeb.Data
              .Where(b => b.CriadoPorUserId == userId && !b.WasDeleted)
              .ToListAsync();
         }
+      
 
-       
 
         public async Task<bool> SoftDeleteBilheteAsync(int id)
         {
@@ -194,6 +207,44 @@ namespace BilheticaAeronauticaWeb.Data
            .Include(b => b.Passageiro)
            .ToListAsync();
 
+        }
+
+
+        public async Task<bool> ConfirmarPagamentoEBilheteAsync(int bilheteId)
+        {
+           
+            var bilhete = await _context.Bilhetes
+                .FirstOrDefaultAsync(b => b.Id == bilheteId);
+
+            if (bilhete == null)
+                return false;
+
+            
+            bilhete.PagamentoConfirmado = true; 
+            bilhete.DataEmissao = DateTime.Now;
+            bilhete.Estado = "Emitido"; 
+
+          
+            _context.Bilhetes.Update(bilhete);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<List<Bilhete>> GetBilhetesFuturosByUserAsync(string userId)
+        {
+            var now = DateTime.Now;
+            return await _context.Bilhetes
+                .Include(b => b.Voo).ThenInclude(v => v.Origem)
+                .Include(b => b.Voo).ThenInclude(v => v.Destino)
+                .Include(b => b.Lugar)
+                .Where(b => b.Passageiro.UserId == userId && b.Voo.DataHoraPartida >= now && !b.WasDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<List<Bilhete>> GetByVooIdAsync(int vooId)
+        {
+            return await _context.Bilhetes.Where(b => b.VooId == vooId).ToListAsync();
         }
     }
 

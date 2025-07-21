@@ -17,7 +17,7 @@
                 <input type="hidden" asp-for="Id" />
                 <div class="mb-3">
                     <label asp-for="VooId" class="form-label">Voo</label>
-                    <select asp-for="VooId" asp-items="Model.Voos" class="form-select"></select>
+                    <select asp-for="VooId" asp-items="Model.Voos" class="form-select" id="VooId"></select>
                 </div>
                 <div class="mb-3">
                     <label asp-for="PassageiroId" class="form-label">Passageiro</label>
@@ -25,19 +25,19 @@
                 </div>
                 <div class="mb-3">
                     <label asp-for="LugarId" class="form-label">Lugar</label>
-                    <select asp-for="LugarId" asp-items="Model.Lugares" class="form-select"></select>
+                    <select asp-for="LugarId" asp-items="Model.Lugares" class="form-select" id="LugarId"></select>
                 </div>
                 <div class="mb-3 form-check">
-                    <input asp-for="BagagemExtra" class="form-check-input" />
+                    <input asp-for="BagagemExtra" class="form-check-input" id="BagagemExtra" />
                     <label asp-for="BagagemExtra" class="form-check-label">Bagagem Extra (+30€)</label>
                 </div>
                 <div class="mb-3 form-check">
-                    <input asp-for="Refeicao" class="form-check-input" />
+                    <input asp-for="Refeicao" class="form-check-input" id="Refeicao" />
                     <label asp-for="Refeicao" class="form-check-label">Refeição (+20€)</label>
                 </div>
                 <div class="mb-3">
                     <label asp-for="Valor" class="form-label">Preço</label>
-                    <input asp-for="Valor" class="form-control" readonly />
+                    <input asp-for="Valor" class="form-control" id="Valor" readonly />
                 </div>
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-save"></i> Guardar Alterações
@@ -50,10 +50,27 @@
     </div>
 </div>
 
-
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        function atualizarPreco() {
+            var vooId = $('#VooId').val();
+            var lugarId = $('#LugarId').val();
+            var bagagemExtra = $('#BagagemExtra').is(':checked');
+            var refeicao = $('#Refeicao').is(':checked');
+            if (vooId && lugarId) {
+                $.getJSON('@Url.Action("CalcularPreco", "Bilhete")', {
+                    vooId: vooId,
+                    lugarId: lugarId,
+                    bagagemExtra: bagagemExtra,
+                    refeicao: refeicao
+                }, function (preco) {
+                    $('#Valor').val(preco.toFixed(2));
+                });
+            } else {
+                $('#Valor').val('');
+            }
+        }
         $(function () {
             $('#VooId').change(function () {
                 var vooId = $(this).val();
@@ -67,17 +84,21 @@
                                 text: lugar.text
                             }));
                         });
+                        atualizarPreco();
                     });
                 } else {
                     $('#LugarId').empty();
+                    atualizarPreco();
                 }
             });
+            $('#LugarId, #BagagemExtra, #Refeicao').change(atualizarPreco);
         });
     </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
 
 
 

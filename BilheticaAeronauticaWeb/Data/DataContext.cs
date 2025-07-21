@@ -30,7 +30,11 @@ namespace BilheticaAeronauticaWeb.Data
         {
             base.OnModelCreating(modelBuilder);
 
-           modelBuilder.Entity<Bilhete>()
+            modelBuilder.Entity<Aeroporto>()
+             .Property(p => p.TaxaAeroportoPadrao)
+             .HasColumnType("decimal(10,2)");
+
+            modelBuilder.Entity<Bilhete>()
               .Property(b => b.Valor)
               .HasColumnType("decimal(18,2)");
 
@@ -46,10 +50,7 @@ namespace BilheticaAeronauticaWeb.Data
              .Property(l => l.PrecoBase)
              .HasColumnType("decimal(18,2)");
 
-          modelBuilder.Entity<Voo>()
-             .Property(v => v.TaxaAeroporto)
-             .HasColumnType("decimal(18,2)");
-
+         
             modelBuilder.Entity<Voo>()
              .HasOne(v => v.Origem)
              .WithMany()

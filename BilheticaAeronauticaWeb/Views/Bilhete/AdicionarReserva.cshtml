@@ -1,4 +1,16 @@
-﻿@model BilheteViewModel
+﻿@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var modelState in ViewData.ModelState.Values)
+            foreach (var error in modelState.Errors)
+            {
+                <div>@error.ErrorMessage</div>
+            }
+    </div>
+}
+
+
+@model BilheteViewModel
 
 @{
     ViewData["Title"] = "Adicionar Reserva";
@@ -14,7 +26,6 @@
         </div>
         <div class="card-body">
 
-        
             <div class="mb-3">
                 <a asp-action="Carrinho" asp-controller="Bilhete" class="btn btn-info">
                     <i class="fa-solid fa-shopping-cart"></i> Ver Carrinho de Reservas
@@ -31,36 +42,37 @@
                 </div>
             }
 
-            <form asp-action="AdicionarReserva" method="post">
+            <form asp-action="AdicionarReserva" method="post" autocomplete="off">
                 <input type="hidden" asp-for="PassageiroId" />
 
                 <div class="mb-3">
                     <label asp-for="VooId" class="form-label">Voo</label>
-                    <select asp-for="VooId" asp-items="Model.Voos" class="form-select"></select>
+                    <select asp-for="VooId" asp-items="Model.Voos" class="form-select" id="VooId"></select>
                 </div>
                 <div class="mb-3">
                     <label asp-for="LugarId" class="form-label">Lugar</label>
-                    <select asp-for="LugarId" asp-items="Model.Lugares" class="form-select"></select>
+                    <select asp-for="LugarId" asp-items="Model.Lugares" class="form-select" id="LugarId"></select>
+                    <small class="text-muted">Lugares marcados como <b>(ocupado)</b> não podem ser escolhidos.</small>
                 </div>
                 <div class="mb-3 form-check">
-                    <input asp-for="BagagemExtra" class="form-check-input" />
+                    <input asp-for="BagagemExtra" class="form-check-input" id="BagagemExtra" />
                     <label asp-for="BagagemExtra" class="form-check-label">Bagagem Extra (+30€)</label>
                 </div>
                 <div class="mb-3 form-check">
-                    <input asp-for="Refeicao" class="form-check-input" />
+                    <input asp-for="Refeicao" class="form-check-input" id="Refeicao" />
                     <label asp-for="Refeicao" class="form-check-label">Refeição (+20€)</label>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Valor" class="form-label">Preço</label>
-                    <input asp-for="Valor" class="form-control" id="Valor" readonly />
+                    <input type="text" id="Valor_Visivel" class="form-control" readonly />
+                    <input type="hidden" asp-for="Valor" />
+
+
+
                 </div>
 
-                <form asp-action="AdicionarReserva" method="post">
-                    <button type="submit" class="btn btn-success mt-3 mb-5">
-                        <i class="fa-solid fa-plus"></i> Reservar
-                    </button>
-                </form>
-
+                <button type="submit" class="btn btn-success mt-3 mb-5">
+                    <i class="fa-solid fa-plus"></i> Reservar
+                </button>
             </form>
         </div>
     </div>
@@ -68,28 +80,36 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
+        // Atualiza a dropdown dos lugares com base no voo selecionado
         function atualizarLugares() {
             var vooId = $('#VooId').val();
+            var $lugarSelect = $('#LugarId');
+            $lugarSelect.empty();
+
             if (vooId) {
                 $.getJSON('@Url.Action("LugaresDisponiveis", "Bilhete")', { vooId: vooId }, function (data) {
-                    var $lugarSelect = $('#LugarId');
-                    $lugarSelect.empty();
                     $.each(data, function (i, lugar) {
-                        $lugarSelect.append($('<option>', {
+                        var option = $('<option>', {
                             value: lugar.value,
                             text: lugar.text
-                        }));
+                        });
+                        if (lugar.disabled) {
+                            option.prop('disabled', true);
+                            option.attr('title', 'Este lugar está ocupado');
+                        }
+                        $lugarSelect.append(option);
                     });
-                  
-                    atualizarPreco();
+
+                    atualizarPreco(); // Atualiza o preço com o novo lugar
                 });
             } else {
-                $('#LugarId').empty();
-                atualizarPreco();
+                atualizarPreco(); // Sem voo: só limpa o preço
             }
         }
 
+        // Calcula o preço com base nos dados selecionados
         function atualizarPreco() {
             var vooId = $('#VooId').val();
             var lugarId = $('#LugarId').val();
@@ -103,24 +123,36 @@
                     bagagemExtra: bagagemExtra,
                     refeicao: refeicao
                 }, function (preco) {
-                   $('#Valor').val(preco.toFixed(2));
-
+                    $('#Valor_Visivel').val(preco.toFixed(2));
+                    $('input[name="Valor"]').val(preco.toFixed(2));
                 });
             } else {
-                $('#Valor').val('');
+                $('#Valor_Visivel').val('');
+                $('input[name="Valor"]').val('');
             }
         }
 
-        $(function () {
-            $('#VooId').change(atualizarLugares);
-            $('#LugarId, #BagagemExtra, #Refeicao').change(atualizarPreco);
+        // Faz bind dos eventos ao carregar a página
+        $(document).ready(function () {
+            atualizarLugares();
+
+            // Quando muda o voo, atualiza lugares
+            $('#VooId').change(function () {
+                atualizarLugares();
+            });
+
+            // Quando muda o lugar ou extras, atualiza preço
+            $('#LugarId, #BagagemExtra, #Refeicao').change(function () {
+                atualizarPreco();
+            });
         });
     </script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
 
+ 
+}
 
 
 

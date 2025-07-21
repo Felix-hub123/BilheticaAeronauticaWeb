@@ -19,15 +19,18 @@ namespace BilheticaAeronauticaWeb.Controllers
         private readonly IVooService _vooService;
         private readonly IAeroportoRepository _aeroportoRepository;
         private readonly IAviaoRepository _aviaoRepository;
+        private readonly IVooRepository _vooRepository;
 
         public VooController(
             IVooService vooService,
             IAeroportoRepository aeroportoRepository,
-            IAviaoRepository aviaoRepository)
+            IAviaoRepository aviaoRepository,
+            IVooRepository vooRepository)
         {
             _vooService = vooService;
             _aeroportoRepository = aeroportoRepository;
             _aviaoRepository = aviaoRepository;
+            _vooRepository = vooRepository;
         }
 
         // GET: VooController
@@ -35,143 +38,199 @@ namespace BilheticaAeronauticaWeb.Controllers
         public async Task<ActionResult> Index()
         {
             var voos = await _vooService.ObterVoosDisponiveisAsync();
-            return View(voos.OrderBy(v => v.Id));
+            return View(voos.OrderBy(v => v.DataHoraPartida));
         }
+
+
 
         // GET: VooController/Details/5
         [AllowAnonymous]
         public async Task<ActionResult> Details(int? id)
         {
-            if(id == null)
-            {
+            if (id == null)
                 return NotFound();
-            }
 
             var voo = await _vooService.ObterVooPorIdAsync(id.Value);
             if (voo == null)
-            {
                 return NotFound();
-            }
+
             return View(voo);
         }
 
+
         // GET: VooController/Create
+        [HttpGet]
         [Authorize(Roles = "Funcionario,Admin")]
-        public async  Task<ActionResult> Create()
+        public async Task<IActionResult> Create()
         {
             await PreencherDropDowns();
             return View();
         }
 
-        private async Task PreencherDropDowns()
-        {
-            var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
-            var avioes = await _aviaoRepository.GetAll().ToListAsync();
-            ViewBag.OrigemId = new SelectList(aeroportos, "Id", "Nome");
-            ViewBag.DestinoId = new SelectList(aeroportos, "Id", "Nome");
-            ViewBag.AviaoId = new SelectList(avioes, "Id", "Modelo");
-
-        }
-
-        // POST: VooController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
-        public async Task<ActionResult> Create(Voo voo, decimal precoBaseLugar)
+        public async Task<IActionResult> Create(VooViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 await PreencherDropDowns();
-                return View(voo);
+                return View(model);
             }
-
+            if (model.OrigemId == model.DestinoId)
+            {
+                ModelState.AddModelError("", "Origem e destino não podem ser iguais.");
+                await PreencherDropDowns();
+                return View(model);
+            }
+            if (model.DataHoraChegada <= model.DataHoraPartida)
+            {
+                ModelState.AddModelError("", "A chegada deve ser posterior à partida.");
+                await PreencherDropDowns();
+                return View(model);
+            }
             try
             {
-                await _vooService.CriarVooAsync(voo, precoBaseLugar);
+                var aeroportoDestino = await _aeroportoRepository.GetByIdAsync(model.DestinoId);
+                decimal taxaDestino = aeroportoDestino?.TaxaAeroportoPadrao ?? 0m;
+                var voo = new Voo
+                {
+                    OrigemId = model.OrigemId,
+                    DestinoId = model.DestinoId,
+                    AviaoId = model.AviaoId,
+                    DataHoraPartida = model.DataHoraPartida,
+                    DataHoraChegada = model.DataHoraChegada,
+                    PrecoBase = model.PrecoBase,
+       
+                };
+
+                await _vooService.CriarVooAsync(voo, model.PrecoBase);
+
+                TempData["Success"] = "Voo criado com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "Erro ao criar voo.");
+                ViewBag.ErrorMessage = $"Erro ao criar voo: {ex.Message}";
                 await PreencherDropDowns();
-                return View(voo);
+                return View(model);
             }
         }
 
-        // GET: VooController/Edit/5
-        [HttpGet]
+
+        // GET: Voo/Edit/5
         [Authorize(Roles = "Funcionario,Admin")]
-        public async Task<ActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            try
+            var voo = await _vooService.ObterVooPorIdAsync(id.Value);
+            if (voo == null)
+                return NotFound();
+
+            var model = new VooViewModel
             {
-                var voo = await _vooService.ObterVooPorIdAsync(id.Value);
-                if (voo == null)
-                {
-                    return NotFound();
+                Id = voo.Id,
+                OrigemId = voo.OrigemId,
+                DestinoId = voo.DestinoId,
+                AviaoId = voo.AviaoId,
+                DataHoraPartida = voo.DataHoraPartida,
+                DataHoraChegada = voo.DataHoraChegada,
+                PrecoBase = voo.PrecoBase,
+            };
 
-                }
+            await PreencherDropDowns(); 
 
-                await PreencherDropDowns();
-                return View(voo);
-            }
-            catch (Exception)
-            {
-                return View("Error");
-            }
-
+            return View(model); 
         }
 
-        // POST: VooController/Edit/5
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
-        public async Task<ActionResult> Edit(int id, Voo voo)
+        public async Task<IActionResult> Edit(VooViewModel model)
         {
-            if (id != voo.Id)
-            {
-                return NotFound();
-            }
-
             if (!ModelState.IsValid)
             {
                 await PreencherDropDowns();
-                return View(voo);
+                return View(model);
             }
-
-            try
+            if (model.OrigemId == model.DestinoId)
             {
-                await _vooService.EditarVooAsync(voo);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception)
-            {
-                ModelState.AddModelError("", "Erro ao editar voo.");
+                ModelState.AddModelError("", "Origem e destino não podem ser iguais.");
                 await PreencherDropDowns();
-                return View(voo);
+                return View(model);
             }
+            var voo = await _vooService.ObterVooPorIdAsync(model.Id);
+            if (voo == null)
+                return NotFound();
+
+            voo.OrigemId = model.OrigemId;
+            voo.DestinoId = model.DestinoId;
+            voo.AviaoId = model.AviaoId;
+            voo.DataHoraPartida = model.DataHoraPartida;
+            voo.DataHoraChegada = model.DataHoraChegada;
+            voo.PrecoBase = model.PrecoBase;
+
+            await _vooService.EditarVooAsync(voo);
+
+            TempData["Success"] = "Voo atualizado com sucesso!";
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: VooController/Delete/5
+
+
+
         [Authorize(Roles = "Funcionario,Admin")]
-        public async Task<ActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
+            if (id == null)
+                return NotFound();
+
             try
             {
                 await _vooService.EliminarVooAsync(id.Value);
+                TempData["Success"] = "Voo eliminado com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                
+                TempData["ErrorMessage"] = $"Erro ao eliminar voo: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Pesquisa()
+        {
+            var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
+            var model = new PesquisaVoosViewModel
+            {
+                Aeroportos = aeroportos.Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nome }).ToList(),
+                Resultados = new List<Voo>()
+            };
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Pesquisa(PesquisaVoosViewModel model)
+        {
+            var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
+            model.Aeroportos = aeroportos.Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nome }).ToList();
+
+          
+            model.Resultados = await _vooService.PesquisarVoosAsync(model.DataPartida, model.OrigemId, model.DestinoId);
+            return View(model);
+        }
+
+
+
+
+
+
+
 
         // POST: VooController/Delete/5
         [HttpPost]
@@ -192,28 +251,29 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> Pesquisa()
+      
+
+     
+        private async Task PreencherDropDowns()
         {
             var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
+            var avioes = await _aviaoRepository.GetAll().ToListAsync();
 
-            var model = new PesquisaVoosViewModel
+            if (!aeroportos.Any())
             {
-                Aeroportos = aeroportos.Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nome }).ToList(),
-                Resultados = new List<Voo>()
-            };
-            return View(model);
-        }
+                ViewBag.ErrorMessage = "Nenhum aeroporto disponível. Cadastre aeroportos antes de criar um voo.";
+            }
 
-        [HttpPost]
-        public async Task<IActionResult> Pesquisa(PesquisaVoosViewModel model)
-        {
-            var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();
-            model.Aeroportos = aeroportos.Select(a => new SelectListItem { Value = a.Id.ToString(), Text = a.Nome }).ToList();
+            if (!avioes.Any())
+            {
+                ViewBag.ErrorMessage = (ViewBag.ErrorMessage ?? "") + " Nenhum avião disponível. Cadastre aviões antes de criar um voo.";
+            }
 
-            model.Resultados = await _vooService.PesquisarVoosAsync(model.DataPartida, model.OrigemId, model.DestinoId);
-            return View(model);
+            ViewBag.OrigemId = aeroportos.Select(a => new { Value = a.Id, Text = a.Nome }).ToList();
+            ViewBag.DestinoId = aeroportos.Select(a => new { Value = a.Id, Text = a.Nome }).ToList();
+            ViewBag.AviaoId = avioes.Select(a => new { Value = a.Id, Text = a.Modelo }).ToList();
         }
     }
 }
+
 

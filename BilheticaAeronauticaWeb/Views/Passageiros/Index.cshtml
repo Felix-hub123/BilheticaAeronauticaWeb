@@ -1,53 +1,31 @@
-﻿@model IEnumerable<BilheticaAeronauticaWeb.Data.Entities.Passageiro>
+﻿@using BilheticaAeronauticaWeb.Data.Entities
+@model IEnumerable<Passageiro>
 
-@{
-    ViewData["Title"] = "Passageiros";
-}
-
-<h2 class="mb-4">
-    <i class="fa-solid fa-users text-primary"></i> Passageiros
-</h2>
-
-<p>
-    <a asp-action="Create" class="btn btn-success">
-        <i class="fa-solid fa-user-plus"></i> Criar Novo Passageiro
-    </a>
-</p>
-
-<div class="table-responsive">
-    <table class="table table-striped table-hover align-middle">
-        <thead class="table-dark">
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Apelido</th>
+            <th>Email</th>
+            <th>Foto</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
             <tr>
-                <th>Nome</th>
-                <th>Apelido</th>
-                <th>Documento de Identificação</th>
-                <th>Data de Nascimento</th>
-                <th>Número do Documento</th>
-                <th>Data de Registo</th>
-                <th>Ações</th>
+                <td>@item.Nome</td>
+                <td>@item.Apelido</td>
+                <td>@item.User?.Email</td>
+                <td>
+                    <img src="@Url.Content(item.ImageFullPath)" alt="Foto" width="64" class="img-thumbnail" />
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Ver</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Nome</td>
-                    <td>@item.Apelido</td>
-                    <td>@item.DataRegisto.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm me-1" title="Editar">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </a>
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm me-1" title="Detalhes">
-                            <i class="fa-solid fa-circle-info"></i>
-                        </a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Eliminar">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
+        }
+    </tbody>
+</table>

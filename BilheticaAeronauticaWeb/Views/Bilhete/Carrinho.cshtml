@@ -1,6 +1,5 @@
 ﻿@using BilheticaAeronauticaWeb.Data.Entities
 @model IEnumerable<BilheteTemp>
-
 @{
     ViewData["Title"] = "Carrinho de Reservas";
     var bilhetes = Model.ToList();
@@ -28,7 +27,7 @@
             }
             else
             {
-                <form id="formCompra" asp-action="Comprar" method="post">
+                <form id="formCompra" asp-action="ComprarSelecionado" method="post">
                     <input type="hidden" id="idBilheteSelecionado" name="idBilheteSelecionado" value="@bilhetes.First().Id" />
                     <div class="table-responsive">
                         <table class="table table-striped align-middle" id="tabelaBilhetes">
@@ -50,7 +49,9 @@
                                         <td>
                                             @if (item.Voo != null)
                                             {
-                                                <span>@item.Voo.Numero - @item.Voo.Origem?.Nome → @item.Voo.Destino?.Nome</span>
+                                                <span>
+                                                    @item.Voo.Numero - @item.Voo.Origem?.Nome → @item.Voo.Destino?.Nome
+                                                </span>
                                             }
                                             else
                                             {
@@ -58,24 +59,10 @@
                                             }
                                         </td>
                                         <td>
-                                            @if (item.Passageiro != null)
-                                            {
-                                                <span>@item.Passageiro.FullName</span>
-                                            }
-                                            else
-                                            {
-                                                <span>@item.PassageiroId</span>
-                                            }
+                                            @(item.Passageiro?.FullName ?? item.PassageiroId.ToString())
                                         </td>
                                         <td>
-                                            @if (item.Lugar != null)
-                                            {
-                                                <span>@item.Lugar.Codigo</span>
-                                            }
-                                            else
-                                            {
-                                                <span>@item.LugarId</span>
-                                            }
+                                            @(item.Lugar?.Codigo ?? item.LugarId.ToString())
                                         </td>
                                         <td>@item.Preco.ToString("C")</td>
                                         <td>
@@ -89,7 +76,8 @@
                                             }
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-danger btn-sm btn-remover" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#modalRemover">
+                                            <button type="button" class="btn btn-danger btn-sm btn-remover" data-id="@item.Id"
+                                                    data-bs-toggle="modal" data-bs-target="#modalRemover">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </td>
@@ -106,7 +94,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="modalComprar" tabindex="-1" aria-labelledby="modalComprarLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -129,7 +116,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="modalRemover" tabindex="-1" aria-labelledby="modalRemoverLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -204,4 +190,5 @@
         });
     </script>
 }
+
 

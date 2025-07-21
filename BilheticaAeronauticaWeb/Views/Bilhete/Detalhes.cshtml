@@ -28,28 +28,10 @@
                 </dd>
 
                 <dt class="col-sm-3"><i class="fa-solid fa-user"></i> Passageiro</dt>
-                <dd class="col-sm-9">
-                    @if (Model.Passageiro != null)
-                    {
-                        <span>@Model.Passageiro.FullName (@Model.Passageiro.FullName)</span>
-                    }
-                    else
-                    {
-                        <span>@Model.PassageiroId</span>
-                    }
-                </dd>
+                <dd class="col-sm-9">@Model.Passageiro?.FullName ?? @Model.PassageiroId.ToString()</dd>
 
                 <dt class="col-sm-3"><i class="fa-solid fa-chair"></i> Lugar</dt>
-                <dd class="col-sm-9">
-                    @if (Model.Lugar != null)
-                    {
-                        <span>@Model.Lugar.Codigo</span>
-                    }
-                    else
-                    {
-                        <span>@Model.LugarId</span>
-                    }
-                </dd>
+                <dd class="col-sm-9">@Model.Lugar?.Codigo ?? @Model.LugarId.ToString()</dd>
 
                 <dt class="col-sm-3"><i class="fa-solid fa-euro-sign"></i> Preço</dt>
                 <dd class="col-sm-9">@Model.Valor.ToString("C")</dd>
@@ -58,7 +40,7 @@
                 <dd class="col-sm-9">
                     @if (Model.BagagemExtra)
                     {
-                        <span class="badge bg-secondary">Bagagem Extra</span>
+                        <span class="badge bg-secondary me-2">Bagagem Extra</span>
                     }
                     @if (Model.Refeicao)
                     {
@@ -71,10 +53,25 @@
                 </dd>
 
                 <dt class="col-sm-3"><i class="fa-solid fa-calendar"></i> Data de Compra</dt>
-                <dd class="col-sm-9">@Model.DataCompra.ToShortDateString()</dd>
+                <dd class="col-sm-9">@Model.DataCompra.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3"><i class="fa-solid fa-flag"></i> Estado</dt>
+                <dd class="col-sm-9">
+                    @if (Model.WasDeleted)
+                    {
+                        <span class="badge bg-danger">Cancelado</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Ativo</span>
+                    }
+                </dd>
             </dl>
             <a asp-action="Historico" class="btn btn-secondary mt-3">
                 <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+            <a asp-action="DownloadPdf" asp-route-id="@Model.Id" class="btn btn-outline-primary mt-3 ms-2">
+                <i class="fa-solid fa-file-pdf"></i> Download Bilhete (PDF)
             </a>
         </div>
     </div>

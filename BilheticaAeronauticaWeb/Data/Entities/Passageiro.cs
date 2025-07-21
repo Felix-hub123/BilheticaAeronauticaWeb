@@ -17,20 +17,31 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required, MaxLength(100)]
         public string Apelido { get; set; }
 
+        public Guid ImageId { get; set; }
+
+        public string ImageFullPath => ImageId == Guid.Empty
+             ? $"/images/users/noimage.png"
+             : $"https://bilheticaapp.blob.core.windows.net/users/{ImageId}";
 
         public DateTime DataRegisto { get; set; } = DateTime.UtcNow;
 
-        // Histórico de bilhetes comprados pelo cliente
+     
 
         [NotMapped]
         public string NomeCompleto => $"{Nome} {Apelido}";
 
-        // Ligação ao utilizador autenticado (Identity)
+    
       
         public string UserId { get; set; }
         public User User { get; set; }
 
         public bool WasDeleted { get; set; }
+
+        public string DocumentoIdentificacao { get;  set; }
+
+        public string NumeroDocumento { get;  set; }
+
+        public DateTime? DataNascimento { get;  set; }
     }
 }
 

@@ -11,12 +11,12 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string Numero { get; set; }
 
-        // FK para Aeroporto de Origem
+      
         [Required]
         public int OrigemId { get; set; }
         public Aeroporto Origem { get; set; }
 
-        // FK para Aeroporto de Destino
+       
         [Required]
         public int DestinoId { get; set; }
         public Aeroporto Destino { get; set; }
@@ -26,8 +26,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public int AviaoId { get; set; }
         public Aviao Aviao { get; set; }
 
-        public decimal TaxaAeroporto { get; set; }
-
+      
         [Required]
         public DateTime DataHoraPartida { get; set; }
 
@@ -38,10 +37,9 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal PrecoBase { get; set; }
 
+        public ICollection<Lugar> Lugares { get; set; }
 
 
-
-        public ICollection<Lugar> Lugares { get; set; } = new List<Lugar>();
 
         // Soft delete
         public bool WasDeleted { get; set; }

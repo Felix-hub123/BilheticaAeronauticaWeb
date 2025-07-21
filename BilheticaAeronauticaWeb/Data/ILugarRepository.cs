@@ -8,6 +8,8 @@ namespace BilheticaAeronauticaWeb.Data
     {
         Task<IEnumerable<Lugar>> GetLugaresDisponiveisByVooIdAsync(int vooId);
 
+        Task<List<Lugar>> GetLugaresByAviaoIdAsync(int aviaoId);
+
 
     }
 }

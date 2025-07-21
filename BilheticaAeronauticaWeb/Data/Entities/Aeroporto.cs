@@ -23,6 +23,9 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required, MaxLength(3)]
         public string IATA { get; set; }
 
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal TaxaAeroportoPadrao { get; set; }
+
         public Guid ImageId { get; set; }
 
         public string ImageFullPath => ImageId == Guid.Empty

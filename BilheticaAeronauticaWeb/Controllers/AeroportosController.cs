@@ -158,6 +158,19 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ObterTaxa(int id)
+        {
+            var aeroporto = await _aeroportoRepository.GetByIdAsync(id); // usa o método do repositório!
+            if (aeroporto == null)
+                return Json(new { taxa = 0 });
+
+            // Garante que o campo existe e não é nulo
+            return Json(new { taxa = aeroporto.TaxaAeroportoPadrao });
+
+
+        }
+
         // GET: Aeroportos/Delete/5
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Delete(int? id)

@@ -5,7 +5,8 @@ namespace BilheticaAeronauticaWeb.Models
 {
     public class LoginViewModel
     {
-        [Required][EmailAddress] public required string Username { get; set; }
+
+
 
 
         [Required]
@@ -17,5 +18,14 @@ namespace BilheticaAeronauticaWeb.Models
         [Required]
         [DisplayName("Remember Me?")]
         public required bool RememberMe { get; set; }
+
+
+        [Required]
+
+        [Display(Name = "Email")]
+
+        [EmailAddress(ErrorMessage = "Invalid email address format.")]
+        public string Email { get; set; }
+
     }
 }

@@ -14,5 +14,12 @@ namespace BilheticaAeronauticaWeb.Data
 
         Task<IEnumerable<Voo>> GetVoosByUtilizadorIdAsync(int utilizadorId);
 
+        Task<List<Voo>> GetVoosFuturosAsync();
+
+        Task<List<Voo>> GetVoosPassadosAsync();
+
+        Task<string> GerarNumeroVooAsync();
+
+        Task<Voo> ObterUltimoVooAsync();
     }
 }

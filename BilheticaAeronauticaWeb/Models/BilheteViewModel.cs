@@ -19,6 +19,7 @@ namespace BilheticaAeronauticaWeb.Models
         [Required]
         [Display(Name = "Passageiro")]
         public int PassageiroId { get; set; }
+
         public string PassageiroNome { get; set; }
 
         public string OrigemNome { get; set; }
@@ -53,6 +54,9 @@ namespace BilheticaAeronauticaWeb.Models
 
         public bool WasDeleted { get; set; }
 
+        [Display(Name = "Data Partida")]
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}", ApplyFormatInEditMode = false)]
+        public DateTime DataPartida { get; set; }
 
         public IEnumerable<SelectListItem> Voos { get; set; }
         public IEnumerable<SelectListItem> Passageiros { get; set; }

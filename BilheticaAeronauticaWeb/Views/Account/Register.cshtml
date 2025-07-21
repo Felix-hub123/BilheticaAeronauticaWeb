@@ -1,0 +1,56 @@
+﻿@using SuperShop.Models
+@model RegisterNewUserViewModel
+
+@{
+    ViewData["Title"] = "Registar";
+}
+
+<h2 class="mb-3">Registar Novo Utilizador</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">@ViewBag.Message</div>
+}
+
+<form asp-action="Register" method="post" autocomplete="off">
+    <div class="form-group mb-3">
+        <label asp-for="Nome"></label>
+        <input asp-for="Nome" class="form-control" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="Apelido"></label>
+        <input asp-for="Apelido" class="form-control" />
+        <span asp-validation-for="Apelido" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="PhoneNumber"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="Confirm"></label>
+        <input asp-for="Confirm" type="password" class="form-control" />
+        <span asp-validation-for="Confirm" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Registar</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+

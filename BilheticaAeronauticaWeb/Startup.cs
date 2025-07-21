@@ -11,15 +11,20 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
+using Rotativa.AspNetCore;
+using SendGrid.Helpers.Mail;
+using SuperShop.Helpers;
 using Syncfusion.Blazor;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -69,12 +74,18 @@ namespace BilheticaAeronauticaWeb
             services.AddScoped<IVooRepository, VooRepository>();
             services.AddScoped<ILugarRepository, LugarRepository>();
             services.AddScoped<IBilheteRepository, BilheteRepository>();
-            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
-            services.AddTransient<IEmailSender, EmailSender>();
             services.AddScoped<IBilheteService, BilheteService>();
             services.AddScoped<IVooService, VooService>();
+            services.AddScoped<IEMailHelper, EMailHelper>();
             services.AddMudServices();
             services.AddSyncfusionBlazor();
+            services.Configure<RequestLocalizationOptions>(options =>
+             {
+                var supportedCultures = new[] { new CultureInfo("pt-PT") };
+                options.DefaultRequestCulture = new RequestCulture("pt-PT");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
 
 
             services.ConfigureApplicationCookie(options =>
@@ -102,7 +113,7 @@ namespace BilheticaAeronauticaWeb
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+           
             app.UseRouting();
 
             app.UseAuthentication();
@@ -110,7 +121,7 @@ namespace BilheticaAeronauticaWeb
 
             app.UseAuthorization();
 
-           
+         
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

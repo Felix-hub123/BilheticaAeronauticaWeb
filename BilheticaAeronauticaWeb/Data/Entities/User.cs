@@ -28,18 +28,18 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Display(Name = "Image")]
         public Guid ImageId { get; set; }
 
-       
-
         public string ImageFullPath => ImageId == Guid.Empty
             ? $"/images/users/noimage.png"
-            : $"https://bilheticaaeronauticaapp.blob.core.windows.net/Users/{ImageId}";
+            : $"https://bilheticaaeronauticaapp.blob.core.windows.net/users/{ImageId}.jpg";
 
 
 
         [NotMapped]
         public string FullName => $"{Nome} {Apelido}";
 
-    
+        public virtual ICollection<Bilhete> Bilhetes { get; set; }
+
+
 
 
     }

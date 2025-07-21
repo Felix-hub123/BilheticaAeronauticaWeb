@@ -1,4 +1,5 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,9 @@ namespace BilheticaAeronauticaWeb.Data
         Task<List<Bilhete>> GetBilhetesByUserAsync(string userId);
         Task<Bilhete> GetBilheteAsync(int id); 
         Task<List<Bilhete>> GetBilhetesByVooAsync(int vooId);
+
+        Task<List<Bilhete>> GetBilhetesFuturosByUserAsync(string userId);
+
 
         Task<List<BilheteTemp>> GetBilheteTempsByUserAsync(string userId);
         Task<bool> AddBilheteTempAsync(BilheteTemp bilheteTemp, string userId);
@@ -24,6 +28,12 @@ namespace BilheticaAeronauticaWeb.Data
         Task<IEnumerable<Bilhete>> GetAllBilhetesAsync();
 
         Task UpdateBilheteAsync(Bilhete bilhete);
+
+        Task<bool> ConfirmarPagamentoEBilheteAsync(int bilheteId);
+
+        Task<List<Bilhete>> GetByVooIdAsync(int vooId);
+
+       
     }
        
 }

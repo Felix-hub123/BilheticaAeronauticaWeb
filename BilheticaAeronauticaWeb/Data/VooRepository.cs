@@ -1,5 +1,6 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,9 +19,19 @@ namespace BilheticaAeronauticaWeb.Data
 
         }
 
+        public new async Task DeleteAsync(Voo voo)
+        {
+            voo.WasDeleted = true;
+            _context.Voos.Update(voo);
+            await _context.SaveChangesAsync();
+        }
+
+
+
         public async Task<List<Voo>> GetAllVoosAsync()
         {
             return await _context.Voos
+                 .Where(v => !v.WasDeleted)
                 .Include(v => v.Origem)
                 .Include(v => v.Destino)
                 .Include(v => v.Aviao)
@@ -55,7 +66,54 @@ namespace BilheticaAeronauticaWeb.Data
                 .ToListAsync();
         }
 
-       
+
+        public async Task<List<Voo>> GetVoosFuturosAsync()
+        {
+            return await _context.Voos
+                .Include(v => v.Origem)
+                .Include(v => v.Destino)
+                .Include(v => v.Aviao)
+                .Where(v => v.DataHoraPartida >= DateTime.Now)
+                .ToListAsync();
+        }
+
+        public async Task<List<Voo>> GetVoosPassadosAsync()
+        {
+            return await _context.Voos
+                .Include(v => v.Origem)
+                .Include(v => v.Destino)
+                .Include(v => v.Aviao)
+                .Where(v => v.DataHoraPartida < DateTime.Now)
+                .ToListAsync();
+        }
+
+        private async Task<string> GerarNumeroVooAsync()
+        {
+            var ultimoVoo = await _context.Voos
+             .OrderByDescending(v => v.Id)
+             .FirstOrDefaultAsync();
+
+            int novoNumero = 1;
+            if (ultimoVoo != null)
+            {
+                var numStr = new string(ultimoVoo.Numero.SkipWhile(c => !char.IsDigit(c)).ToArray());
+                if (int.TryParse(numStr, out int lastNum))
+                    novoNumero = lastNum + 1;
+            }
+            return $"TP{novoNumero:D3}";
+        }
+
+        Task<string> IVooRepository.GerarNumeroVooAsync()
+        {
+            return GerarNumeroVooAsync();
+        }
+
+        public async Task<Voo> ObterUltimoVooAsync()
+        {
+            return await _context.Voos
+                .OrderByDescending(v => v.Numero)
+                .FirstOrDefaultAsync();
+        }
 
 
 

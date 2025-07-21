@@ -1,5 +1,4 @@
-﻿@model IEnumerable<BilheticaAeronauticaWeb.Models.BilheteViewModel>
-
+﻿@model BilheticaAeronauticaWeb.Models.HistoricoViewModel
 
 @{
     ViewData["Title"] = "Histórico de Bilhetes";
@@ -14,20 +13,19 @@
             <i class="fa-solid fa-history"></i> Histórico de Bilhetes
         </div>
         <div class="card-body">
-            @if (!Model.Any())
+
+            <h5 class="mb-3"><i class="fa-solid fa-plane-departure"></i> Viagens Futuras</h5>
+            @if (!Model.Futuros.Any())
             {
-                <div class="alert alert-info">
-                    <i class="fa-solid fa-info-circle"></i> Não existem bilhetes comprados.
-                </div>
+                <div class="alert alert-info">Não tem viagens futuras.</div>
             }
             else
             {
-                <div class="table-responsive">
+                <div class="table-responsive mb-4">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Voo</th>
-                                <th>Passageiro</th>
                                 <th>Lugar</th>
                                 <th>Preço</th>
                                 <th>Extras</th>
@@ -37,44 +35,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var bilhete in Model)
+                            @foreach (var bilhete in Model.Futuros)
                             {
                                 <tr>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(bilhete.VooNumero))
-                                        {
-                                            <span>@bilhete.VooNumero - @bilhete.OrigemNome → @bilhete.DestinoNome</span>
-                                        }
-                                        else
-                                        {
-                                            <span>@bilhete.VooId</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(bilhete.PassageiroNome))
-                                        {
-                                            <span>@bilhete.PassageiroNome</span>
-                                        }
-                                        else
-                                        {
-                                            <span>@bilhete.PassageiroId</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(bilhete.LugarCodigo))
-                                        {
-                                            <span>@bilhete.LugarCodigo</span>
-                                        }
-                                        else
-                                        {
-                                            <span>@bilhete.LugarId</span>
-                                        }
-                                    </td>
+                                    <td>@bilhete.VooNumero - @bilhete.OrigemNome → @bilhete.DestinoNome</td>
+                                    <td>@bilhete.LugarCodigo</td>
                                     <td>@bilhete.Valor.ToString("C")</td>
                                     <td>
                                         @if (bilhete.BagagemExtra)
                                         {
-                                            <span class="badge bg-secondary">Bagagem</span>
+                                            <span class="badge bg-secondary me-1">Bagagem</span>
                                         }
                                         @if (bilhete.Refeicao)
                                         {
@@ -84,19 +54,16 @@
                                         {
                                             <span>Sem extras</span>
                                         }
-                                </td>
-                                <td>
-                                    @(bilhete.DataCompra.HasValue
-                                    ? bilhete.DataCompra.Value.ToShortDateString()
-                                    : "N/A")
-                            </td>
-                            <td>
-                                @if (bilhete.WasDeleted)
+                                    </td>
+                                    <td>@bilhete.DataPartida.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (bilhete.WasDeleted)
                                         {
                                             <span class="badge bg-danger">Anulado</span>
                                         }
                                         else
                                         {
+
                                             <span class="badge bg-success">Ativo</span>
                                         }
                                     </td>
@@ -112,16 +79,88 @@
                                                     <i class="fa-solid fa-ban"></i>
                                                 </button>
                                             </form>
+                                            <a asp-action="DownloadPdf" asp-route-id="@bilhete.Id" class="btn btn-danger btn-sm ms-1" title="Download PDF">
+                                                <i class="fa-solid fa-file-pdf"></i> PDF
+                                            </a>
                                         }
-                                      
                                     </td>
-
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
             }
+
+            <h5 class="mb-3"><i class="fa-solid fa-plane-arrival"></i> Viagens Passadas</h5>
+            @if (!Model.Passados.Any())
+            {
+                <div class="alert alert-info">Não tem viagens passadas.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Voo</th>
+                                <th>Lugar</th>
+                                <th>Preço</th>
+                                <th>Extras</th>
+                                <th>Data</th>
+                                <th>Estado</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var bilhete in Model.Passados)
+                            {
+                                <tr>
+                                    <td>@bilhete.VooNumero - @bilhete.OrigemNome → @bilhete.DestinoNome</td>
+                                    <td>@bilhete.LugarCodigo</td>
+                                    <td>@bilhete.Valor.ToString("C")</td>
+                                    <td>
+                                        @if (bilhete.BagagemExtra)
+                                        {
+                                            <span class="badge bg-secondary me-1">Bagagem</span>
+                                        }
+                                        @if (bilhete.Refeicao)
+                                        {
+                                            <span class="badge bg-info text-dark">Refeição</span>
+                                        }
+                                        @if (!bilhete.BagagemExtra && !bilhete.Refeicao)
+                                        {
+                                            <span>Sem extras</span>
+                                        }
+                                    </td>
+                                    <td>@bilhete.DataPartida.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (bilhete.WasDeleted)
+                                        {
+                                            <span class="badge bg-danger">Anulado</span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="badge bg-secondary">Terminado</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Detalhes" asp-route-id="@bilhete.Id" class="btn btn-info btn-sm" title="Detalhes">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <a asp-action="DownloadPdf" asp-route-id="@bilhete.Id" class="btn btn-danger btn-sm ms-1" title="Download PDF">
+                                            <i class="fa-solid fa-file-pdf"></i> PDF
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
         </div>
     </div>
 </div>
+
+

@@ -20,5 +20,7 @@ namespace BilheticaAeronauticaWeb.Services
         Task<Voo> ObterVooPorIdAsync(int id);
 
         Task<List<Voo>> PesquisarVoosAsync(DateTime? data, int? origemAeroportoId, int? destinoAeroportoId);
+
+       
     }
 }

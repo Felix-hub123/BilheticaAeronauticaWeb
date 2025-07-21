@@ -11,23 +11,54 @@
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <dl class="row mb-0">
+            <dt class="col-sm-3">Número do Voo</dt>
+            <dd class="col-sm-9">@Model.Numero</dd>
+
             <dt class="col-sm-3">Origem</dt>
             <dd class="col-sm-9">@Model.Origem?.Nome</dd>
+
             <dt class="col-sm-3">Destino</dt>
             <dd class="col-sm-9">@Model.Destino?.Nome</dd>
+
             <dt class="col-sm-3">Avião</dt>
             <dd class="col-sm-9">@Model.Aviao?.Modelo</dd>
+
             <dt class="col-sm-3">Partida</dt>
             <dd class="col-sm-9">@Model.DataHoraPartida.ToString("dd/MM/yyyy HH:mm")</dd>
+
             <dt class="col-sm-3">Chegada</dt>
             <dd class="col-sm-9">@Model.DataHoraChegada.ToString("dd/MM/yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Preço Base</dt>
+            <dd class="col-sm-9">@Model.PrecoBase.ToString("C")</dd>
+
+           
         </dl>
     </div>
 </div>
 
 <div class="d-flex gap-2">
-      <a asp-action="Index" class="btn btn-outline-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Voltar
-    </a>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <a asp-action="Pesquisa" asp-controller="Voo" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Pesquisa
+        </a>
+    }
+    else
+    {
+        <a asp-action="Index" asp-controller="Voo" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Voltar aos Voos
+        </a>
+        @if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fa-solid fa-pen"></i> Editar
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="fa-solid fa-trash"></i> Eliminar
+            </a>
+        }
+    }
 </div>
+
 
