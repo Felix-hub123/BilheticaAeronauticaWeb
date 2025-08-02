@@ -7,6 +7,7 @@
 <h2>Editar Funcionário</h2>
 
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <div class="form-group">
         <label asp-for="Nome"></label>
@@ -35,4 +36,9 @@
     <button type="submit" class="btn btn-primary">Guardar</button>
     <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
 </form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
 

@@ -5,6 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+    /// <summary>
+    /// Representa um passageiro do sistema, contendo dados pessoais,
+    /// informações de contacto, imagem de perfil, data de registo,
+    /// dados de identificação, e associação ao utilizador do sistema.
+    /// Suporta soft delete para remoção lógica dos registos.
+    /// </summary>
     public class Passageiro : IEntity
     {
         public int Id { get; set; }

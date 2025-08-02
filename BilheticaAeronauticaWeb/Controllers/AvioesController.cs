@@ -14,6 +14,11 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
+
+    /// <summary>
+    /// Controller para gerir os aviões/aparelhos (CRUD).
+    /// Acesso restrito a funcionários e administradores para alterações.
+    /// </summary>
     public class AvioesController : Controller
     {
        
@@ -67,6 +72,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View();
         }
 
+
+
+        /// <summary>
+        /// Cria um novo avião com upload de imagem obrigatório para cumprimento do requisito visual.
+        /// </summary>
+        /// 
         // POST: Avioes/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -93,7 +104,9 @@ namespace BilheticaAeronauticaWeb.Controllers
 
 
 
-
+        /// <summary>
+        /// Atualiza um avião, tratando concorrência e upload opcional de nova imagem.
+        /// </summary>
         // GET: Avioes/Edit/5
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -157,6 +170,10 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Confirma e efetua remoção do avião.
+        /// </summary>
         // GET: Avioes/Delete/5
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Delete(int? id)

@@ -5,6 +5,7 @@
       "dynamicId": null
     },
     "storage1": {
+      "ignored": "true",
       "type": "storage",
       "connectionId": "Blob:ConnectionString1",
       "dynamicId": null
@@ -13,6 +14,18 @@
       "type": "mssql",
       "connectionId": "ConnectionStrings:DefaultConnection",
       "dynamicId": null
+    },
+    "identityapp1": {
+      "ignored": "true",
+      "type": "identityapp"
+    },
+    "storage2": {
+      "type": "storage",
+      "connectionId": "StorageConnection"
+    },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DatabaseConnection"
     }
   }
 }

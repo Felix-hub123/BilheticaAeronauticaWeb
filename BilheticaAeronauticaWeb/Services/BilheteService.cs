@@ -11,6 +11,10 @@ using Bilhete = BilheticaAeronauticaWeb.Data.Entities.Bilhete;
 
 namespace BilheticaAeronauticaWeb.Services
 {
+    /// <summary>
+    /// Serviço que encapsula a lógica de negócio relacionada à manipulação de bilhetes,
+    /// incluindo cálculo de preço, verificação de disponibilidade e criação de bilhetes.
+    /// </summary>
     public class BilheteService : IBilheteService
     {
         private readonly IVooRepository _vooRepository;
@@ -26,6 +30,9 @@ namespace BilheticaAeronauticaWeb.Services
             _bilheteRepository = bilheteRepository;
         }
 
+        /// <summary>
+        /// Calcula o preço do bilhete considerando preços base, extras e desconto para voos distantes.
+        /// </summary>
         public decimal CalcularPrecoBilhete(Lugar lugar, Voo voo, bool bagagemExtra, bool refeicao)
         {
             decimal preco = lugar.PrecoBase;
@@ -38,12 +45,21 @@ namespace BilheticaAeronauticaWeb.Services
             return preco;
         }
 
+
+        /// <summary>
+        /// Verifica assíncronamente se o lugar está disponível para o voo informado.
+        /// </summary>
+
         public async Task<bool> LugarDisponivelAsync(int vooId, int lugarId)
         {
             var bilhete = await _bilheteRepository.GetByVooAndLugarAsync(vooId, lugarId);
             return bilhete == null;
         }
 
+
+        /// <summary>
+        /// Cria um bilhete para o voo e lugar indicados, marcando o lugar como ocupado.
+        /// </summary>
         public async Task<Bilhete> CriarBilheteAsync(int vooId, int lugarId, int passageiroId, bool bagagemExtra, bool refeicao)
         {
             var voo = await _vooRepository.GetVooWithIncludesAsync(vooId);
@@ -82,6 +98,44 @@ namespace BilheticaAeronauticaWeb.Services
 
 
 
+        public async Task<bool> ReservarBilheteTempMBWayAsync(int vooId, int lugarId, int passageiroId,
+           bool bagagemExtra, bool refeicao, string userId)
+        {
+            var voo = await _vooRepository.GetByIdAsync(vooId);
+            var lugar = await _lugarRepository.GetByIdAsync(lugarId);
+
+            if (voo == null || lugar == null)
+            {
+                throw new Exception("Voo ou lugar inválido.");
+            }
+
+            if (!await LugarDisponivelAsync(vooId, lugarId))
+            {
+                return false;
+            }
+
+            var preco = CalcularPrecoBilhete(lugar, voo, bagagemExtra, refeicao);
+
+            var bilheteTemp = new BilheteTemp
+            {
+                VooId = vooId,
+                LugarId = lugarId,
+                PassageiroId = passageiroId,
+                BagagemExtra = bagagemExtra,
+                Refeicao = refeicao,
+                Preco = preco,
+                CriadoPorUserId = userId,
+                DataReserva = DateTime.UtcNow,
+                WasDeleted = false
+            };
+
+            // Adiciona bilhete temporário
+            return await _bilheteRepository.AddBilheteTempAsync(bilheteTemp, userId);
+        }
+
+        /// <summary>
+        /// Obtém a lista de voos formatada para uso em dropdown lists.
+        /// </summary>
         public async Task<IEnumerable<SelectListItem>> GetVoosSelectListAsync()
         {
             var voos = await _vooRepository.GetAllVoosWithIncludesAsync();
@@ -92,6 +146,10 @@ namespace BilheticaAeronauticaWeb.Services
             });
         }
 
+
+        /// <summary>
+        /// Obtém a lista de lugares de um voo com indicação de ocupação, formatada para dropdown lists.
+        /// </summary>
         public async Task<IEnumerable<SelectListItem>> GetLugaresSelectListAsync(int vooId)
         {
             var voo = await _vooRepository.GetByIdAsync(vooId);
@@ -110,6 +168,35 @@ namespace BilheticaAeronauticaWeb.Services
         }
 
 
+        /// <summary>
+        /// Confirma o pagamento MB WAY do utilizador, convertendo os bilhetes temporários em definitivos
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns>True se a confirmação ocorrer com sucesso.</returns>
+        public async Task<bool> ConfirmarPagamentoMBWayAsync(string userId, string numeroTelemovel)
+        {
+            // Confirma bilhetes temporários deste utilizador (remove temporários, cria definitivos)
+            var confirmado = await _bilheteRepository.ConfirmBilheteAsync(userId);
+
+            if (!confirmado)
+                return false;
+
+            // Após criar bilhetes definitivos, marca lugares como ocupados
+            var bilhetesConfirmados = await _bilheteRepository.GetBilhetesByUserAsync(userId);
+
+            foreach (var bilhete in bilhetesConfirmados)
+            {
+                var lugar = await _lugarRepository.GetByIdAsync(bilhete.LugarId);
+                if (lugar != null && lugar.Disponivel)
+                {
+                    lugar.Disponivel = false;
+                    await _lugarRepository.UpdateAsync(lugar);
+                }
+            }
+
+            return true;
+        }
+
         public async Task<Lugar> GetLugarByIdAsync(int lugarId)
         {
             return await _lugarRepository.GetByIdAsync(lugarId);
@@ -120,8 +207,7 @@ namespace BilheticaAeronauticaWeb.Services
             return await _vooRepository.GetByIdAsync(vooId);
         }
 
-     
 
-       
+     
     }   
 }

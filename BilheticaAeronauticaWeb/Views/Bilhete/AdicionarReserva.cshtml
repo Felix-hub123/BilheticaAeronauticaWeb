@@ -132,16 +132,16 @@
             }
         }
 
-        // Faz bind dos eventos ao carregar a página
+    
         $(document).ready(function () {
             atualizarLugares();
 
-            // Quando muda o voo, atualiza lugares
+
             $('#VooId').change(function () {
                 atualizarLugares();
             });
 
-            // Quando muda o lugar ou extras, atualiza preço
+ 
             $('#LugarId, #BagagemExtra, #Refeicao').change(function () {
                 atualizarPreco();
             });
@@ -152,7 +152,7 @@
 }
 
  
-}
+
 
 
 

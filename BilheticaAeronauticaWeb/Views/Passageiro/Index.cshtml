@@ -7,7 +7,13 @@
 
 <div class="container mt-4">
     <h1 class="mb-4"><i class="fa-solid fa-user"></i> Área do Passageiro</h1>
-
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
     <div class="alert alert-info">
         <i class="fa-solid fa-plane-departure"></i>
         Bem-vindo! Aqui pode consultar voos, comprar bilhetes e ver o seu histórico de viagens.
@@ -60,11 +66,7 @@
     <div>
         <h4><i class="fa-solid fa-ellipsis-h"></i> Outras opções</h4>
         <ul class="list-unstyled">
-            <li>
-                <a href="@Url.Action("Index", "Home")" class="link-primary">
-                    <i class="fa-solid fa-house"></i> Voltar ao Início
-                </a>
-            </li>
+          
             <li>
                 <a href="@Url.Action("Perfil", "Passageiro")" class="link-primary">
                     <i class="fa-solid fa-user-pen"></i> Ver/Editar Perfil

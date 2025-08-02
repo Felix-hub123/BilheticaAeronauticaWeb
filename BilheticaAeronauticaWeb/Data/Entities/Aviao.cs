@@ -5,6 +5,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+    /// <summary>
+    /// Representa um avião/aparelho da frota, com informações de marca, modelo,
+    /// capacidade nas classes econômica e executiva, imagem associada, estado de disponibilidade,
+    /// lista de lugares e suporte a soft delete.
+    /// </summary>
     public class Aviao : IEntity
     {
         public int Id { get; set; }
@@ -27,7 +32,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string ImageFullPath => ImageId == Guid.Empty
             ? $"/images/aviao/noimage.png"
-            : $"https://bilheticaapp.blob.core.windows.net/avioes/{ImageId}";
+            : $"https://bilhetica.blob.core.windows.net/avioes/{ImageId}";
              
 
 

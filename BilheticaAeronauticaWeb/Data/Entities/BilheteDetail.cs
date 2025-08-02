@@ -2,6 +2,12 @@
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+    /// <summary>
+    /// Representa um detalhe associado a um bilhete, como extras ou serviços adicionais,
+    /// por exemplo bagagem extra ou refeição, contendo descrição, preço unitário, quantidade,
+    /// valor calculado total e indicador de eliminação lógica (soft delete).
+    /// </summary>
+
     public class BilheteDetail : IEntity
     {
         public int Id { get; set; }

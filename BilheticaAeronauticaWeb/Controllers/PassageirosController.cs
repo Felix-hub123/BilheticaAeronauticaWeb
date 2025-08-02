@@ -13,6 +13,11 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
+    /// <summary>
+    /// Controller responsável pela gestão dos passageiros.
+    /// Inclui operações de CRUD, perfil do usuário e histórico de bilhetes.
+    /// Aplica regras de autorização conforme roles e propriedade dos dados.
+    /// </summary>
     [Authorize(Roles = "Passageiro")]
     public class PassageirosController : Controller
     {
@@ -37,6 +42,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             _bilheteRepository = bilheteRepository;
         }
 
+
+
+        /// <summary>
+        /// Lista todos os passageiros (apenas Admin e Funcionário).
+        /// </summary>
+        /// <returns>View com lista ordenada por nome dos passageiros.</returns>
         // GET: Passageiros
         [Authorize(Roles = "Admin,Funcionario")]
         public IActionResult Index()
@@ -46,9 +57,13 @@ namespace BilheticaAeronauticaWeb.Controllers
 
 
 
-
+        /// <summary>
+        /// Exibe detalhes do passageiro específico.
+        /// Só pode ser visto pelo próprio passageiro, Admin ou Funcionário.
+        /// </summary>
+        /// <param name="id">ID do passageiro a consultar.</param>
+        /// <returns>View com detalhes ou página de not found / forbidden 
         // GET: Passageiros/Details/5
-
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -62,6 +77,13 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(passageiro);
         }
 
+
+
+        /// <summary>
+        /// Exibe formulário para criação de novo passageiro.
+        /// Redireciona para perfil se já existir passageiro associado ao user.
+        /// </summary>
+        /// <returns>View do formulário ou redirecionamento para perfil.</returns>
         // GET: Passageiros/Create
         public IActionResult Create()
         {
@@ -72,6 +94,14 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View();
         }
 
+
+
+        /// <summary>
+        /// Cria um novo passageiro com dados submetidos, incluindo upload de imagem.
+        /// </summary>
+        /// <param name="model">ViewModel com dados do passageiro.</param>
+        /// <returns>Redireciona para perfil em sucesso, ou mostra formulário com erros.</returns>
+        /// 
         // POST: Passageiros/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -96,6 +126,15 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction(nameof(Perfil));
         }
 
+
+
+        /// <summary>
+        /// Cria um passageiro via API recebido no corpo da requisição.
+        /// Associa o passageiro ao utilizador logado.
+        /// </summary>
+        /// <param name="model">Modelo Passageiro enviado na request JSON.</param>
+        /// <returns>JSON com ID e nome do passageiro criado.</returns>
+        /// 
         [HttpPost]
         public async Task<IActionResult> CreateFromReserva([FromBody] Passageiro model)
         {
@@ -106,6 +145,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return Json(new { id = model.Id, nome = model.Nome });
         }
 
+
+
+        /// <summary>
+        /// Mostra o perfil do passageiro logado, redireciona para criação se não existir.
+        /// </summary>
+        /// <returns>View do perfil com dados do passageiro.</returns>
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> Perfil()
         {
@@ -117,9 +162,13 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
-      
 
 
+        /// <summary>
+        /// Atualiza os dados do perfil do passageiro, incluindo upload de nova imagem.
+        /// </summary>
+        /// <param name="model">ViewModel com dados para atualização.</param>
+        /// <returns>Redireciona para perfil em sucesso ou retorna à view com erros.</returns>
         [HttpPost]
         [Authorize(Roles = "Passageiro")]
         [ValidateAntiForgeryToken]
@@ -148,7 +197,12 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Exibe formulário para editar passageiro específico.
+        /// Permite edição apenas para o próprio, Admin ou Funcionário.
+        /// </summary>
+        /// <param name="id">ID do passageiro para editar.</param>
+        /// <returns>View do formulário ou páginas de erro.</returns>
         // EDIT (Admin ou Funcionário, ou próprio passageiro)
         [Authorize(Roles = "Passageiro,Admin,Funcionario")]
         public async Task<IActionResult> Edit(int? id)
@@ -166,6 +220,13 @@ namespace BilheticaAeronauticaWeb.Controllers
             var model = _converterHelper.ToPassageirosViewModel(passageiro);
             return View(model);
         }
+
+
+        /// <summary>
+        /// Atualiza passageiro após edição com validação e upload opcional de imagem.
+        /// </summary>
+        /// <param name="model">ViewModel com dados atualizados.</param>
+        /// <returns>Redireciona para perfil ou retorna ao formulário com erros.</returns>
 
         // POST: Passageiros/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -200,7 +261,11 @@ namespace BilheticaAeronauticaWeb.Controllers
 
 
 
-
+        /// <summary>
+        /// Atualiza os dados básicos do passageiro a partir do ViewModel.
+        /// </summary>
+        /// <param name="entidade">Entidade Passageiro a atualizar.</param>
+        /// <param name="model">ViewModel com dados atualizados.</param>
         private void AtualizaPassageiro(Passageiro entidade, PassageiroViewModel model)
         {
             entidade.Nome = model.Nome;
@@ -211,6 +276,11 @@ namespace BilheticaAeronauticaWeb.Controllers
             // entidade.ImageId já tratado acima na lógica de imagem
         }
 
+
+        /// <summary>
+        /// Obtém o passageiro associado ao utilizador autenticado atual.
+        /// </summary>
+        /// <returns>Entidade Passageiro ou null se não existir.</returns>
         private async Task<Passageiro> ObterPassageiroAtual()
         {
             var user = await _userHelper.GetUserAsync(User);

@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Programa de Fidelidade AeroPoints";
+}
+
+<div class="container mt-5">
+    <div class="jumbotron bg-light p-5 rounded shadow-sm text-center">
+        <h1 class="display-4 welcome-title">AeroPoints: Seu Programa de Fidelidade</h1>
+        <p class="lead mt-4">
+            No Programa de Fidelidade AeroPoints, cada voo que você faz com a AeroTickets aproxima-o de novas e emocionantes recompensas! Acumule pontos em todas as suas viagens e troque-os por passagens aéreas gratuitas, upgrades de classe, acesso a lounges exclusivos e muito mais.
+        </p>
+        <hr class="my-4">
+        <h3 class="text-primary">Como Funciona:</h3>
+        <ul class="list-unstyled lead text-start mx-auto" style="max-width: 600px;">
+            <li><i class="fa-solid fa-plus-circle me-2"></i> Acumule Pontos: Ganhe pontos por cada euro gasto em passagens e serviços.</li>
+            <li><i class="fa-solid fa-exchange-alt me-2"></i> Troque Recompensas: Utilize seus pontos para passagens, upgrades ou serviços adicionais.</li>
+            <li><i class="fa-solid fa-star me-2"></i> Níveis de Status:** Avance por níveis (Silver, Gold, Platinum) para desbloquear benefícios exclusivos.</li>
+            <li><i class="fa-solid fa-user-plus me-2"></i> Inscrição Gratuita: Cadastre-se agora e comece a acumular pontos na sua próxima viagem!</li>
+        </ul>
+        <hr class="my-4">
+        <p class="mt-4">
+            Viaje mais, ganhe mais! AeroPoints é a nossa forma de agradecer a sua preferência.
+        </p>
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg mt-3 animated-button">
+                <i class="fa-solid fa-user-plus"></i> Inscreva-se no AeroPoints
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Passageiro" asp-action="MeusAeroPoints" class="btn btn-primary btn-lg mt-3 animated-button">
+                <i class="fa-solid fa-user"></i> Ver Meus Pontos
+            </a>
+        }
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg mt-3 ms-2 animated-button">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Página Inicial
+        </a>
+    </div>
+</div>
+

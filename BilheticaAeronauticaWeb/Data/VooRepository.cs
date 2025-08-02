@@ -10,7 +10,7 @@ namespace BilheticaAeronauticaWeb.Data
    
     public class VooRepository : GenericRepository<Voo>, IVooRepository
     {
-        private readonly DataContext _context;
+        private new readonly DataContext _context;
 
         public VooRepository(DataContext context) : base(context)
         {
@@ -18,6 +18,8 @@ namespace BilheticaAeronauticaWeb.Data
 
 
         }
+
+      
 
         public new async Task DeleteAsync(Voo voo)
         {
@@ -115,6 +117,22 @@ namespace BilheticaAeronauticaWeb.Data
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<IEnumerable<Lugar>> GetLugaresByVooIdAsync(int vooId)
+        {
+            return await _context.Lugares
+                .Where(l => l.VooId == vooId)
+                .ToListAsync();
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Bilhete>> GetBilhetesByVooIdAsync(int vooId)
+        {
+            return await _context.Bilhetes.Where(b => b.VooId == vooId).ToListAsync();
+        }
 
 
     }

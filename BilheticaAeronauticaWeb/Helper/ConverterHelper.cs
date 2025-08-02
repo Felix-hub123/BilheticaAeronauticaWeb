@@ -2,13 +2,25 @@
 using BilheticaAeronauticaWeb.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SuperShop.Models;
 using System;
 using System.Collections.Generic;
 
 namespace BilheticaAeronauticaWeb.Helper
 {
+    /// <summary>
+    /// Helper para converter entre entidades do domínio e ViewModels,
+    /// facilitando o mapeamento em ambos os sentidos.
+    /// </summary>
     public class ConverterHelper : IConverterHelper
     {
+        /// <summary>
+        /// Converte um <see cref="AvioesViewModel"/> em entidade <see cref="Aviao"/>.
+        /// </summary>
+        /// <param name="model">ViewModel com dados do avião.</param>
+        /// <param name="ImageId">Identificador da imagem associada.</param>
+        /// <param name="isNew">Indica se a entidade é nova (para definir Id).</param>
+        /// <returns>Nova instância de <see cref="Aviao"/> com os dados do VM.</returns>
         public Aviao ToAviao(AvioesViewModel model, Guid ImageId, bool isNew)
         {
 
@@ -25,6 +37,8 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
+
+
         public AvioesViewModel ToAvioesViewModel(Aviao aviao)
         {
             return new AvioesViewModel
@@ -40,7 +54,13 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
-
+        /// <summary>
+        /// Converte uma <see cref="AeroportosViewModel"/> em entidade <see cref="Aeroporto"/>.
+        /// </summary>
+        /// <param name="model">ViewModel do aeroporto.</param>
+        /// <param name="ImageId">Identificador da imagem associada.</param>
+        /// <param name="isNew">Indica se é nova entidade para definir Id.</param>
+        /// <returns>Entidade <see cref="Aeroporto"/> criada a partir do ViewModel.</returns>
         public Aeroporto ToAeroporto(AeroportosViewModel model, Guid ImageId, bool isNew)
         {
             return new Aeroporto
@@ -54,6 +74,12 @@ namespace BilheticaAeronauticaWeb.Helper
             };
         }
 
+
+        /// <summary>
+        /// Converte entidade <see cref="Aeroporto"/> em <see cref="AeroportosViewModel"/>.
+        /// </summary>
+        /// <param name="aeroporto">Entidade aeroporto.</param>
+        /// <returns>ViewModel criado a partir da entidade.</returns>
         public AeroportosViewModel ToAeroportosViewModel(Aeroporto aeroporto)
         {
             return new AeroportosViewModel
@@ -85,6 +111,14 @@ namespace BilheticaAeronauticaWeb.Helper
             };
         }
 
+
+        /// <summary>
+        /// Converte um <see cref="PassageiroViewModel"/> em entidade <see cref="Passageiro"/>.
+        /// </summary>
+        /// <param name="model">ViewModel do passageiro.</param>
+        /// <param name="userId">Identificador do utilizador associado.</param>
+        /// <param name="isNew">Indica se é uma nova entidade para definir Id.</param>
+        /// <returns>Entidade Passageiro pronta para persistência.</returns>
         public PassageiroViewModel ToPassageirosViewModel(Passageiro passageiro)
         {
             return new PassageiroViewModel
@@ -103,7 +137,12 @@ namespace BilheticaAeronauticaWeb.Helper
 
 
 
-
+        /// <summary>
+        /// Converte um <see cref="VooViewModel"/> em entidade <see cref="Voo"/>.
+        /// </summary>
+        /// <param name="model">ViewModel do voo.</param>
+        /// <param name="isNew">Indica se é uma nova entidade para definir Id.</param>
+        /// <returns>Entidade Voo pronta para persistência.</returns>
         public Voo TooVoo(VooViewModel model, bool isNew)
         {
             return new Voo
@@ -116,6 +155,12 @@ namespace BilheticaAeronauticaWeb.Helper
             };
         }
 
+
+        /// <summary>
+        /// Converte entidade <see cref="Voo"/> para o respetivo <see cref="VooViewModel"/>.
+        /// </summary>
+        /// <param name="voo">Entidade voo.</param>
+        /// <returns>ViewModel contendo dados do voo.</returns>
         public VooViewModel ToVooViewModel(Voo voo)
         {
             return new VooViewModel
@@ -128,6 +173,13 @@ namespace BilheticaAeronauticaWeb.Helper
             };
         }
 
+
+        /// <summary>
+        /// Converte um <see cref="UserViewModel"/> em entidade <see cref="User"/>.
+        /// </summary>
+        /// <param name="model">ViewModel do utilizador (Funcionário).</param>
+        /// <param name="isNew">Indica se é uma nova entidade para gerar Id.</param>
+        /// <returns>Instância de <see cref="User"/> com os dados do ViewModel.</returns>
         public User ToFuncionario(UserViewModel model, bool isNew)
         {
             var user = new User
@@ -141,6 +193,12 @@ namespace BilheticaAeronauticaWeb.Helper
             return user;
         }
 
+
+        /// <summary>
+        /// Converte entidade <see cref="User"/> (Funcionário) em <see cref="UserViewModel"/>.
+        /// </summary>
+        /// <param name="funcionario">Entidade funcionário.</param>
+        /// <returns>ViewModel com os dados do funcionário.</returns>
         public UserViewModel ToUserViewModel(User funcionario)
         {
             return new UserViewModel
@@ -153,6 +211,9 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
+
+
+
         public void UpdateFuncionarioFromViewModel(User funcionario, UserViewModel model)
         {
             funcionario.Nome = model.Nome;
@@ -161,11 +222,15 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
-       
 
-      
-    
 
+
+
+        /// <summary>
+        /// Atualiza os dados do funcionário com base nos dados fornecidos no ViewModel.
+        /// </summary>
+        /// <param name="funcionario">Entidade funcionário a atualizar.</param>
+        /// <param name="model">ViewModel com os dados atualizados.</param>
         public Bilhete ToBilhete(BilheteViewModel model, bool isNew)
         {
             return new Bilhete
@@ -183,6 +248,12 @@ namespace BilheticaAeronauticaWeb.Helper
             };
         }
 
+
+        /// <summary>
+        /// Converte uma entidade <see cref="Bilhete"/> em <see cref="BilheteViewModel"/>.
+        /// </summary>
+        /// <param name="bilhete">Entidade bilhete.</param>
+        /// <returns>ViewModel correspondente ao bilhete.</returns>
         public BilheteViewModel ToBilheteViewModel(Bilhete bilhete)
         {
             return new BilheteViewModel
@@ -197,10 +268,21 @@ namespace BilheticaAeronauticaWeb.Helper
                 DataCompra = bilhete.DataReserva,
                 WasDeleted = bilhete.WasDeleted,
                 DataPartida = bilhete.Voo?.DataHoraPartida ?? DateTime.MinValue,
+                VooNumero = bilhete.Voo?.Numero,
+                OrigemNome = bilhete.Voo?.Origem?.Nome,
+                DestinoNome = bilhete.Voo?.Destino?.Nome,
+                LugarCodigo = bilhete.Lugar?.Codigo
 
             };
         }
 
+
+        /// <summary>
+        /// Converte um <see cref="BilheteViewModel"/> em entidade temporária <see cref="BilheteTemp"/>.
+        /// </summary>
+        /// <param name="model">ViewModel do bilhete.</param>
+        /// <param name="userId">Identificador do utilizador que criou a reserva temporária.</param>
+        /// <returns>Nova instância de <see cref="BilheteTemp"/>.</returns>
         public BilheteTemp ToBilheteTemp(BilheteViewModel model, string userId)
         {
             return new BilheteTemp
@@ -216,8 +298,12 @@ namespace BilheticaAeronauticaWeb.Helper
             };
         }
 
-      
 
+        /// <summary>
+        /// Atualiza o ViewModel de um administrador com os dados da entidade <see cref="User"/>.
+        /// </summary>
+        /// <param name="admin">Entidade administrador.</param>
+        /// <param name="model">ViewModel do administrador a atualizar.</param>
         public void ToAdminViewModel(User admin, UserViewModel model)
         {
             model.Id = admin.Id;
@@ -231,6 +317,13 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
+
+        /// <summary>
+        /// Atualiza a entidade <see cref="Bilhete"/> com os dados fornecidos no <see cref="BilheteViewModel"/>.
+        /// </summary>
+        /// <param name="bilhete">Bilhete a ser atualizado.</param>
+        /// <param name="model">ViewModel com dados atualizados.</param>
+        /// <returns>Bilhete atualizado.</returns>
         public Bilhete UpdateBilheteFromViewModel(Bilhete bilhete, BilheteViewModel model)
         {
             bilhete.VooId = model.VooId;
@@ -240,5 +333,26 @@ namespace BilheticaAeronauticaWeb.Helper
             bilhete.Valor = model.Valor;
             return bilhete;
         }
+
+
+
+
+        public RegisterNewUserViewModel ToRegisterNewUserViewModel(RegisterFuncionarioViewModel funcModel)
+        {
+            if (funcModel == null)
+                return null;
+
+            return new RegisterNewUserViewModel
+            {
+                Nome = funcModel.Nome,
+                Apelido = funcModel.Apelido,
+                Username = funcModel.Email,        
+                PhoneNumber = funcModel.PhoneNumber,
+
+                Password = null,
+                ConfirmPassword = null
+            };
+        }
+
     }
 }

@@ -7,17 +7,6 @@
       "type": "storage.azure",
       "connectionId": "Blob:ConnectionString1",
       "dynamicId": null
-    },
-    "storage2": {
-      "ignored": "true",
-      "type": "storage",
-      "connectionId": "Blob:ConnectionString"
-    },
-    "mssql1": {
-      "secretStore": "AzureAppSettings",
-      "type": "mssql.onprem",
-      "connectionId": "ConnectionStrings:DefaultConnection",
-      "dynamicId": null
     }
   }
 }

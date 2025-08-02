@@ -4,6 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+    /// <summary>
+    /// Representa um lugar assento em um avião, com código identificador, preço base, disponibilidade,
+    /// associação ao avião e opcionalmente a um voo específico.
+    /// Inclui propriedade para soft delete para remoção lógica do registo.
+    /// </summary>
     public class Lugar : IEntity
     {
         public int Id { get; set; }

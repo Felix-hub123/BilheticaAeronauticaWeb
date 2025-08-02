@@ -1,0 +1,37 @@
+﻿@model BilheticaAeronauticaWeb.Models.UserProfileImageViewModel
+
+@if (Model.IsAuthenticated)
+{
+    var displayMode = Model.DisplayMode;
+
+    @if (displayMode == "largeImage")
+    {
+        <div class="position-relative" style="height: 60px;">
+            <img src="@Model.ImageFullPath?v=@DateTime.Now.Ticks"
+                 class="user-profile-avatar user-profile-avatar--drop"
+                 alt="Foto de Perfil"
+                 onerror="this.onerror=null;this.src='/images/users/noimage.png';" />
+        </div>
+       
+    }
+    else if (displayMode == "nameAndDropdown")
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Olá @Model.FullName!
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                <li><a class="dropdown-item" asp-controller="Account" asp-action="EditProfile">Editar Perfil</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        <button type="submit" class="dropdown-item">
+                            <i class="fa-solid fa-sign-out-alt me-2"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+}
+

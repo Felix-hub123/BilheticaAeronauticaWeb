@@ -1,0 +1,20 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "404 - Página não encontrada";
+}
+
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 p-5">
+                <h1 class="display-1 text-danger mb-4">404</h1>
+                <h2 class="mb-3">Página não encontrada</h2>
+                <p class="lead mb-4">@ViewBag.ErrorMessage ?? "A página que procuraste não foi encontrada." </p>
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house-door-fill me-2"></i>Voltar à Página Inicial
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

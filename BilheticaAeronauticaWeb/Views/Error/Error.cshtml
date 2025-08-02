@@ -1,0 +1,27 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Erro inesperado";
+}
+
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger shadow-sm p-5">
+                <h1 class="display-4 text-danger mb-4">Oops! Algo correu mal.</h1>
+                <p class="lead mb-4">@ViewBag.ErrorMessage ?? "Ocorreu um erro inesperado no sistema. Por favor, tente novamente mais tarde." </p>
+
+                @if (!string.IsNullOrEmpty(ViewBag.Path))
+                {
+                    <p class="text-muted"><small>Em: @ViewBag.Path</small></p>
+                }
+
+                <a href="/" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-house-fill me-2"></i>Voltar à Página Inicial
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

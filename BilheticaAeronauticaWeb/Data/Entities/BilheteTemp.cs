@@ -3,6 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+    /// <summary>
+    /// Representa uma reserva temporária de bilhete,
+    /// contendo informações do passageiro, voo, lugar, preço unitário, quantidade,
+    /// extras opcionais (bagagem extra, refeição), data de criação,
+    /// indicações para exclusão lógica (soft delete) e identificadores de criação.
+    /// Utilizado para operações intermediárias antes da confirmação definitiva do bilhete.
+    /// </summary>
     public class BilheteTemp : IEntity
     {
         public int Id { get; set; }
@@ -32,8 +39,11 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         [Required]
         [Display(Name = "Foi Eliminado?")]
         public bool WasDeleted { get; set; }
-        public bool BagagemExtra { get; internal set; }
-        public bool Refeicao { get; internal set; }
-        public DateTime DataCriacao { get; internal set; }
+        public bool BagagemExtra { get; set; }
+        public bool Refeicao { get; set; }
+
+        public DateTime DataCriacao { get;  set; }
+
+        public DateTime DataReserva { get;  set; }
     }
 }

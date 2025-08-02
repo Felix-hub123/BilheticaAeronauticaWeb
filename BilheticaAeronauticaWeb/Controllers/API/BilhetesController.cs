@@ -1,5 +1,7 @@
 ﻿using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Helper;
+using BilheticaAeronauticaWeb.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers.API
 {
-    [Authorize(Roles = "Cliente")]
+
     [ApiController]
     [Route("api/[controller]")]
     public class BilhetesController : Controller
@@ -23,13 +25,24 @@ namespace BilheticaAeronauticaWeb.Controllers.API
             _userHelper = userHelper;
         }
 
+        // GET: api/bilhetes/futuros
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Passageiro")]
         [HttpGet("Futuros")]
         public async Task<IActionResult> GetVoosFuturos()
         {
+
             var user = await _userHelper.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Utilizador não autenticado." });
+            }
+
+
             var bilhetesFuturos = await _bilheteRepository.GetBilhetesFuturosByUserAsync(user.Id);
 
-            var lista = bilhetesFuturos.Select(b => new
+           
+            var lista = bilhetesFuturos.Select(b => new BilheteFuturoModel
             {
                 BilheteId = b.Id,
                 VooId = b.Voo.Id,

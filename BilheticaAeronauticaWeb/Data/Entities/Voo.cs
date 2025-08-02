@@ -5,6 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+    /// <summary>
+    /// Representa um voo agendado na aplicação, incluindo número do voo,
+    /// aeroportos de origem e destino, avião associado, datas/hora de partida e chegada,
+    /// preço base para o bilhete e lista de lugares disponíveis.
+    /// Implementa soft delete para remoção lógica.
+    /// </summary>
     public class Voo : IEntity
     {
         public int Id { get; set; }

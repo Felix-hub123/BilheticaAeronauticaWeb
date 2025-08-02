@@ -16,13 +16,15 @@ namespace BilheticaAeronauticaWeb.Models
                 .Must(BeFutureDate).WithMessage("A data/hora de partida deve ser futura.");
 
             RuleFor(v => v.DataHoraChegada)
-                .NotEmpty().WithMessage("A data/hora de chegada é obrigatória.");
+                .NotEmpty().WithMessage("A data/hora de chegada é obrigatória.")
+                .GreaterThan(v => v.DataHoraPartida).WithMessage("A data/hora de chegada deve ser posterior à de partida.");
 
             RuleFor(v => v.OrigemId)
                 .NotEmpty().WithMessage("Selecione a origem.");
 
             RuleFor(v => v.DestinoId)
-                .NotEmpty().WithMessage("Selecione o destino.");
+                .NotEmpty().WithMessage("Selecione o destino.")
+                .NotEqual(v => v.OrigemId).WithMessage("A origem e o destino não podem ser iguais.");
 
             RuleFor(v => v.AviaoId)
                 .NotEmpty().WithMessage("Selecione o avião.");
@@ -52,7 +54,7 @@ namespace BilheticaAeronauticaWeb.Models
 
         private bool BeFutureDate(DateTime date)
         {
-            return date > DateTime.Now;
+            return date > DateTime.UtcNow;
         }
     }
 }

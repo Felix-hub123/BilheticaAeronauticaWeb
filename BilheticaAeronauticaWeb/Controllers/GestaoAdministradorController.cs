@@ -8,7 +8,11 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
-{
+{/// <summary>
+ /// Controlador para gestão dos administradores da plataforma.
+ /// Permite listar, criar, editar e eliminar utilizadores com role "Admin".
+ /// Aplica regras de upload de imagem e usa UserManager para gestão segura de contas.
+ /// </summary>
     public class GestaoAdministradorController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -24,6 +28,11 @@ namespace BilheticaAeronauticaWeb.Controllers
             _converterHelper = converterHelper;
             _blobHelper = blobHelper;
         }
+
+        /// <summary>
+        /// Lista todos os administradores registados.
+        /// </summary>
+        /// <returns>View com a lista dos administradores.</returns>
         // GET: GestaoAdministradorController
         public async Task<ActionResult> Index()
         {
@@ -32,6 +41,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Mostra detalhes de um administrador específico.
+        /// </summary>
+        /// <param name="id">ID do utilizador administrador.</param>
+        /// <returns>View com os detalhes ou NotFound se não existir.</returns>
         // GET: GestaoAdministradorController/Details/5
         public async Task<ActionResult> Details(string id)
         {
@@ -43,12 +58,26 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+
+        /// <summary>
+        /// Exibe o formulário para criação de um novo administrador.
+        /// </summary>
+        /// <returns>View para criar administrador.</returns>
         // GET: GestaoAdministradorController/Create
         public ActionResult Create()
         {
             return View();
         }
 
+
+
+
+        /// <summary>
+        /// Recebe dados do formulário para criar novo administrador.
+        /// Faz upload da imagem e atribui o role "Admin" ao utilizador criado.
+        /// </summary>
+        /// <param name="model">ViewModel com dados do novo administrador.</param>
+        /// <returns>Redireciona para Index em sucesso ou retorna ao formulário 
         // POST: GestaoAdministradorController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -82,6 +111,14 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+
+
+
+        /// <summary>
+        /// Exibe o formulário para editar administrador existente.
+        /// </summary>
+        /// <param name="id">ID do administrador.</param>
+        /// <returns>View para edição ou página de erro personalizada se não encontrado.</returns>
         // GET: GestaoAdministradorController/Edit/5
         public async Task<ActionResult> Edit(string id)
         {
@@ -95,6 +132,14 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+
+
+        /// <summary>
+        /// Recebe dados para atualizar informações do administrador.
+        /// Faz upload da nova imagem se fornecida.
+        /// </summary>
+        /// <param name="model">ViewModel com dados atualizados.</param>
+        /// <returns>Redireciona para index ou retorna view com erros.</returns>
         // POST: GestaoAdministradorController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -131,6 +176,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Exibe confirmação para eliminar administrador.
+        /// </summary>
+        /// <param name="id">ID do administrador.</param>
+        /// <returns>View de confirmação ou página de erro se não encontrado.</returns>
         // GET: GestaoAdministradorController/Delete/5
         public async Task<ActionResult> Delete(string id)
         {
@@ -157,6 +208,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Remove o administrador da base de dados.
+        /// </summary>
+        /// <param name="id">ID do administrador a eliminar.</param>
+        /// <returns>Redireciona para index ou retorna view com erro.</returns>
         // POST: GestaoAdministradorController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]

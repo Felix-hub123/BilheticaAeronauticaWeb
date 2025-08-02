@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Desconto de Verão";
+}
+
+<div class="container mt-5">
+    <div class="jumbotron bg-light p-5 rounded shadow-sm text-center">
+        <h1 class="display-4 welcome-title">Desconto de Verão: 20% OFF!</h1>
+        <p class="lead mt-4">
+            O verão está a chegar e a AeroTickets tem uma oferta imperdível para você! Aproveite <strong>20% de desconto</strong> em voos selecionados para destinos incríveis, perfeitos para as suas férias. Seja para relaxar numa praia paradisíaca ou explorar uma cidade vibrante, temos a opção certa para si.
+        </p>
+        <hr class="my-4">
+        <h3 class="text-primary">Condições da Promoção:</h3>
+        <ul class="list-unstyled lead text-start mx-auto" style="max-width: 600px;">
+            <li><i class="fa-solid fa-percent me-2"></i> Desconto: 20% sobre o valor da passagem (somente voo).</li>
+            <li><i class="fa-solid fa-calendar-day me-2"></i> Período de Venda:** De 22 de Julho a 31 de Agosto de 2025.</li>
+            <li><i class="fa-solid fa-plane-departure me-2"></i> Período de Voo:** De 1 de Setembro a 30 de Novembro de 2025.</li>
+            <li><i class="fa-solid fa-route me-2"></i> **Destinos: Selecionados (consulte na pesquisa de voos).</li>
+            <li><i class="fa-solid fa-user-check me-2"></i> **Aplicável a: Todos os tipos de passageiro.</li>
+            <li><i class="fa-solid fa-info-circle me-2"></i> **Como aplicar: O desconto será automaticamente aplicado em voos elegíveis.</li>
+        </ul>
+        <hr class="my-4">
+        <p class="mt-4">
+            Não perca esta oportunidade de voar mais e gastar menos! O número de lugares com desconto é limitado.
+        </p>
+        <a asp-controller="Voo" asp-action="Pesquisa" class="btn btn-success btn-lg mt-3 animated-button">
+            <i class="fa-solid fa-tags"></i> Encontrar Voos com Desconto
+        </a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg mt-3 ms-2 animated-button">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Página Inicial
+        </a>
+    </div>
+</div>
+

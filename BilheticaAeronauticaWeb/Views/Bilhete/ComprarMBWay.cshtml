@@ -1,0 +1,31 @@
+﻿@model PagamentoMbwayViewModel
+
+<h2>Comprar Bilhete via MB WAY</h2>
+
+<form asp-action="ComprarMBWay" asp-controller="Bilhete" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="NumeroTelemovel" class="form-label">Número de Telemóvel MB WAY</label>
+        <input asp-for="NumeroTelemovel" class="form-control" placeholder="Insira o número" />
+        <span asp-validation-for="NumeroTelemovel" class="text-danger"></span>
+    </div>
+
+    <div>
+        <strong>Voo:</strong> @Model.VooId <br />
+        <strong>Lugar:</strong> @Model.LugarId <br />
+        <strong>Valor:</strong> @Model.Valor.ToString("C")
+    </div>
+
+    <input asp-for="VooId" type="hidden" />
+    <input asp-for="LugarId" type="hidden" />
+    <input asp-for="Valor" type="hidden" />
+    <input asp-for="BagagemExtra" type="hidden" />
+    <input asp-for="Refeicao" type="hidden" />
+
+    <button type="submit" class="btn btn-primary">Confirmar Compra</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

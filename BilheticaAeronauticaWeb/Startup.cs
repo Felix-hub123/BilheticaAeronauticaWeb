@@ -5,7 +5,10 @@ using Azure.Storage.Queues;
 using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
 using BilheticaAeronauticaWeb.Helper;
+using BilheticaAeronauticaWeb.Models;
 using BilheticaAeronauticaWeb.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -17,6 +20,7 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using MudBlazor.Services;
 using Rotativa.AspNetCore;
 using SendGrid.Helpers.Mail;
@@ -26,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb
@@ -60,7 +65,23 @@ namespace BilheticaAeronauticaWeb
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
 
-          
+            services.AddAuthentication()
+              .AddCookie()
+              .AddJwtBearer(cfg =>
+              {
+                  cfg.TokenValidationParameters = new TokenValidationParameters
+                  {
+                      ValidateIssuer = true,
+                      ValidateAudience = true,
+                      ValidateLifetime = true,
+                      ValidateIssuerSigningKey = true,
+                      ValidIssuer = Configuration["Tokens:Issuer"],
+                      ValidAudience = Configuration["Tokens:Audience"],
+                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
+                  };
+              });
+
+
             services.AddRazorPages();
             services.AddControllersWithViews();
             services.AddScoped<IUserHelper, UserHelper>();
@@ -79,6 +100,15 @@ namespace BilheticaAeronauticaWeb
             services.AddScoped<IEMailHelper, EMailHelper>();
             services.AddMudServices();
             services.AddSyncfusionBlazor();
+            services.AddHttpContextAccessor();
+            services.AddControllersWithViews();
+            services.AddFluentValidationAutoValidation();
+            services.AddFluentValidationClientsideAdapters();
+            services.AddScoped<SoftDeleteInterceptor>();
+            services.AddValidatorsFromAssemblyContaining<VooViewModelValidator>();
+
+
+
             services.Configure<RequestLocalizationOptions>(options =>
              {
                 var supportedCultures = new[] { new CultureInfo("pt-PT") };
@@ -90,7 +120,7 @@ namespace BilheticaAeronauticaWeb
 
             services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/Account/NotAuthorized";
+                options.LoginPath = "/Account/Login";
                 options.AccessDeniedPath = "/Account/NotAuthorized";
             });
 
@@ -108,9 +138,12 @@ namespace BilheticaAeronauticaWeb
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error/Error");
                 app.UseHsts();
             }
+
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
            
@@ -131,11 +164,6 @@ namespace BilheticaAeronauticaWeb
             });
 
 
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                var seeder = scope.ServiceProvider.GetRequiredService<SeedDb>();
-                seeder.SeedAsync().Wait();
-            }
         }
     }
 }

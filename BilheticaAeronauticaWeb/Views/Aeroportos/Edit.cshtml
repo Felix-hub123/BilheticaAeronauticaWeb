@@ -12,8 +12,22 @@
     <div class="col-md-6">
         <div class="card shadow-sm mb-4">
             <div class="card-body">
+
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert alert-danger">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>@error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+                }
+
                 <form asp-action="Edit" enctype="multipart/form-data" autocomplete="off">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                     <input type="hidden" asp-for="Id" />
 
                     <div class="mb-3">
@@ -21,26 +35,31 @@
                         <input asp-for="Nome" class="form-control" placeholder="Nome do aeroporto" />
                         <span asp-validation-for="Nome" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="Cidade" class="form-label"><i class="fa-solid fa-city"></i> Cidade</label>
                         <input asp-for="Cidade" class="form-control" placeholder="Cidade" />
                         <span asp-validation-for="Cidade" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="Pais" class="form-label"><i class="fa-solid fa-earth-europe"></i> País</label>
                         <input asp-for="Pais" class="form-control" placeholder="País" />
                         <span asp-validation-for="Pais" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="IATA" class="form-label"><i class="fa-solid fa-code"></i> Código IATA</label>
                         <input asp-for="IATA" class="form-control" placeholder="Ex: LIS" maxlength="3" />
                         <span asp-validation-for="IATA" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
                         <label asp-for="ImageFile" class="form-label"><i class="fa-solid fa-image"></i> Nova Imagem</label>
                         <input asp-for="ImageFile" class="form-control" type="file" />
                         <span asp-validation-for="ImageFile" class="text-danger"></span>
                     </div>
+
                     <div class="d-flex justify-content-between">
                         <button type="submit" class="btn btn-success">
                             <i class="fa-solid fa-floppy-disk"></i> Guardar
@@ -50,20 +69,31 @@
                         </a>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
+
+ 
     <div class="col-md-6 d-flex flex-column align-items-center">
         <div class="mb-2 fw-bold">
             <i class="fa-solid fa-image"></i> Imagem Atual
         </div>
-        <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do aeroporto" class="img-thumbnail mb-3" style="max-width: 300px; height: auto;" />
+        @if (!string.IsNullOrEmpty(Model.ImageFullPath))
+        {
+            <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do aeroporto" class="img-thumbnail mb-3" style="max-width: 300px; height: auto;" />
+        }
+        else
+        {
+            <div class="alert alert-secondary mb-3" style="max-width: 300px; text-align:center;">
+                Sem imagem disponível
+            </div>
+        }
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }
+
 

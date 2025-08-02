@@ -4,6 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BilheticaAeronauticaWeb.Models
 {
+    /// <summary>
+    /// ViewModel usado para representar e validar os dados de um passageiro,
+    /// incluindo informações pessoais, documentos de identificação e imagem opcional.
+    /// </summary>
     public class PassageiroViewModel
     {
         public int Id { get; set; }
@@ -29,6 +33,6 @@ namespace BilheticaAeronauticaWeb.Models
 
         [Display(Name = "Image")]
         public IFormFile ImageFile { get; set; }
-        public Guid ImageId { get; internal set; }
+        public Guid ImageId { get;  set; }
     }
 }

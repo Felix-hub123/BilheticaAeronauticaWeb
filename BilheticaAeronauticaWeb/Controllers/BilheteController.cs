@@ -10,10 +10,18 @@ using Rotativa.AspNetCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
+
+    /// <summary>
+    /// Controlador responsável pela gestão dos bilhetes.
+    /// Implementa funcionalidades de consulta, histórico, reservas temporárias,
+    /// compra, pagamento, cancelamento e edição de bilhetes.
+    /// Aplica regras de permissão conforme roles e proprietário do bilhete.
+    /// </summary>
     public class BilheteController : Controller
     {
         private readonly IBilheteRepository _bilheteRepository;
@@ -44,12 +52,23 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
+        /// <summary>
+        /// Lista todos os bilhetes (acesso restrito a Admin e Funcionário).
+        /// </summary>
+
         [Authorize(Roles = "Admin,Funcionario")]
         public async Task<IActionResult> Index()
         {
             var bilhetes = await _bilheteRepository.GetAllBilhetesAsync();
             return View(bilhetes);
         }
+
+        /// <summary>
+        /// Exibe os detalhes de um aeroporto específico.
+        /// </summary>
+        /// <param name="id">ID do aeroporto a consultar.</param>
+        /// <returns>Retorna a View com os detalhes do aeroporto se encontrado, 
+        /// ou retorna uma página de erro personalizada se não encontrado.</returns>
 
         [Authorize(Roles = "Passageiro,Admin,Funcionario")]
         public async Task<IActionResult> Detalhes(int? id)
@@ -78,7 +97,10 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(bilhete);
         }
 
-
+        /// <summary>
+        /// Retorna JSON com os voos futuros reservados pelo cliente atual.
+        /// </summary>
+        /// <returns>Lista JSON de voos futuros para o cliente autenticado.</returns>
         [HttpGet("Futuros")]
         public async Task<IActionResult> GetVoosFuturos()
         {
@@ -101,7 +123,10 @@ namespace BilheticaAeronauticaWeb.Controllers
             return Ok(lista);
         }
 
-
+        /// <summary>
+        /// Apresenta o carrinho de reservas temporárias do utilizador autenticado.
+        /// </summary>
+        /// <returns>View com reservas temporárias do cliente.</returns>
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> Carrinho()
         {
@@ -111,7 +136,11 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-    
+        /// <summary>
+        /// Exibe o formulário para adicionar uma nova reserva.
+        /// Disponível apenas para Passageiros autenticados.
+        /// </summary>
+        /// <returns>View com formulário e listas de voos disponíveis.</returns>
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> AdicionarReserva()
         {
@@ -141,22 +170,13 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+              
 
-
-
-        [HttpPost]
-        [Authorize(Roles = "Passageiro")]
-        public async Task<IActionResult> ComprarSelecionado(int idBilheteSelecionado)
-        {
-            var user = await _userHelper.GetUserAsync(User);
-
-            var sucesso = await _bilheteRepository.ConfirmBilheteTempAsync(user.Id, idBilheteSelecionado);
-            if (sucesso)
-                return RedirectToAction("Historico");
-            TempData["ErrorMessage"] = "Não foi possível confirmar o bilhete. Verifique o seu carrinho.";
-            return RedirectToAction("Carrinho");
-        }
-
+        /// <summary>
+        /// Edita um bilhete existente (apenas para Admin).
+        /// </summary>
+        /// <param name="model">Dados atualizados do bilhete</param>
+        /// <returns>Redirect à listagem ou view com erros</returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Editar(BilheteViewModel model)
@@ -179,7 +199,12 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Adiciona uma reserva ao carrinho (Bilhete temporário).
+        /// Valida datas e disponibilidade antes de reservar.
+        /// </summary>
+        /// <param name="model">Dados da reserva pretendida</param>
+        /// <returns>Redirect ao carrinho ou view com erros</returns>
         [HttpPost]
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> AdicionarReserva(BilheteViewModel model)
@@ -190,9 +215,7 @@ namespace BilheticaAeronauticaWeb.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-
                 ViewBag.ErrosValidacao = erros;
-
                 await PreencherSelectLists(model);
                 return View(model);
             }
@@ -200,6 +223,14 @@ namespace BilheticaAeronauticaWeb.Controllers
             var user = await _userHelper.GetUserAsync(User);
             var lugar = await _bilheteService.GetLugarByIdAsync(model.LugarId);
             var voo = await _bilheteService.GetVooByIdAsync(model.VooId);
+
+            
+            if (voo == null || voo.DataHoraPartida <= DateTime.Now)
+            {
+                ModelState.AddModelError("", "Não é possível reservar lugar em voos que já partiram.");
+                await PreencherSelectLists(model);
+                return View(model);
+            }
 
             var lugarOcupado = !await _bilheteService.LugarDisponivelAsync(model.VooId, model.LugarId);
             if (lugarOcupado)
@@ -226,7 +257,11 @@ namespace BilheticaAeronauticaWeb.Controllers
 
 
 
-
+        /// <summary>
+        /// Obtém os lugares disponíveis para determinado voo.
+        /// </summary>
+        /// <param name="vooId">ID do voo</param>
+        /// <returns>Lista JSON de lugares disponíveis</returns>
         [HttpGet]
         public async Task<JsonResult> LugaresDisponiveis(int vooId)
         {
@@ -234,6 +269,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return Json(lugares);
         }
 
+
+        /// <summary>
+        /// Remove uma reserva temporária do carrinho.
+        /// </summary>
+        /// <param name="id">ID da reserva temporária</param>
+        /// <returns>Redirect ao carrinho</returns>
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> RemoverReserva(int? id)
         {
@@ -247,11 +288,23 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Finaliza a compra de todos os bilhetes presentes no carrinho.
+        /// </summary>
+        /// <returns>Redirect ao histórico ou carrinho com erro</returns>
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> Comprar()
         {
             var user = await _userHelper.GetUserAsync(User);
+            var bilhetes = await _bilheteRepository.GetBilheteTempsByUserAsync(user.Id);
+
+           
+            if (bilhetes.Any(b => b.Voo.DataHoraPartida <= DateTime.Now))
+            {
+                TempData["ErrorMessage"] = "Um ou mais bilhetes no carrinho referem voos que já partiram. Remova-os para prosseguir.";
+                return RedirectToAction("Carrinho");
+            }
+
             var sucesso = await _bilheteRepository.ConfirmBilheteAsync(user.Id);
             if (sucesso)
                 return RedirectToAction("Historico");
@@ -260,6 +313,11 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
+
+        /// <summary>
+        /// Exibe o historial completo de bilhetes do utilizador.
+        /// </summary>
+        /// <returns>View com histórico de viagens divididas entre futuros e passados.</returns>
         [Authorize(Roles = "Passageiro,Admin,Funcionario")]
         public async Task<IActionResult> Historico()
         {
@@ -282,6 +340,13 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
+
+
+        /// <summary>
+        /// Permite download do bilhete em formato PDF.
+        /// </summary>
+        /// <param name="id">ID do bilhete</param>
+        /// <returns>Arquivo PDF do bilhete para download</returns>
         public async Task<IActionResult> DownloadPdf(int id)
         {
             var bilhete = await _bilheteRepository.GetBilheteAsync(id);
@@ -297,7 +362,11 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Exibe formulário para edição de bilhete (apenas Admin).
+        /// </summary>
+        /// <param name="id">ID do bilhete</param>
+        /// <returns>View para edição ou erro.</returns>
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Editar(int? id)
         {
@@ -320,7 +389,11 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
-
+        /// <summary>
+        /// Anula um bilhete através de soft delete (apenas Admin).
+        /// </summary>
+        /// <param name="id">ID do bilhete</param>
+        /// <returns>Redirect à listagem</returns>
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Anular(int? id)
         {
@@ -330,7 +403,14 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction("Index");
         }
 
-
+        /// <summary>
+        /// Calcula o preço do bilhete com base no voo, lugar e extras.
+        /// </summary>
+        /// <param name="vooId">ID do voo</param>
+        /// <param name="lugarId">ID do lugar</param>
+        /// <param name="bagagemExtra">Indica se há bagagem extra</param>
+        /// <param name="refeicao">Indica se há refeição</param>
+        /// <returns>Preço calculado em decimal JSON</returns>
         [HttpGet]
         public async Task<JsonResult> CalcularPreco(int vooId, int lugarId, bool bagagemExtra, bool refeicao)
         {
@@ -340,6 +420,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return Json(preco);
         }
 
+
+        /// <summary>
+        /// Preenche as listas de voos e lugares para utilização nas Views.
+        /// </summary>
+        /// <param name="model">ViewModel para preencher as coleções</param>
+        /// <returns>Task assíncrona</returns>
         private async Task PreencherSelectLists(BilheteViewModel model)
         {
             model.Voos = await _bilheteService.GetVoosSelectListAsync();
@@ -376,52 +462,64 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction("Historico");
         }
 
-        [Authorize(Roles = "Passageiro")]
-        [HttpGet]
-        public async Task<IActionResult> Pagamento(int idBilhete)
-        {
-            var bilhete = await _bilheteRepository.GetBilheteAsync(idBilhete);
-            if (bilhete == null)
-                return NotFound();
 
-            var model = new PagamentoViewModel
-            {
-                BilheteId = idBilhete,
-                Valor = bilhete.Valor
-            };
-            return View(model);
-        }
 
-        [Authorize(Roles = "Passageiro")]
+
         [HttpPost]
-        public async Task<IActionResult> Pagamento(PagamentoViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ComprarSelecionado(int idBilheteSelecionado, string numeroTelemovel)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            
-            bool pagamentoSucesso = model.NumeroCartao.StartsWith("4"); 
-
-            if (!pagamentoSucesso)
+            var user = await _userHelper.GetUserAsync(User);
+            if (user == null)
             {
-                ModelState.AddModelError("", "Pagamento recusado. Verifique os dados do cartão.");
-                return View(model);
+                TempData["Error"] = "Usuário não autenticado.";
+                return RedirectToAction("Carrinho");
             }
 
-           
-            await _bilheteRepository.ConfirmarPagamentoEBilheteAsync(model.BilheteId);
+            // Validação do número de telemóvel (9 dígitos)
+            if (string.IsNullOrWhiteSpace(numeroTelemovel) || !Regex.IsMatch(numeroTelemovel, @"^\d{9}$"))
+            {
+                TempData["Error"] = "Número de telemóvel inválido. Insira um número com 9 dígitos.";
+                return RedirectToAction("Carrinho");
+            }
 
-            
-            var bilhete = await _bilheteRepository.GetBilheteAsync(model.BilheteId);
-            var passageiro = await _passageiroRepository.GetByIdAsync(bilhete.PassageiroId);
+            // Confirmar bilhete temporário selecionado
+            bool confirmado = await _bilheteRepository.ConfirmBilheteTempAsync(user.Id, idBilheteSelecionado);
+            if (!confirmado)
+            {
+                TempData["Error"] = "Bilhete inválido ou não encontrado.";
+                return RedirectToAction("Carrinho");
+            }
 
-            TempData["SuccessMessage"] = "Pagamento efetuado e bilhete enviado para o seu email!";
-            return RedirectToAction("Historico");
+            // Simular espera do pagamento MB WAY, 3s de delay para parecer real
+            await Task.Delay(3000);
 
+            // Simula pagamento aprovado
+            bool pago = true;
+            if (!pago)
+            {
+                TempData["Error"] = "Falha no pagamento. Por favor, tente novamente.";
+                return RedirectToAction("Carrinho");
+            }
 
+            TempData["Mensagem"] = "Pagamento com sucesso! Bilhete confirmado.";
+            return RedirectToAction("CompraSucesso");
         }
 
 
+
+
+
+
+
+        [HttpGet]
+        public IActionResult CompraSucesso()
+        {
+            ViewBag.Mensagem = TempData["Mensagem"];
+            return View();
+        }
+
+       
 
 
 

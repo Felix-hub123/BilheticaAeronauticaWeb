@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Detalhes da Nova Rota";
+}
+
+<div class="container mt-5">
+    <div class="jumbotron bg-light p-5 rounded shadow-sm text-center">
+        <h1 class="display-4 welcome-title">Lisboa - Rio de Janeiro: Sua Nova Rota!</h1>
+        <p class="lead mt-4">
+            Estamos entusiasmados em anunciar a mais recente adição à nossa rede de destinos: voos diretos de Lisboa para o vibrante Rio de Janeiro! Prepare-se para explorar as maravilhas da Cidade Maravilhosa, desde as praias icónicas de Copacabana e Ipanema até o majestoso Cristo Redentor e o Pão de Açúcar.
+        </p>
+        <p class="mt-4">
+            A AeroTickets compromete-se a oferecer uma experiência de voo superior, com o conforto e a segurança que você merece. Nossos voos para o Rio de Janeiro serão operados com aeronaves modernas, garantindo uma viagem tranquila e agradável.
+        </p>
+        <hr class="my-4">
+        <h3 class="text-primary">Informações da Rota:</h3>
+        <ul class="list-unstyled lead">
+            <li><i class="fa-solid fa-calendar-alt me-2"></i> Início das Operações: 1 de Outubro de 2025</li>
+            <li><i class="fa-solid fa-plane me-2"></i> Frequência: 3 vezes por semana (Terças, Quintas e Sábados)</li>
+            <li><i class="fa-solid fa-clock me-2"></i> Duração Estimada do Voo:** Aproximadamente 10 horas</li>
+        </ul>
+        <hr class="my-4">
+        <p class="mt-4">
+            Não perca a oportunidade de explorar um dos destinos mais procurados do mundo. Reserve já o seu bilhete e embarque nesta aventura com a AeroTickets!
+        </p>
+        <a asp-controller="Voo" asp-action="Pesquisa" class="btn btn-primary btn-lg mt-3 animated-button">
+            <i class="fa-solid fa-plane-departure"></i> Pesquisar Voos para o Rio
+        </a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg mt-3 ms-2 animated-button">
+            <i class="fa-solid fa-arrow-left"></i> Voltar à Página Inicial
+        </a>
+    </div>
+</div>

@@ -6,9 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BilheticaAeronauticaWeb.Data
 {
+    /// <summary>
+    /// Repositório genérico para operações básicas CRUD em entidades que implementam IEntity.
+    /// Utiliza Entity Framework Core para acesso assíncrono e tracking otimizado.
+    /// </summary>
+    /// <typeparam name="T">Tipo da entidade (classe) que implementa IEntity.</typeparam>
     public class GenericRepository<T> : IGenericRepository<T> where T : class, IEntity
     {
-        private readonly DataContext _context;
+        protected readonly DataContext _context;
 
         public GenericRepository(DataContext context)
         {

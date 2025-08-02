@@ -1,11 +1,15 @@
-﻿@await Html.PartialAsync("_GraficoIndicadores")
+﻿@using BilheticaAeronauticaWeb.Data.Entities
+ @using Syncfusion.EJ2.Navigations 
+ @using Syncfusion.EJ2.CircularGauge 
 
-@using BilheticaAeronauticaWeb.Data.Entities
 @{
     ViewData["Title"] = "Bem-vindo à AeroTicket";
 }
 
 <link rel="stylesheet" href="~/css/site-home.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" /> 
+
 
 <div class="jumbotron bg-light p-5 rounded shadow-sm text-center welcome-section">
     <h1 class="display-4 welcome-title">Bem-vindo à AEROTICKET!</h1>
@@ -24,7 +28,7 @@
             </a>
         </p>
     }
-    else if (User.IsInRole("Administrador"))
+    else if (User.IsInRole("Admin"))
     {
         <a class="btn btn-dark btn-lg animated-button" href="@Url.Action("Index", "Admin")">
             <i class="fa-solid fa-user-shield"></i> Painel de Administração
@@ -45,29 +49,109 @@
 </div>
 
 
-
 <a asp-controller="Voo" asp-action="Pesquisa" class="btn btn-primary btn-primary-custom btn-grow btn-shadow">
     <i class="fa-solid fa-plane"></i> Pesquisar Voos
 </a>
 
+<hr class="my-5" />
+
+
+<section class="kpi-section text-center mt-5 mb-5 fade-slide-in">
+    <h2 class="section-title">Estatísticas Rápidas da <span class="highlight">AeroTickets</span></h2>
+    <p class="section-subtitle">Fique a par dos nossos números e conquistas</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-4 col-sm-6 mb-4">
+            <ejs-card>
+                <e-card-header>
+                    <e-card-header-title><i class="fa-solid fa-plane-departure me-2 text-primary"></i> Voos Ativos</e-card-header-title>
+                </e-card-header>
+                <e-card-content>
+                    <h3 class="display-4 fw-bold text-success">155</h3> 
+                    <p class="text-muted">voos diários operacionais</p>
+                </e-card-content>
+            </ejs-card>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <ejs-card>
+                <e-card-header>
+                    <e-card-header-title><i class="fa-solid fa-ticket-alt me-2 text-warning"></i> Bilhetes Vendidos</e-card-header-title>
+                </e-card-header>
+                <e-card-content>
+                    <h3 class="display-4 fw-bold text-success">13.2K</h3> 
+                    <p class="text-muted">bilhetes nos últimos 30 dias</p>
+                </e-card-content>
+            </ejs-card>
+        </div>
+
+        <div class="col-md-4 col-sm-6 mb-4">
+            <ejs-card>
+                <e-card-header>
+                    <e-card-header-title><i class="fa-solid fa-map-marked-alt me-2 text-info"></i> Destinos</e-card-header-title>
+                </e-card-header>
+                <e-card-content>
+                    <h3 class="display-4 fw-bold text-success">48</h3> 
+                    <p class="text-muted">cidades globais alcançadas</p>
+                </e-card-content>
+            </ejs-card>
+        </div>
+    </div>
+</section>
+
+<hr class="my-5" />
+
+<section class="gauge-section text-center mt-5 mb-5 fade-slide-in">
+    <h2 class="section-title">Desempenho <span class="highlight">AeroTickets</span></h2>
+    <p class="section-subtitle">O nosso compromisso com a excelência em números</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <ejs-radialgauge id="gaugePontualidade" height="250px" width="250px">
+                <e-radialgauge-axes>
+                    <e-radialgauge-axis minimum="0" maximum="100" startAngle="200" endAngle="140" lineBreakAngle="0">
+                        <e-radialgauge-axis-pointers>
+                            <e-radialgauge-pointer value="96" type="Needle" animation-enable="true" color="#1196ff" radius="80%" pointerWidth="7"></e-radialgauge-pointer> 
+                        </e-radialgauge-axis-pointers>
+                        <e-radialgauge-axis-annotations>
+                            <e-radialgauge-annotation content='<div style="color:#1196ff; font-size:20px; font-weight:bold;">96%</div>'
+                                                      angle="180" zIndex="1" x="0" y="0"></e-radialgauge-annotation>
+                            <e-radialgauge-annotation content='<div style="color:#666; font-size:14px; margin-top:10px;">Taxa de Pontualidade</div>'
+                                                      angle="180" zIndex="1" x="0" y="30"></e-radialgauge-annotation>
+                        </e-radialgauge-axis-annotations>
+                        <e-radialgauge-axis-ranges>
+                            <e-radialgauge-range start="0" end="70" color="#e04040"></e-radialgauge-range>
+                            <e-radialgauge-range start="70" end="90" color="#ffdd00"></e-radialgauge-range>
+                            <e-radialgauge-range start="90" end="100" color="#30B32D"></e-radialgauge-range>
+                        </e-radialgauge-axis-ranges>
+                    </e-radialgauge-axis>
+                </e-radialgauge-axes>
+            </ejs-radialgauge>
+        </div>
+    </div>
+</section>
+
+<hr class="my-5" />
+
+
 <div id="mainCarousel" class="carousel slide mt-5 shadow rounded position-relative" data-bs-ride="carousel">
     <div class="carousel-inner">
         <div class="carousel-item active">
-            <img src="~/images/carrossel/voo1.jpg" class="d-block w-100" alt="Imagem 1" />
+            <img src="~/images/carrossel/voo1.jpg" class="d-block w-100" alt="Imagem 1" loading="lazy" />
             <div class="carousel-caption-custom">
                 <h2>Viaje com Segurança</h2>
                 <p>Conforto, pontualidade e atendimento premium com a AeroTickets.</p>
             </div>
         </div>
         <div class="carousel-item">
-            <img src="~/images/carrossel/voo2.jpg" class="d-block w-100" alt="Imagem 2" />
+            <img src="~/images/carrossel/voo2.jpg" class="d-block w-100" alt="Imagem 2" loading="lazy" />
             <div class="carousel-caption-custom">
                 <h2>Descubra Novos Destinos</h2>
                 <p>Conectando Portugal ao mundo com excelência.</p>
             </div>
         </div>
         <div class="carousel-item">
-            <img src="~/images/carrossel/voo3.jpg" class="d-block w-100" alt="Imagem 3" />
+            <img src="~/images/carrossel/voo3.jpg" class="d-block w-100" alt="Imagem 3" loading="lazy" />
             <div class="carousel-caption-custom">
                 <h2>Compromisso com Você</h2>
                 <p>Experiência de voo que supera expectativas.</p>
@@ -92,20 +176,115 @@
 
     <div class="row justify-content-center mt-4">
         <div class="col-md-3 col-sm-6 benefit-item">
-            <div class="benefit-icon bg-primary"></div>
+            <div class="benefit-icon">
+                <i class="fa-solid fa-shield-alt fa-3x text-primary"></i>
+            </div>
             <h5 class="benefit-title">Segurança Garantida</h5>
             <p class="benefit-text">Frota moderna e manutenção rigorosa para sua tranquilidade</p>
         </div>
         <div class="col-md-3 col-sm-6 benefit-item">
-            <div class="benefit-icon bg-primary"></div>
+            <div class="benefit-icon">
+                <i class="fa-solid fa-clock fa-3x text-primary"></i>
+            </div>
             <h5 class="benefit-title">Pontualidade</h5>
-            <p class="benefit-text">95% dos nossos voos chegam no horário programado</p>
+            <p class="benefit-text">96% dos nossos voos chegam no horário programado</p> 
         </div>
         <div class="col-md-3 col-sm-6 benefit-item">
-            <div class="benefit-icon bg-primary"></div>
+            <div class="benefit-icon">
+                <i class="fa-solid fa-headset fa-3x text-primary"></i>
+            </div>
             <h5 class="benefit-title">Atendimento Premium</h5>
             <p class="benefit-text">Equipe dedicada ao seu conforto e satisfação</p>
         </div>
     </div>
 </section>
 
+<hr class="my-5" />
+
+
+<section class="testimonials-section text-center mt-5 mb-5 fade-slide-in">
+    <h2 class="section-title">O que os nossos <span class="highlight">clientes dizem</span></h2>
+    <p class="section-subtitle">Histórias de viagens inesquecíveis com a AeroTickets</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <div id="testimonialsCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <blockquote class="blockquote">
+                            <p class="mb-0">"A AeroTickets tornou a minha viagem de sonho uma realidade! Fácil de usar e com excelente suporte ao cliente."</p>
+                            <footer class="blockquote-footer mt-2">Maria Silva, <cite title="Source Title">Viajante Frequente</cite></footer>
+                        </blockquote>
+                    </div>
+                    <div class="carousel-item">
+                        <blockquote class="blockquote">
+                            <p class="mb-0">"Pontualidade impecável e o atendimento a bordo foi fantástico. Recomendo a todos!"</p>
+                            <footer class="blockquote-footer mt-2">João Santos, <cite title="Source Title">Passageiro Satisfeito</cite></footer>
+                        </blockquote>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Próximo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="my-5" />
+
+
+<section class="news-promotions-section text-center mt-5 mb-5 fade-slide-in">
+    <h2 class="section-title">Últimas <span class="highlight">Notícias & Promoções</span></h2>
+    <p class="section-subtitle">Fique por dentro das novidades da AeroTickets</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-4 mb-4">
+            <ejs-card>
+                <e-card-header>
+                    <e-card-header-title>Nova Rota: Lisboa - Rio de Janeiro!</e-card-header-title>
+                </e-card-header>
+                <e-card-content>
+                    <p>Estamos entusiasmados em anunciar nossa nova rota direta para o Rio de Janeiro. Reserve já!</p>
+                </e-card-content>
+                <e-card-actions>
+                   
+                    <a asp-controller="Home" asp-action="VerDetalhes" class="btn btn-sm btn-outline-primary">Ver Detalhes</a>
+                </e-card-actions>
+            </ejs-card>
+        </div>
+        <div class="col-md-4 mb-4">
+            <ejs-card>
+                <e-card-header>
+                    <e-card-header-title>Desconto de Verão: 20% OFF!</e-card-header-title>
+                </e-card-header>
+                <e-card-content>
+                    <p>Aproveite 20% de desconto em voos selecionados para as suas férias de verão. Válido até 31/08.</p>
+                </e-card-content>
+                <e-card-actions>
+                   
+                    <a asp-controller="Home" asp-action="AproveitarPromocao" class="btn btn-sm btn-outline-primary">Aproveitar</a>
+                </e-card-actions>
+            </ejs-card>
+        </div>
+        <div class="col-md-4 mb-4">
+            <ejs-card>
+                <e-card-header>
+                    <e-card-header-title>Programa de Fidelidade AeroPoints</e-card-header-title>
+                </e-card-header>
+                <e-card-content>
+                    <p>Ganhe pontos em cada voo e troque por passagens e upgrades. Saiba mais sobre nosso programa.</p>
+                </e-card-content>
+                <e-card-actions>
+                 
+                    <a asp-controller="Home" asp-action="SaberMaisFidelidade" class="btn btn-sm btn-outline-primary">Saber Mais</a>
+                </e-card-actions>
+            </ejs-card>
+        </div>
+    </div>
+</section>

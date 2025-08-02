@@ -9,26 +9,42 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Data
 {
+    /// <summary>
+    /// Classe responsável por popular a base de dados com dados iniciais,
+    /// incluindo roles, utilizadores padrão, aeroportos e lugares.
+    /// </summary>
     public class SeedDb
     {
         private readonly DataContext _context;
         private readonly IUserHelper _userHelper;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private Random _random;
 
+
+        /// <summary>
+        /// Construtor que recebe as dependências para manipulação do contexto,
+        /// gestão de utilizadores e roles.
+        /// </summary>
+        /// <param name="context">Contexto da base dados.</param>
+        /// <param name="userHelper">Helper para operação com utilizadores.</param>
+        /// <param name="roleManager">Gestor das roles do Identity.</param>
         public SeedDb(DataContext context,IUserHelper userHelper, RoleManager<IdentityRole> roleManager  )
         {
             _context = context;
             _userHelper = userHelper;
             _roleManager = roleManager;
-            _random = new Random();
+
         }
 
+
+        /// <summary>
+        /// Método principal para executar o seed da base de dados.
+        /// Garante que a base existe, cria roles, utilizadores padrão, aeroportos e lugares.
+        /// </summary>
         public async Task SeedAsync()
         {
             await _context.Database.EnsureCreatedAsync();
 
-          
+
             await EnsureRoleAsync("Admin");
             await EnsureRoleAsync("Funcionario");
             await EnsureRoleAsync("Passageiro");
@@ -36,18 +52,36 @@ namespace BilheticaAeronauticaWeb.Data
 
 
 
-            var adminUser = await EnsureUserWithRoleAsync("admin@aero.com", "Admin123!", "Admin", "Administrador Completo", criarPassageiro: false);
-            var funcUser = await EnsureUserWithRoleAsync("func@aero.com", "Funcionario123!", "Funcionario", "Funcionário-Teste", criarPassageiro: false);
-            var passageiroUser = await EnsureUserWithRoleAsync("passageiro@aero.com", "Passageiro123!", "Passageiro", "Paulo Henrique", criarPassageiro: true);
+            var adminUser = await EnsureUserWithRoleAsync("admin1@yopmail.com", "Admin123!", "Admin", "Administrador", "Completo", false);
+            var funcUser = await EnsureUserWithRoleAsync("funcionario@yopmail.com", "Funcionario123!", "Funcionario", "Dário", "Funcionario", false);
+            var passageiroUser = await EnsureUserWithRoleAsync("passageiro@aero.com", "Passageiro123!", "Passageiro", "Paulo", "Henrique", true);
 
-            // 3. Outros seeds (apenas seed se não houver)
+
             if (!_context.Aeroportos.Any())
-                AddAeroportos();
+            {
+                _context.Aeroportos.AddRange(
+                    new Aeroporto { Nome = "Lisboa", Cidade = "Lisboa", Pais = "Portugal", IATA = "LIS" },
+                    new Aeroporto { Nome = "Porto", Cidade = "Porto", Pais = "Portugal", IATA = "OPO" },
+                    new Aeroporto { Nome = "Faro", Cidade = "Faro", Pais = "Portugal", IATA = "FAO" }
+                );
+            }
+
+           
 
             if (!_context.Lugares.Any())
-                AddLugares();
+            {
+                for (int i = 1; i <= 6; i++)
+                {
+                    _context.Lugares.Add(new Lugar
+                    {
+                        Codigo = $"A{i}",
+                        Disponivel = true,
+                        WasDeleted = false
+                    });
+                }
 
-        
+               
+            }
 
             await _context.SaveChangesAsync();
         }
@@ -58,12 +92,7 @@ namespace BilheticaAeronauticaWeb.Data
         /// <summary>
         /// Cria user, atribui role e, se for passageiro, cria registo na tabela Passageiros.
         /// </summary>
-        private async Task<User> EnsureUserWithRoleAsync(
-            string email,
-            string password,
-            string role,
-            string nome,
-            bool criarPassageiro)
+        private async Task<User> EnsureUserWithRoleAsync(string email, string password, string role, string nome, string apelido, bool criarPassageiro)
         {
             var user = await _userHelper.GetUserByEmailAsync(email);
 
@@ -74,29 +103,31 @@ namespace BilheticaAeronauticaWeb.Data
                     UserName = email,
                     Email = email,
                     EmailConfirmed = true,
-                    Nome = nome
+                    Nome = nome,
+                    Apelido = apelido
                 };
+
                 var result = await _userHelper.AddUserAsync(user, password);
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
-                    await _userHelper.AddUserToRoleAsync(user, role);
+                    throw new Exception($"Erro ao criar utilizador {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
                 }
+                await _userHelper.AddUserToRoleAsync(user, role);
             }
-            else
+            else if (!await _userHelper.IsUserInRoleAsync(user, role))
             {
-                if (!await _userHelper.IsUserInRoleAsync(user, role))
-                    await _userHelper.AddUserToRoleAsync(user, role);
+                await _userHelper.AddUserToRoleAsync(user, role);
             }
 
-            // Só para a role Passageiro: cria também na tabela Passageiros (ligação obrigatória)
+            // Adiciona registo de Passageiro se pedido
             if (criarPassageiro)
             {
                 if (!_context.Passageiros.Any(p => p.UserId == user.Id))
                 {
                     _context.Passageiros.Add(new Passageiro
                     {
-                        Nome = "Paulo",
-                        Apelido = "Henrique",
+                        Nome = nome,
+                        Apelido = apelido,
                         DataRegisto = DateTime.UtcNow,
                         UserId = user.Id
                     });
@@ -108,82 +139,16 @@ namespace BilheticaAeronauticaWeb.Data
 
 
         /// <summary>
-        /// Garante/cria role na tabela AspNetRoles
+        /// Garante a existência de uma role, criando-a se necessário.
         /// </summary>
+        /// <param name="roleName">Nome da role a criar.</param>
         private async Task EnsureRoleAsync(string roleName)
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
                 await _roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-
-
-
-        private void AddAeroportos()
-        {
-            _context.Aeroportos.AddRange(
-                new Aeroporto { Nome = "Lisboa", Cidade = "Lisboa", Pais = "Portugal", IATA = "LIS" },
-                new Aeroporto { Nome = "Porto", Cidade = "Porto", Pais = "Portugal", IATA = "OPO" },
-                new Aeroporto { Nome = "Faro", Cidade = "Faro", Pais = "Portugal", IATA = "FAO" }
-            );
-        }
-
-       
-
-
-
-
-
-        public static async Task SeedRolesAndAdminAsync(IServiceProvider serviceProvider)
-        {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-
-            
-            string[] roles = { "Admin", "Funcionario", "Passageiro" };
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                    await roleManager.CreateAsync(new IdentityRole(role));
-            }
-
          
-            var adminEmail = "admin@email.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            if (adminUser == null)
-            {
-                adminUser = new User
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    Nome = "Administrador",
-          
-                };
-                var result = await userManager.CreateAsync(adminUser, "Admin123!");
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
-            }
-        }
-
-
-
-        private void AddLugares()
-        {
-            for (int i = 1; i <= 5; i++)
-            {
-                _context.Lugares.Add(new Lugar
-                {
-                    Codigo = $"E{i}",
-                    Disponivel = true,
-                    WasDeleted = false
-                });
-            }
-        }
-
-
-
 
     }
 }

@@ -31,14 +31,8 @@
     <div class="mb-3">
         <label asp-for="ImageFile">Foto de Perfil</label>
         <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
-        @if (Model.ImageId != Guid.Empty)
-        {
-            <img src="https://bilheticaapp.blob.core.windows.net/users/@Model.ImageId?v=@DateTime.Now.Ticks" style="height:80px;" class="rounded mt-2" />
-        }
-        else
-        {
-            <img src="/images/users/noimage.png" style="height:80px;" class="rounded mt-2" />
-        }
+
+        <img src="@Url.Content(Model.ImageFullPath)" style="height:80px;" class="rounded mt-2" />
     </div>
     <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
 </form>

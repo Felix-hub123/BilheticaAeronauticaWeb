@@ -5,7 +5,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
-    public class Aeroporto : IEntity
+    /// <summary>
+    /// Representa um aeroporto no sistema, contendo dados de localização,
+    /// código IATA, taxa aeroportuária padrão e imagem associada.
+    /// </summary>
+    public class Aeroporto : IEntity, ISoftDelete
     {
         public int Id { get; set; }
 
@@ -30,10 +34,13 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string ImageFullPath => ImageId == Guid.Empty
              ? $"/images/aeroportos/noimage.png"
-             : $"https://bilheticaapp.blob.core.windows.net/aeroportos/{ImageId}";
+             : $"https://bilhetica.blob.core.windows.net/aeroportos/{ImageId}";
 
 
         public bool WasDeleted { get; set; }
+
+        [NotMapped]
+        public bool FoiUsadoEmVoos { get; set; }
     }
 
 }

@@ -1,66 +1,91 @@
-﻿@model UserViewModel
+﻿@model RegisterFuncionarioViewModel
 
 @{
     ViewData["Title"] = "Criar Funcionário";
 }
 
-<h2 class="mb-4">
-    <i class="fa-solid fa-user-tie text-success"></i> Criar Funcionário
-</h2>
+<h2>Criar Funcionário</h2>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <form asp-action="Create" method="post" enctype="multipart/form-data" autocomplete="off">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<form asp-controller="GestaoFuncionario" asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                <label asp-for="Nome" class="form-label">
-                    <i class="fa-solid fa-user"></i> Nome
-                </label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
+    @* Mensagem de sucesso (alerta bootstrap) *@
+    @if (ViewBag.Mensagem != null)
+    {
+        <div class="container-fluid">
+            <div class="alert alert-success d-flex align-items-start justify-content-center shadow-lg p-5 rounded-4 mt-5 border border-success-subtle" role="alert" style="font-size: 1.4rem; max-width: 100%;">
+                <i class="fa-solid fa-circle-check fa-4x me-4 text-success"></i>
+                <div>
+                    <h3 class="alert-heading fw-bold mb-3">Funcionário Criado com Sucesso</h3>
+                    <p class="mb-3">@ViewBag.Mensagem</p>
+                    <hr />
+                    <p class="mb-0 text-muted">Foi enviado um e-mail para definição de password. Pode agora criar outro funcionário, se desejar.</p>
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">
-                    <i class="fa-solid fa-envelope"></i> Email
-                </label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label">
-                    <i class="fa-solid fa-lock"></i> Password
-                </label>
-                <input asp-for="Password" type="password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="ImageFile" class="form-label">
-                    <i class="fa-solid fa-image"></i> Fotografia
-                </label>
-                <input asp-for="ImageFile" type="file" class="form-control" />
-                <span asp-validation-for="ImageFile" class="text-danger"></span>
-            </div>
-
-            <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn btn-success">
-                    <i class="fa-solid fa-user-plus"></i> Criar
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-ban"></i> Cancelar
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        </div>
     }
+
+    <div class="form-group mb-3">
+        <label asp-for="Nome"></label>
+        <input asp-for="Nome" class="form-control" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Apelido"></label>
+        <input asp-for="Apelido" class="form-control" />
+        <span asp-validation-for="Apelido" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="PhoneNumber"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Criar Funcionário</button>
+</form>
+
+@* Modal de sucesso *@
+@if (TempData["ShowSuccessModal"] != null)
+{
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalLabel">Funcionário Criado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body fs-5">
+                    Funcionário criado com sucesso!<br />
+                    Um e-mail foi enviado para definição da password.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modalEl = document.getElementById('successModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+
+                setTimeout(function () {
+                    modal.hide();
+                }, 7000);
+            }
+        });
+    </script>
 }
 
 

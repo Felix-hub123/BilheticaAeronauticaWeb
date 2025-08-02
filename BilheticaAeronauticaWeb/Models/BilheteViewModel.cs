@@ -6,6 +6,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BilheticaAeronauticaWeb.Models
 {
+    /// <summary>
+    /// ViewModel que representa os dados necessários para criar ou editar um bilhete,
+    /// incluindo informações do voo, passageiro, lugar, valores e estado do bilhete.
+    /// Também contém coleções para dropdown lists usados nas views de formulários.
+    /// </summary>
     public class BilheteViewModel
     {
         public int Id { get; set; }

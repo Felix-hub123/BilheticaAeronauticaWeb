@@ -6,6 +6,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BilheticaAeronauticaWeb.Data.Entities
 {
+
+    /// <summary>
+    /// Representa um utilizador da aplicação, herdando as propriedades de IdentityUser para autenticação e segurança.
+    /// Inclui informações pessoais adicionais como nome, apelido, documentos, data de nascimento e morada.
+    /// Armazena referência à imagem de perfil no Blob Storage e colecção de bilhetes associados.
+    /// </summary>
     public class User : IdentityUser
     {
         
@@ -15,8 +21,6 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         [MaxLength(100)]
         public string Apelido { get; set; }
-
-
 
         [MaxLength(200)]
         public string Endereço { get; set; }
@@ -30,7 +34,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public string ImageFullPath => ImageId == Guid.Empty
             ? $"/images/users/noimage.png"
-            : $"https://bilheticaaeronauticaapp.blob.core.windows.net/users/{ImageId}.jpg";
+            : $"https://bilhetica.blob.core.windows.net/users/{ImageId}.jpg";
 
 
 
@@ -39,9 +43,12 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         public virtual ICollection<Bilhete> Bilhetes { get; set; }
 
+        public bool PasswordInicialDefinida { get; set; } = false;
+
+
 
 
 
     }
-  
+
 }

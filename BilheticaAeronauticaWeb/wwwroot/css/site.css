@@ -3,71 +3,221 @@ for details on configuring this project to bundle and minify static web assets. 
 
 a.navbar-brand {
     white-space: nowrap;
-    text-align: left; 
+    text-align: left;
     word-break: normal;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease;
+}
+
+    a.navbar-brand:hover,
+    a.navbar-brand:focus {
+        color: #ffd700;
+        text-decoration: none;
+    }
+
+/* ===========================
+   User Profile Avatar ÚNICA v2024
+=========================== */
+.user-profile-avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    background-color: #ccc;
+    transition: all 0.2s ease;
+}
+    /* Efeito hover/destaque */
+    .user-profile-avatar:hover,
+    .user-profile-avatar:focus {
+        box-shadow: 0 0 8px #ffd700;
+        outline: none;
+        transform: scale(1.06);
+    }
+/* Modificador: imagem um pouco abaixo para alinhar com texto */
+.user-profile-avatar--pull {
+    position: relative;
+    top: -8px; /* Ajuste este valor conforme necessário */
+    flex-shrink: 0;
+}
+/* Modificador: foto "pendurada" na navbar, grande */
+.user-profile-avatar--drop {
+    width: 100px;
+    height: 100px;
+    display: block;
+    margin: 8px auto 0 auto;
+    right: 16px;
+    bottom: -20px;
+    z-index: 1050;
+    background: #fff;
+    border: 4px solid #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.navbar {
+    position: relative;
+    z-index: 1;
+}
+/* Responsivo */
+@media (max-width: 768px) {
+    .user-profile-avatar,
+    .user-profile-avatar--drop {
+        width: 36px;
+        height: 36px;
+    }
+
+    .user-profile-avatar--drop {
+        bottom: -18px;
+        right: 12px;
+    }
+}
+
+/* ===========================
+   Navbar Links e Botão Toggler
+=========================== */
+.navbar-nav .nav-item {
+    margin: 0 0.5rem;
+}
+
+.navbar-nav .nav-link {
+    color: #ffffffcc;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.375rem;
+    transition: color 0.3s, background-color 0.3s, box-shadow 0.3s;
+    white-space: nowrap;
+}
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        color: #ffd700;
+        background-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        text-decoration: none;
+        outline: none;
+    }
+
+.navbar-toggler {
+    border: none;
+    outline: none;
+    padding: 0.25rem 0.75rem;
+    transition: background 0.3s;
+}
+
+    .navbar-toggler:hover,
+    .navbar-toggler:focus {
+        background: rgba(255,255,255,0.1);
+    }
+
+.navbar-toggler-icon {
+    transition: transform 0.4s;
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(153deg) brightness(107%) contrast(101%);
+}
+
+.navbar-toggler.collapsed .navbar-toggler-icon {
+    transform: rotate(0deg);
+}
+
+.navbar-toggler:not(.collapsed) .navbar-toggler-icon {
+    transform: rotate(90deg);
+}
+
+.navbar {
+    background-color: #1196ff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    overflow: visible;
+}
+
+/* Foco acessível para links */
+.navbar-nav .nav-link:focus-visible {
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
+    background: rgba(255,255,255,0.15);
+}
+
+@media (max-width: 768px) {
+    .navbar-nav .nav-item {
+        margin: 0.25rem 0;
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 1.1rem;
+    }
 }
 
 /* Provide sufficient contrast against white background */
 a {
-  color: #0366d6;
+    color: #0366d6;
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
+
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .border-top {
-  border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #e5e5e5;
 }
+
 .border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
 }
 
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
 button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+    font-size: 1rem;
+    line-height: inherit;
 }
 
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 40px;
+    /* Margin bottom by footer height */
+    margin-bottom: 40px;
 }
+
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 50%;
-  white-space: nowrap;
-  line-height: 10px; /* Vertically center the text there */
+    position: absolute;
+    bottom: 0;
+    width: 50%;
+    white-space: nowrap;
+    line-height: 10px; /* Vertically center the text there */
 }
 /* Forbidden page
 -------------------------------------------------- */
@@ -114,7 +264,6 @@ body {
     font-size: 30px;
     text-transform: uppercase;
 }
-
 
 /*Page not Found - 404*/
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,600,700');
@@ -250,7 +399,6 @@ body {
 }
 
 
-
 .erro_h1 {
     text-align: center;
     margin: 30px 15px;
@@ -282,6 +430,7 @@ a.more-link {
     margin-top: 50px;
     letter-spacing: 1px;
 }
+
 .copyright-corner {
     position: fixed;
     right: 20px;
@@ -304,19 +453,8 @@ body {
     margin-right: 8px;
 }
 
-.profile-img {
-    width: 32px;
-    height: 32px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    margin-right: 8px; 
-    display: inline-block;
-    vertical-align: middle;
-}
-
 .navbar .nav-link.username {
-    max-width: 160px; 
+    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: inline-block;
@@ -334,7 +472,7 @@ body {
 
 .banner-container {
     position: relative;
-    background-image: url('/images/banner.jpg'); 
+    background-image: url('/images/banner.jpg');
     background-size: cover;
     background-position: center;
     height: 350px;
@@ -352,7 +490,6 @@ body {
     padding: 0 20px;
 }
 
-
 .flag-icon {
     width: 24px;
     height: 16px;
@@ -365,7 +502,6 @@ body {
     background: #1196ff;
     color: #fff;
 }
-
 
 /* Animação suave para footer */
 .footer-animate {
@@ -478,20 +614,19 @@ body {
     border-radius: 15px;
 }
 
-
 /* Tipografia base */
 body {
     font-family: 'Poppins', sans-serif;
-    font-weight: 400; /* peso normal para parágrafos */
+    font-weight: 400; 
     font-size: 16px;
-    line-height: 1.5; /* espaçamento confortável entre linhas */
-    color: #333; /* cor escura para melhor leitura */
-    background-color: #f9f9f9; /* fundo suave para menos cansaço visual */
+    line-height: 1.5; 
+    color: #333;
+    background-color: #f9f9f9; 
 }
 
 /* Títulos */
 h1, h2, h3, h4 {
-    font-weight: 600; /* negrito para títulos */
+    font-weight: 600; 
     color: #222;
     margin-bottom: 0.5rem;
     line-height: 1.2;
@@ -534,15 +669,15 @@ a {
     color: #666;
 }
 
-
 #mainCarousel img {
-    max-height: 400px; 
-    object-fit: cover; 
-    width: 100%; 
+    max-height: 400px;
+    object-fit: cover;
+    width: 100%;
 }
+
 #mainCarousel {
     max-height: 400px;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .carousel-caption-custom {
@@ -698,3 +833,178 @@ input.datetimepicker {
     }
 }
 
+
+.progress-fill {
+    transition: width 1.2s ease-in-out;
+    background: linear-gradient(to right, #fff, #ccc);
+}
+
+#btnComprar, #btnConfirmarCompra {
+    transition: all 0.3s ease-in-out;
+}
+
+    #btnComprar:disabled,
+    #btnConfirmarCompra:disabled {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    #btnConfirmarCompra.loading .btn-text {
+        opacity: 0.5;
+        transform: scale(0.95);
+        transition: all 0.3s ease-in-out;
+    }
+
+    #btnConfirmarCompra.loading .spinner-border {
+        opacity: 1 !important;
+    }
+
+    #btnConfirmarCompra .spinner-border {
+        transition: opacity 0.3s;
+        opacity: 0;
+    }
+
+/* ------------------------------------------
+   Parte melhorada e adicionada para navbar
+------------------------------------------- */
+
+/* ===========================
+   Navbar Brand (Logo e texto)
+=========================== */
+a.navbar-brand {
+    white-space: nowrap;
+    text-align: left;
+    word-break: normal;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    color: #fff; /* Geralmente navbar escura, branco destaca */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s ease;
+}
+
+    a.navbar-brand:hover,
+    a.navbar-brand:focus {
+        color: #ffd700; /* Efeito hover amarelo ouro */
+        text-decoration: none;
+    }
+
+/* ===========================
+   Navbar Links (nav-items)
+=========================== */
+.navbar-nav .nav-item {
+    margin: 0 0.5rem;
+}
+
+.navbar-nav .nav-link {
+    color: #ffffffcc; /* Branco com 80% de opacidade para suavizar */
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 0.375rem;
+    transition: color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    white-space: nowrap;
+}
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        color: #ffd700; /* amarelo ouro */
+        background-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        text-decoration: none;
+        outline: none;
+    }
+
+/* ===========================
+   Navbar Toggler (Hamburger)
+=========================== */
+.navbar-toggler {
+    border: none;
+    outline: none;
+    padding: 0.25rem 0.75rem;
+    transition: background-color 0.3s ease;
+}
+
+    .navbar-toggler:hover,
+    .navbar-toggler:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+.navbar-toggler-icon {
+    transition: transform 0.4s ease;
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(153deg) brightness(107%) contrast(101%);
+}
+
+.navbar-toggler.collapsed .navbar-toggler-icon {
+    transform: rotate(0deg);
+}
+
+.navbar-toggler:not(.collapsed) .navbar-toggler-icon {
+    transform: rotate(90deg);
+}
+
+/* ===========================
+   User profile image in Navbar
+=========================== */
+.user-profile-larger-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    transition: box-shadow 0.3s ease;
+}
+
+    .user-profile-larger-img:hover,
+    .user-profile-larger-img:focus {
+        box-shadow: 0 0 8px #ffd700;
+        outline: none;
+    }
+
+/* ===========================
+   Responsive tweaks
+=========================== */
+@media (max-width: 768px) {
+    .navbar-nav .nav-item {
+        margin: 0.25rem 0;
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 1.1rem;
+    }
+
+    .user-profile-larger-img {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* ===========================
+   Accessibility and focus styles
+=========================== */
+.navbar-nav .nav-link:focus-visible {
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ===========================
+   Navbar background & shadows (if needed)
+=========================== */
+.navbar {
+    background-color: #1196ff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+/* ===========================
+   Misc - smooth transitions
+=========================== */
+a, button {
+    transition: all 0.3s ease;
+}

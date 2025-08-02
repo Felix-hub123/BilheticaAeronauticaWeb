@@ -2,6 +2,10 @@
 
 namespace SuperShop.Models
 {
+    /// <summary>
+    /// ViewModel utilizado para capturar os dados necessários para a redefinição da password de um utilizador,
+    /// incluindo o identificador do utilizador, token de segurança, email, nova password e confirmação da nova password.
+    /// </summary>
     public class ResetPasswordViewModel
     {
         [Required]
@@ -16,11 +20,13 @@ namespace SuperShop.Models
 
         [Required]
         [DataType(DataType.Password)]
+        [Display(Name = "Nova Palavra-passe")]
         public string NewPassword { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [Compare("NewPassword", ErrorMessage = "As passwords não coincidem.")]
+        [Display(Name = "Confirmar Palavra-passe")]
         public string ConfirmPassword { get; set; }
 
     }

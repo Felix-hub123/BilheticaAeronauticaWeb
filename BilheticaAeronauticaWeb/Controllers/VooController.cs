@@ -14,6 +14,12 @@ using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Controllers
 {
+
+    /// <summary>
+    /// Controlador responsável pela gestão de voos.
+    /// Implementa CRUD, pesquisa e validações específicas de negócio (datas, origem/destino distintas, etc).
+    /// Aplica regras de acesso conforme roles (Funcionário e Admin para modificações).
+    /// </summary>
     public class VooController : Controller
     {
         private readonly IVooService _vooService;
@@ -33,6 +39,13 @@ namespace BilheticaAeronauticaWeb.Controllers
             _vooRepository = vooRepository;
         }
 
+
+
+        /// <summary>
+        /// Lista todos os voos disponíveis para consulta pública, ordenados por data/hora de partida.
+        /// </summary>
+        /// <returns>View contendo os voos disponíveis.</returns>
+        /// 
         // GET: VooController
         [AllowAnonymous]
         public async Task<ActionResult> Index()
@@ -42,7 +55,13 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-
+        /// <summary>
+        /// Mostra os detalhes do voo identificado pelo ID.
+        /// Retorna NotFound caso o voo não exista ou o ID não seja informado.
+        /// </summary>
+        /// <param name="id">ID do voo</param>
+        /// <returns>View com detalhes do voo ou NotFound.</returns>
+        /// 
         // GET: VooController/Details/5
         [AllowAnonymous]
         public async Task<ActionResult> Details(int? id)
@@ -57,7 +76,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(voo);
         }
 
-
+        /// <summary>
+        /// Exibe o formulário para criação de um novo voo.
+        /// Apenas acessível para roles Funcionario e Admin.
+        /// </summary>
+        /// <returns>View com formulário para criar voo.</returns>
+        /// 
         // GET: VooController/Create
         [HttpGet]
         [Authorize(Roles = "Funcionario,Admin")]
@@ -118,34 +142,6 @@ namespace BilheticaAeronauticaWeb.Controllers
         }
 
 
-        // GET: Voo/Edit/5
-        [Authorize(Roles = "Funcionario,Admin")]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var voo = await _vooService.ObterVooPorIdAsync(id.Value);
-            if (voo == null)
-                return NotFound();
-
-            var model = new VooViewModel
-            {
-                Id = voo.Id,
-                OrigemId = voo.OrigemId,
-                DestinoId = voo.DestinoId,
-                AviaoId = voo.AviaoId,
-                DataHoraPartida = voo.DataHoraPartida,
-                DataHoraChegada = voo.DataHoraChegada,
-                PrecoBase = voo.PrecoBase,
-            };
-
-            await PreencherDropDowns(); 
-
-            return View(model); 
-        }
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
@@ -156,50 +152,60 @@ namespace BilheticaAeronauticaWeb.Controllers
                 await PreencherDropDowns();
                 return View(model);
             }
+
             if (model.OrigemId == model.DestinoId)
             {
                 ModelState.AddModelError("", "Origem e destino não podem ser iguais.");
                 await PreencherDropDowns();
                 return View(model);
             }
+
             var voo = await _vooService.ObterVooPorIdAsync(model.Id);
             if (voo == null)
                 return NotFound();
 
-            voo.OrigemId = model.OrigemId;
-            voo.DestinoId = model.DestinoId;
-            voo.AviaoId = model.AviaoId;
-            voo.DataHoraPartida = model.DataHoraPartida;
-            voo.DataHoraChegada = model.DataHoraChegada;
-            voo.PrecoBase = model.PrecoBase;
+            var (sucesso, mensagem) = await _vooService.AtualizarVooComRegrasAsync(voo, model);
 
-            await _vooService.EditarVooAsync(voo);
+            if (!sucesso)
+            {
+                ModelState.AddModelError("", mensagem);
+                await PreencherDropDowns();
+                return View(model);
+            }
 
-            TempData["Success"] = "Voo atualizado com sucesso!";
+            TempData["Success"] = mensagem;
             return RedirectToAction(nameof(Index));
         }
 
 
 
-
+        /// <summary>
+        /// Elimina um voo identificado pelo ID.
+        /// Aplica tratamento de exceções e retorna feedback via TempData.
+        /// </summary>
+        /// <param name="id">ID do voo a eliminar.</param>
+        /// <returns>Redirect para lista de voos.</returns>
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            try
-            {
-                await _vooService.EliminarVooAsync(id.Value);
-                TempData["Success"] = "Voo eliminado com sucesso!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Erro ao eliminar voo: {ex.Message}";
-                return RedirectToAction(nameof(Index));
-            }
+            var voo = await _vooRepository.GetVooWithIncludesAsync(id.Value); 
+
+            if (voo == null)
+                return NotFound();
+
+            return View(voo);
         }
+
+
+
+        /// <summary>
+        /// Exibe formulário para pesquisar voos conforme origem, destino e data.
+        /// Carrega listas de aeroportos para seleção.
+        /// </summary>
+        /// <returns>View com filtros e resultados (inicialmente vazios).</returns>
 
         [HttpGet]
         public async Task<IActionResult> Pesquisa()
@@ -213,7 +219,12 @@ namespace BilheticaAeronauticaWeb.Controllers
             return View(model);
         }
 
-
+        /// <summary>
+        /// Processa pesquisa de voos segundo critérios especificados.
+        /// Retorna lista dos voos que cumprem os critérios.
+        /// </summary>
+        /// <param name="model">ViewModel com os filtros aplicados.</param>
+        /// <returns>View com lista de resultados.</returns>
         [HttpPost]
         public async Task<IActionResult> Pesquisa(PesquisaVoosViewModel model)
         {
@@ -231,29 +242,48 @@ namespace BilheticaAeronauticaWeb.Controllers
 
 
 
-
+        /// <summary>
+        /// Confirma eliminação do voo via POST.
+        /// Tratar com validação e erro silencioso retornando para lista.
+        /// </summary>
+        /// <param name="id">ID do voo a eliminar.</param>
+        /// <returns>Redirect para lista.</returns>
         // POST: VooController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            try
+            var voo = await _vooRepository.GetByIdAsync(id);
+
+            if (voo == null)
             {
-                await _vooService.EliminarVooAsync(id);
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            catch (Exception)
+
+            // Busca diretamente bilhetes associados ao voo
+            var bilhetes = await _vooRepository.GetBilhetesByVooIdAsync(id);
+
+            if (bilhetes != null && bilhetes.Any())
             {
-                
-                return RedirectToAction(nameof(Index));
+                ViewBag.ErrorMessage = "Não é possível eliminar este voo porque existem bilhetes vendidos associados a ele.";
+                return View("Delete", voo);
             }
+
+            await _vooRepository.DeleteAsync(voo);
+
+            return RedirectToAction(nameof(Index));
         }
 
 
-      
 
-     
+
+
+        /// <summary>
+        /// Método auxiliar para preencher ViewBags com listas de aeroportos (origem/destino) e aviões.
+        /// Apresenta mensagens de erro caso não existam registros necessários para criação/edição.
+        /// </summary>
+        /// <returns>Task para execução assíncrona.</returns>
         private async Task PreencherDropDowns()
         {
             var aeroportos = await _aeroportoRepository.GetAll().ToListAsync();

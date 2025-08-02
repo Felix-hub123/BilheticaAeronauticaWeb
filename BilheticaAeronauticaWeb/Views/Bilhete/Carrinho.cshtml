@@ -1,12 +1,24 @@
 ﻿@using BilheticaAeronauticaWeb.Data.Entities
 @model IEnumerable<BilheteTemp>
+
 @{
     ViewData["Title"] = "Carrinho de Reservas";
     var bilhetes = Model.ToList();
 }
 
+<!-- Mensagens de feedback -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+}
+@if (TempData["Mensagem"] != null)
+{
+    <div class="alert alert-success" role="alert">@TempData["Mensagem"]</div>
+}
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="~/css/carrinho.css" asp-append-version="true" />
 
 <div class="container mt-4">
     <div class="card shadow">
@@ -21,14 +33,22 @@
         <div class="card-body">
             @if (!bilhetes.Any())
             {
-                <div class="alert alert-warning">
+                <div class="alert alert-warning text-center">
                     <i class="fa-solid fa-info-circle"></i> O seu carrinho está vazio.
                 </div>
             }
             else
             {
-                <form id="formCompra" asp-action="ComprarSelecionado" method="post">
+                <form id="form" asp-action="ComprarSelecionado" asp-controller="Bilhete" method="post">
+                    @Html.AntiForgeryToken()
+
                     <input type="hidden" id="idBilheteSelecionado" name="idBilheteSelecionado" value="@bilhetes.First().Id" />
+                    <input type="hidden" id="VooId" name="VooId" />
+                    <input type="hidden" id="LugarId" name="LugarId" />
+                    <input type="hidden" id="Valor" name="Valor" />
+                    <input type="hidden" id="BagagemExtra" name="BagagemExtra" />
+                    <input type="hidden" id="Refeicao" name="Refeicao" />
+
                     <div class="table-responsive">
                         <table class="table table-striped align-middle" id="tabelaBilhetes">
                             <thead class="table-light">
@@ -45,30 +65,30 @@
                                 @for (int i = 0; i < bilhetes.Count; i++)
                                 {
                                     var item = bilhetes[i];
-                                    <tr class="bilhete-item @(i == 0 ? "table-primary" : "")" tabindex="0" data-index="@i" data-id="@item.Id">
+                                    <tr class="bilhete-item @(i == 0 ? "table-primary" : "")" tabindex="0"
+                                        data-index="@i" data-id="@item.Id"
+                                        data-vooid="@item.VooId"
+                                        data-lugarid="@item.LugarId"
+                                        data-preco="@item.Preco"
+                                        data-bagagemextra="@item.BagagemExtra"
+                                        data-refeicao="@item.Refeicao">
                                         <td>
                                             @if (item.Voo != null)
                                             {
-                                                <span>
-                                                    @item.Voo.Numero - @item.Voo.Origem?.Nome → @item.Voo.Destino?.Nome
-                                                </span>
+                                                <span>@item.Voo.Numero - @item.Voo.Origem?.Nome → @item.Voo.Destino?.Nome</span>
                                             }
                                             else
                                             {
                                                 <span>@item.VooId</span>
                                             }
                                         </td>
-                                        <td>
-                                            @(item.Passageiro?.FullName ?? item.PassageiroId.ToString())
-                                        </td>
-                                        <td>
-                                            @(item.Lugar?.Codigo ?? item.LugarId.ToString())
-                                        </td>
+                                        <td>@(item.Passageiro?.FullName ?? item.PassageiroId.ToString())</td>
+                                        <td>@(item.Lugar?.Codigo ?? item.LugarId.ToString())</td>
                                         <td>@item.Preco.ToString("C")</td>
                                         <td>
                                             @if (item.BagagemExtra)
                                             {
-                                                <span class="badge bg-secondary">Bagagem</span>
+                                                <span class="badge bg-secondary me-1">Bagagem</span>
                                             }
                                             @if (item.Refeicao)
                                             {
@@ -77,7 +97,7 @@
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-danger btn-sm btn-remover" data-id="@item.Id"
-                                                    data-bs-toggle="modal" data-bs-target="#modalRemover">
+                                                    data-bs-toggle="modal" data-bs-target="#modalRemover" title="Remover bilhete do carrinho">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </td>
@@ -86,8 +106,12 @@
                             </tbody>
                         </table>
                     </div>
-                    <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#modalComprar">
-                        <i class="fa-solid fa-credit-card"></i> Comprar Selecionado
+
+                    <button id="btnComprar" type="button" class="btn btn-success mt-3 position-relative overflow-hidden text-white" style="width: 220px;">
+                        <span class="progress-fill position-absolute top-0 start-0 h-100 bg-white" style="width: 0%; opacity: 0.2; z-index: 0;"></span>
+                        <span class="btn-text position-relative z-1">
+                            <i class="fa-solid fa-credit-card me-2"></i>Comprar Selecionado
+                        </span>
                     </button>
                 </form>
             }
@@ -95,28 +119,37 @@
     </div>
 </div>
 
+<!-- Modal MB WAY -->
 <div class="modal fade" id="modalComprar" tabindex="-1" aria-labelledby="modalComprarLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="modalComprarLabel">
-                    <i class="fa-solid fa-credit-card"></i> Confirmar Compra
-                </h5>
+                <h5 class="modal-title" id="modalComprarLabel"><i class="fa-solid fa-credit-card"></i> Confirmar Compra</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                Tem a certeza que deseja comprar o bilhete selecionado?
+                <form id="modalForm" novalidate>
+                    <div class="mb-3">
+                        <label for="NumeroTelemovel" class="form-label">Número de Telemóvel MB WAY</label>
+                        <input type="text" id="NumeroTelemovel" name="NumeroTelemovel" class="form-control" placeholder="Insira o número (9 dígitos)" pattern="^\d{9}$" required />
+                        <div class="invalid-feedback">
+                            Por favor insira um número válido de 9 dígitos.
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="btnConfirmarCompra" class="btn btn-success">
-                    <i class="fa-solid fa-credit-card"></i> Comprar
+                <button type="button" id="btnConfirmarCompra" class="btn btn-success px-4">
+                    <span class="spinner-border spinner-border-sm text-light me-2" style="opacity: 0; transition: opacity 0.3s;" role="status" aria-hidden="true"></span>
+                    Comprar
                 </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal Remover bilhete -->
 <div class="modal fade" id="modalRemover" tabindex="-1" aria-labelledby="modalRemoverLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -135,60 +168,117 @@
     </div>
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            let $items = $('.bilhete-item');
-            let selectedIndex = 0;
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-            function focusItem(index) {
-                $items.removeClass('table-primary');
-                $items.eq(index).addClass('table-primary').focus();
-                selectedIndex = index;
-                $('#idBilheteSelecionado').val($items.eq(selectedIndex).data('id'));
-            }
+<script>
+    $(document).ready(function () {
 
-            if ($items.length > 0) {
-                focusItem(0);
-            }
+        let $items = $('.bilhete-item');
+        let selectedIndex = 0;
 
-            $(document).keydown(function (e) {
-                if (!$items.length) return;
+        // Selecionar e focar o primeiro bilhete
+        if ($items.length > 0) updateSelection(0);
 
-                if (e.key === "ArrowDown") {
-                    if (selectedIndex < $items.length - 1) focusItem(selectedIndex + 1);
-                    e.preventDefault();
-                } else if (e.key === "ArrowUp") {
-                    if (selectedIndex > 0) focusItem(selectedIndex - 1);
-                    e.preventDefault();
-                } else if (e.key === "Delete") {
-                    let reservaId = $items.eq(selectedIndex).data('id');
-                    var url = '@Url.Action("RemoverReserva", "Bilhete")/' + reservaId;
-                    $('#btnConfirmRemover').attr('href', url);
-                    var modal = new bootstrap.Modal(document.getElementById('modalRemover'));
-                    modal.show();
-                    e.preventDefault();
-                }
-            });
+        function updateSelection(index) {
+            $items.removeClass('table-primary');
+            let $selected = $items.eq(index);
+            $selected.addClass('table-primary').focus();
+            selectedIndex = index;
+            $('#idBilheteSelecionado').val($selected.data('id'));
+            $('#VooId').val($selected.data('vooid'));
+            $('#LugarId').val($selected.data('lugarid'));
+            $('#Valor').val($selected.data('preco'));
+            $('#BagagemExtra').val($selected.data('bagagemextra'));
+            $('#Refeicao').val($selected.data('refeicao'));
+        }
 
-            $items.click(function () {
-                let idx = $items.index(this);
-                focusItem(idx);
-            });
-
-            $('.btn-remover').click(function () {
-                let reservaId = $(this).data('id');
-                var url = '@Url.Action("RemoverReserva", "Bilhete")/' + reservaId;
+        // Navegação com teclado (setas e delete)
+        $(document).keydown(function (e) {
+            if (!$items.length) return;
+            if (e.key === 'ArrowDown' && selectedIndex < $items.length - 1) {
+                updateSelection(selectedIndex + 1);
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp' && selectedIndex > 0) {
+                updateSelection(selectedIndex - 1);
+                e.preventDefault();
+            } else if (e.key === 'Delete') {
+                let idToRemove = $items.eq(selectedIndex).data('id');
+                let url = '@Url.Action("RemoverReserva", "Bilhete")/' + idToRemove;
                 $('#btnConfirmRemover').attr('href', url);
-            });
-
-            $('#btnConfirmarCompra').click(function () {
-                $('#formCompra').submit();
-            });
+                new bootstrap.Modal(document.getElementById('modalRemover')).show();
+                e.preventDefault();
+            }
         });
-    </script>
-}
+
+        // Clique para selecionar linha
+        $items.click(function () {
+            let idx = $items.index(this);
+            updateSelection(idx);
+        });
+
+        // Atualiza o link para remoção no modal
+        $('.btn-remover').click(function () {
+            let id = $(this).data('id');
+            let url = '@Url.Action("RemoverReserva", "Bilhete")/' + id;
+            $('#btnConfirmRemover').attr('href', url);
+        });
+
+        // Abrir modal compra e resetar inputs
+        $('#btnComprar').click(function (e) {
+            e.preventDefault();
+            if ($items.length === 0) {
+                alert('Não há bilhetes para comprar.');
+                return;
+            }
+            updateSelection(selectedIndex);
+            $('#modalForm')[0].reset();
+            $('#modalForm').removeClass('was-validated');
+            $('#NumeroTelemovel').val('');
+            $('#modalComprar .spinner-border').css('opacity', 0);
+            $('#modalComprar .btn-text').show();
+            new bootstrap.Modal(document.getElementById('modalComprar')).show();
+        });
+
+        // Confirmar compra no modal
+        $('#btnConfirmarCompra').click(function () {
+            const modalForm = $('#modalForm')[0];
+            // Validação HTML5
+            if (!modalForm.checkValidity()) {
+                $('#modalForm').addClass('was-validated');
+                return;
+            }
+
+            let numeroTelemovel = $('#NumeroTelemovel').val();
+            let $form = $('#form');
+
+            // Remove input hidden anterior e cria novo com nome correto (minúsculo)
+            $('#numeroTelemovelHidden').remove();
+            $('<input>').attr({
+                type: 'hidden',
+                id: 'numeroTelemovelHidden',
+                name: 'numeroTelemovel',
+                value: numeroTelemovel
+            }).appendTo($form);
+
+            // Spinner e desabilitar botão para evitar múltiplos cliques
+            const $btn = $(this);
+            $btn.find('.spinner-border').css('opacity', 1).show();
+            $btn.prop('disabled', true);
+            $btn.find('.btn-text').hide();
+
+            // Submete o form principal
+            $form.submit();
+        });
+
+    });
+</script>
+
+
+
+
+
+
 
 

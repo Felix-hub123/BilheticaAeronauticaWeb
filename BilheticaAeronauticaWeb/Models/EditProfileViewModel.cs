@@ -4,6 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BilheticaAeronauticaWeb.Model
 {
+    /// <summary>
+    /// ViewModel utilizado para editar o perfil do utilizador.
+    /// Contém dados pessoais e dados para atualização da imagem de perfil.
+    /// </summary>
     public class EditProfileViewModel
     {
         [Required(ErrorMessage = "O nome é obrigatório.")]
@@ -23,8 +27,13 @@ namespace BilheticaAeronauticaWeb.Model
         [Display(Name = "Telemóvel")]
         public string PhoneNumber { get; set; }
 
-      
-        public Guid ImageId { get; set; } 
+
+        public Guid ImageId { get; set; }
         public IFormFile ImageFile { get; set; }
+
+        public string ImageFullPath => ImageId == Guid.Empty
+             ? $"/images/users/noimage.png"
+             : $"https://bilhetica.blob.core.windows.net/users/{ImageId}";
     }
 }
+

@@ -8,10 +8,17 @@ using System.Threading.Tasks;
 
 namespace SuperShop.Helpers
 {
-   
 
+    /// <summary>
+    /// Helper para envio de email via SMTP usando a biblioteca MailKit.
+    /// </summary>
     public class EMailHelper : IEMailHelper
     {
+
+        /// <summary>
+        /// Inicializa uma nova instância do <see cref="EMailHelper"/> com as configurações necessárias para envio de email.
+        /// </summary>
+        /// <param name="configuration">Interface para obter configurações da aplicação.</param>
         private readonly IConfiguration _configuration;
 
         public EMailHelper(IConfiguration configuration)
@@ -19,6 +26,16 @@ namespace SuperShop.Helpers
             _configuration = configuration;
         }
 
+
+        /// <summary>
+        /// Envia um email assíncrono para o destinatário especificado com o assunto e corpo em HTML.
+        /// </summary>
+        /// <param name="email">Endereço de email do destinatário.</param>
+        /// <param name="subject">Assunto do email.</param>
+        /// <param name="htmlMessage">Conteúdo HTML do corpo do email.</param>
+        /// <returns>
+        /// Um objeto <see cref="Response"/> indicando sucesso ou falha, e mensagem detalhada em caso de erro.
+        /// </returns>
         public async Task<Response> SendEmailAsync(string email, string subject, string htmlMessage) 
         {
             var nameFrom = _configuration["Mail:NameFrom"];
