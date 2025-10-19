@@ -13,8 +13,9 @@ namespace SuperShop.Models
         /// Endereço de email do utilizador para envio do link de recuperação.
         /// Campo obrigatório e deve estar num formato válido de email.
         /// </summary>
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "O email é obrigatório.")]
+        [EmailAddress(ErrorMessage = "Por favor, insira um email válido.")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
     }
 }

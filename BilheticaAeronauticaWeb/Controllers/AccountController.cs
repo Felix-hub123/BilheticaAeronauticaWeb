@@ -161,6 +161,61 @@ namespace SuperShop.Controllers
         }
 
 
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditProfile()
+        {
+            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+            if (user == null)
+                return NotFound();
+
+            var model = new EditProfileViewModel
+            {
+                Nome = user.Nome,
+                Apelido = user.Apelido,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                ImageId = user.ImageId
+            };
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
+            if (user == null)
+                return NotFound();
+
+            user.Nome = model.Nome;
+            user.Apelido = model.Apelido;
+            user.PhoneNumber = model.PhoneNumber;
+
+            if (model.ImageFile != null)
+            {
+                var imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
+                user.ImageId = imageId;
+            }
+
+            var result = await _userHelper.UpdateUserAsync(user);
+            if (result.Succeeded)
+            {
+                ViewBag.Message = "Perfil atualizado com sucesso.";
+                model.ImageId = user.ImageId;
+                return View(model);
+            }
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return View(model);
+        }
+
+
 
 
         // GET: ConfirmEmail
@@ -223,36 +278,32 @@ namespace SuperShop.Controllers
 
             var user = await _userHelper.GetUserByEmailAsync(model.Email);
 
-            // Não expor se o email existe ou não
-            if (user == null)
+            
+            if (user != null)
             {
-                ViewBag.Message = "If the email exists, instructions have been sent.";
-                return View();
+                var token = await _userHelper.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = System.Net.WebUtility.UrlEncode(token);
+
+                var link = Url.Action("ResetPassword", "Account", new
+                {
+                    userId = user.Id,
+                    token = encodedToken,
+                    email = user.Email
+                }, protocol: HttpContext.Request.Scheme);
+
+                var emailResponse = await _mailHelper.SendEmailAsync(model.Email, "Password Reset",
+                    $"To reset your password, click here: <a href='{link}'>Reset Password</a>");
+
+                if (!emailResponse.IsSuccess)
+                {
+                    ModelState.AddModelError(string.Empty, "Falha ao enviar o e-mail. Por favor, tente novamente mais tarde.");
+                    return View(model);
+                }
             }
 
-            var token = await _userHelper.GeneratePasswordResetTokenAsync(user);
-            var encodedToken = System.Net.WebUtility.UrlEncode(token);
-
-            var link = Url.Action("ResetPassword", "Account", new
-            {
-                userId = user.Id,
-                token = encodedToken,
-                email = user.Email
-            }, protocol: HttpContext.Request.Scheme);
-
-            var emailResponse = await _mailHelper.SendEmailAsync(model.Email, "Password Reset",
-                $"To reset your password, click here: <a href='{link}'>Reset Password</a>");
-
-            if (emailResponse.IsSuccess)
-            {
-                ViewBag.Message = "Instructions to recover your password have been sent.";
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Failed to send email. Please try again later.");
-            }
-
-            return View();
+           
+            TempData["SuccessMessage"] = "Instruções para recuperar sua senha foram enviadas, caso o e-mail exista em nosso sistema.";
+            return RedirectToAction(nameof(RecoverPassword));
         }
 
         [HttpGet]

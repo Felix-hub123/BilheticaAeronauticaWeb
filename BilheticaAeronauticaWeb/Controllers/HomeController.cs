@@ -124,7 +124,7 @@ namespace BilheticaAeronauticaWeb.Controllers
             if (User.IsInRole("Admin"))
                 return RedirectToAction("Index", "Admin");
             else if (User.IsInRole("Funcionario"))
-                return RedirectToAction("Index", "Funcionario");
+                return RedirectToAction("Index", "Funcionarios");
             else if (User.IsInRole("Passageiro"))
                 return RedirectToAction("Index", "Passageiro"); 
 
