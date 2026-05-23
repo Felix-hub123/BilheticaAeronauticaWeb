@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BilheticaAeronauticaWeb.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,7 +23,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                     IATA = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
                     TaxaAeroportoPadrao = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    WasDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    WasDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,8 +49,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Apelido = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Apelido = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Endereço = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Password = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -226,10 +226,10 @@ namespace BilheticaAeronauticaWeb.Migrations
                     Apelido = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DataRegisto = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     WasDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DocumentoIdentificacao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NumeroDocumento = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DocumentoIdentificacao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NumeroDocumento = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DataNascimento = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -239,7 +239,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                         name: "FK_Passageiros_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -248,7 +249,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Numero = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Numero = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrigemId = table.Column<int>(type: "int", nullable: false),
                     DestinoId = table.Column<int>(type: "int", nullable: false),
                     AviaoId = table.Column<int>(type: "int", nullable: false),
@@ -264,7 +265,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                         name: "FK_Voos_Aeroportos_DestinoId",
                         column: x => x.DestinoId,
                         principalTable: "Aeroportos",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Voos_Aeroportos_OrigemId",
                         column: x => x.OrigemId,
@@ -276,7 +278,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         column: x => x.AviaoId,
                         principalTable: "Avioes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -305,7 +307,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                         name: "FK_Lugares_Voos_VooId",
                         column: x => x.VooId,
                         principalTable: "Voos",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -322,27 +325,27 @@ namespace BilheticaAeronauticaWeb.Migrations
                     BagagemExtra = table.Column<bool>(type: "bit", nullable: false),
                     Refeicao = table.Column<bool>(type: "bit", nullable: false),
                     DataReserva = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CriadoPorUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CriadoPorUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     WasDeleted = table.Column<bool>(type: "bit", nullable: false),
                     PagamentoConfirmado = table.Column<bool>(type: "bit", nullable: false),
                     DataEmissao = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Bilhetes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Bilhetes_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Bilhetes_AspNetUsers_CriadoPorUserId",
+                        column: x => x.CriadoPorUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Bilhetes_Lugares_LugarId",
                         column: x => x.LugarId,
                         principalTable: "Lugares",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Bilhetes_Passageiros_PassageiroId",
                         column: x => x.PassageiroId,
@@ -368,7 +371,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                     LugarId = table.Column<int>(type: "int", nullable: false),
                     Preco = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Quantidade = table.Column<double>(type: "float", nullable: false),
-                    CriadoPorUserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CriadoPorUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     WasDeleted = table.Column<bool>(type: "bit", nullable: false),
                     BagagemExtra = table.Column<bool>(type: "bit", nullable: false),
                     Refeicao = table.Column<bool>(type: "bit", nullable: false),
@@ -378,6 +381,12 @@ namespace BilheticaAeronauticaWeb.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BilhetesTemp", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BilhetesTemp_AspNetUsers_CriadoPorUserId",
+                        column: x => x.CriadoPorUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_BilhetesTemp_Lugares_LugarId",
                         column: x => x.LugarId,
@@ -395,7 +404,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         column: x => x.VooId,
                         principalTable: "Voos",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -438,6 +447,11 @@ namespace BilheticaAeronauticaWeb.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bilhetes_CriadoPorUserId",
+                table: "Bilhetes",
+                column: "CriadoPorUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bilhetes_LugarId",
                 table: "Bilhetes",
                 column: "LugarId");
@@ -448,14 +462,14 @@ namespace BilheticaAeronauticaWeb.Migrations
                 column: "PassageiroId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bilhetes_UserId",
-                table: "Bilhetes",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Bilhetes_VooId",
                 table: "Bilhetes",
                 column: "VooId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BilhetesTemp_CriadoPorUserId",
+                table: "BilhetesTemp",
+                column: "CriadoPorUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BilhetesTemp_LugarId",

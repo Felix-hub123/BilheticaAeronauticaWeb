@@ -57,9 +57,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<bool>("WasDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -116,7 +114,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("CriadoPorUserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("DataCompra")
                         .HasColumnType("datetime2");
@@ -143,9 +141,6 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.Property<bool>("Refeicao")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<decimal>("Valor")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -158,11 +153,11 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CriadoPorUserId");
+
                     b.HasIndex("LugarId");
 
                     b.HasIndex("PassageiroId");
-
-                    b.HasIndex("UserId");
 
                     b.HasIndex("VooId");
 
@@ -207,7 +202,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("CriadoPorUserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime2");
@@ -237,6 +232,8 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CriadoPorUserId");
 
                     b.HasIndex("LugarId");
 
@@ -304,6 +301,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DocumentoIdentificacao")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ImageId")
@@ -315,9 +313,11 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NumeroDocumento")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("WasDeleted")
@@ -339,6 +339,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Apelido")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -367,6 +368,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Nome")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -438,6 +440,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Numero")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("OrigemId")
@@ -595,20 +598,22 @@ namespace BilheticaAeronauticaWeb.Migrations
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.Bilhete", b =>
                 {
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.User", null)
+                        .WithMany("Bilhetes")
+                        .HasForeignKey("CriadoPorUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Lugar", "Lugar")
                         .WithMany()
                         .HasForeignKey("LugarId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Passageiro", "Passageiro")
                         .WithMany()
                         .HasForeignKey("PassageiroId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.User", null)
-                        .WithMany("Bilhetes")
-                        .HasForeignKey("UserId");
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Voo", "Voo")
                         .WithMany()
@@ -625,6 +630,11 @@ namespace BilheticaAeronauticaWeb.Migrations
 
             modelBuilder.Entity("BilheticaAeronauticaWeb.Data.Entities.BilheteTemp", b =>
                 {
+                    b.HasOne("BilheticaAeronauticaWeb.Data.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("CriadoPorUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Lugar", "Lugar")
                         .WithMany()
                         .HasForeignKey("LugarId")
@@ -640,7 +650,7 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Voo", "Voo")
                         .WithMany()
                         .HasForeignKey("VooId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Lugar");
@@ -660,7 +670,8 @@ namespace BilheticaAeronauticaWeb.Migrations
 
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Voo", "Voo")
                         .WithMany("Lugares")
-                        .HasForeignKey("VooId");
+                        .HasForeignKey("VooId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Aviao");
 
@@ -671,7 +682,9 @@ namespace BilheticaAeronauticaWeb.Migrations
                 {
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -681,13 +694,13 @@ namespace BilheticaAeronauticaWeb.Migrations
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aviao", "Aviao")
                         .WithMany()
                         .HasForeignKey("AviaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aeroporto", "Destino")
                         .WithMany()
                         .HasForeignKey("DestinoId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BilheticaAeronauticaWeb.Data.Entities.Aeroporto", "Origem")
