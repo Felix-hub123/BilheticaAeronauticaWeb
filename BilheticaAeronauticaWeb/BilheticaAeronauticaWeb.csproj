@@ -48,7 +48,6 @@
   <ItemGroup>
     <Folder Include="Areas\" />
     <Folder Include="Properties\PublishProfiles\" />
-    <Folder Include="wwwroot\images\aeroportos\" />
     <Folder Include="wwwroot\images\carrossel\" />
     <Folder Include="wwwroot\images\logo\" />
   </ItemGroup>
