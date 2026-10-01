@@ -2,6 +2,7 @@
 @model IEnumerable<Bilhete>
 
 <h3>Histórico de Viagens</h3>
+
 <table class="table">
     <thead>
         <tr>
@@ -13,19 +14,33 @@
             <th>Status</th>
         </tr>
     </thead>
+
     <tbody>
         @foreach (var bilhete in Model)
         {
             <tr>
                 <td>@bilhete.Voo.Numero</td>
-                <td>@bilhete.Voo.DataHoraPartida.ToString("dd-MM-yyyy HH:mm")</td>
-                <td>@bilhete.Voo.Origem.Cidade</td>
-                <td>@bilhete.Voo.Destino.Cidade</td>
-                <td>@bilhete.Lugar</td>
-                <td>@bilhete.Estado</td>
+
+                <td>
+                    @bilhete.Voo.DataHoraPartida.ToString("dd-MM-yyyy HH:mm")
+                </td>
+
+                <td>
+                    @bilhete.Voo.Origem.Cidade
+                </td>
+
+                <td>
+                    @bilhete.Voo.Destino.Cidade
+                </td>
+
+                <td>
+                    @bilhete.Lugar
+                </td>
+
+                <td>
+                    @bilhete.Estado
+                </td>
             </tr>
         }
     </tbody>
 </table>
-
-

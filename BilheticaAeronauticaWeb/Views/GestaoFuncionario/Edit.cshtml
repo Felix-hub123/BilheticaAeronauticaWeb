@@ -1,44 +1,205 @@
-﻿@model UserViewModel
+﻿@model BilheticaAeronauticaWeb.Models.UserViewModel
 
 @{
     ViewData["Title"] = "Editar Funcionário";
 }
 
-<h2>Editar Funcionário</h2>
+<h2 class="mb-4">
+    <i class="fa-solid fa-user-pen text-primary"></i>
+    Editar Funcionário
+</h2>
 
-<form asp-action="Edit" method="post" enctype="multipart/form-data">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group">
-        <label asp-for="Nome"></label>
-        <input asp-for="Nome" class="form-control" />
-        <span asp-validation-for="Nome" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+<div class="row">
 
-   
-    @if (!string.IsNullOrEmpty(Model.ImageFullPath))
-    {
-        <div class="mb-3">
-            <img src="@Model.ImageFullPath" alt="Fotografia do Funcionário" style="max-width: 200px; max-height: 200px;" />
+    <div class="col-md-7">
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <form asp-action="Edit"
+                      method="post"
+                      enctype="multipart/form-data"
+                      autocomplete="off">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger">
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="Id" />
+
+                    <input type="hidden"
+                           asp-for="ImageId" />
+
+                    <div class="mb-3">
+
+                        <label asp-for="Nome"
+                               class="form-label">
+
+                            <i class="fa-solid fa-user"></i>
+                            Nome
+
+                        </label>
+
+                        <input asp-for="Nome"
+                               class="form-control"
+                               placeholder="Nome do funcionário" />
+
+                        <span asp-validation-for="Nome"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Apelido"
+                               class="form-label">
+
+                            <i class="fa-solid fa-user"></i>
+                            Apelido
+
+                        </label>
+
+                        <input asp-for="Apelido"
+                               class="form-control"
+                               placeholder="Apelido do funcionário" />
+
+                        <span asp-validation-for="Apelido"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Email"
+                               class="form-label">
+
+                            <i class="fa-solid fa-envelope"></i>
+                            Email
+
+                        </label>
+
+                        <input asp-for="Email"
+                               class="form-control"
+                               type="email"
+                               placeholder="exemplo@email.com" />
+
+                        <span asp-validation-for="Email"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="PhoneNumber"
+                               class="form-label">
+
+                            <i class="fa-solid fa-phone"></i>
+                            Telefone
+
+                        </label>
+
+                        <input asp-for="PhoneNumber"
+                               class="form-control"
+                               placeholder="Número de telefone" />
+
+                        <span asp-validation-for="PhoneNumber"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="ImageFile"
+                               class="form-label">
+
+                            <i class="fa-solid fa-image"></i>
+                            Nova Fotografia
+
+                        </label>
+
+                        <input asp-for="ImageFile"
+                               type="file"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp" />
+
+                        <span asp-validation-for="ImageFile"
+                              class="text-danger">
+                        </span>
+
+                        <div class="form-text">
+                            Se não selecionar uma nova fotografia,
+                            a atual será mantida.
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Guardar
+
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="fa-solid fa-ban"></i>
+                            Cancelar
+
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
         </div>
-    }
 
-    <div class="form-group">
-        <label asp-for="ImageFile"></label>
-        <input asp-for="ImageFile" type="file" class="form-control" />
-        <span asp-validation-for="ImageFile" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
-@section Scripts {
+
+    <div class="col-md-5 text-center">
+
+        <div class="fw-bold mb-2">
+            <i class="fa-solid fa-image"></i>
+            Fotografia Atual
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl"
+                 alt="Fotografia do Funcionário"
+                 class="img-thumbnail shadow"
+                 style="
+                        max-width:220px;
+                        max-height:220px;
+                        object-fit:cover;" />
+        }
+        else
+        {
+            <div class="text-muted">
+                Sem fotografia disponível.
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@section Scripts
+{
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-

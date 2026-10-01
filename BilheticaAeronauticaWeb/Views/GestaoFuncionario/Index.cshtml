@@ -1,41 +1,163 @@
-﻿@model IEnumerable<UserViewModel>
+﻿@model IEnumerable<BilheticaAeronauticaWeb.Models.UserViewModel>
 
 @{
     ViewData["Title"] = "Funcionários";
 }
 
-<h2>Funcionários</h2>
+<h2 class="mb-4">
+    <i class="fa-solid fa-user-tie text-success"></i>
+    Funcionários
+</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Novo Funcionário</a>
-</p>
+<div class="mb-3">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Foto</th>
-            <th>Nome</th>
-            <th>Email</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <a asp-action="Create"
+       class="btn btn-primary">
+
+        <i class="fa-solid fa-user-plus"></i>
+        Novo Funcionário
+
+    </a>
+
+</div>
+
+<div class="table-responsive">
+
+    <table class="table table-striped table-hover align-middle shadow-sm">
+
+        <thead class="table-dark">
+
             <tr>
-                <td>
-                    @if (!string.IsNullOrEmpty(item.ImageFullPath))
-                    {
-                        <img src="@item.ImageFullPath" alt="Foto" style="max-width: 60px; max-height: 60px;" />
-                    }
-                </td>
-                <td>@item.Nome</td>
-                <td>@item.Email</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.Id">Ver</a> |
-                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-                </td>
+
+                <th>
+                    <i class="fa-solid fa-image"></i>
+                    Foto
+                </th>
+
+                <th>
+                    <i class="fa-solid fa-user"></i>
+                    Nome
+                </th>
+
+                <th>
+                    <i class="fa-solid fa-envelope"></i>
+                    Email
+                </th>
+
+                <th>
+                    <i class="fa-solid fa-phone"></i>
+                    Telefone
+                </th>
+
+                <th class="text-center"
+                    style="width:180px;">
+
+                    Ações
+
+                </th>
+
             </tr>
-        }
-    </tbody>
-</table>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+
+                    <td>
+
+                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl"
+                                 alt="Fotografia de @item.Nome"
+                                 class="img-thumbnail shadow"
+                                 style="
+                                            width:60px;
+                                            height:60px;
+                                            object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div class="d-flex
+                                                align-items-center
+                                                justify-content-center
+                                                bg-light
+                                                border
+                                                rounded"
+                                 style="
+                                            width:60px;
+                                            height:60px;">
+
+                                <i class="fa-solid fa-user
+                                                  text-secondary
+                                                  fs-4">
+                                </i>
+
+                            </div>
+                        }
+
+                    </td>
+
+                    <td>
+                        @item.Nome
+                        @item.Apelido
+                    </td>
+
+                    <td>
+                        @item.Email
+                    </td>
+
+                    <td>
+                        @if (!string.IsNullOrWhiteSpace(item.PhoneNumber))
+                        {
+                            @item.PhoneNumber
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                -
+                            </span>
+                        }
+                    </td>
+
+                    <td class="text-center">
+
+                        <a asp-action="Details"
+                           asp-route-id="@item.Id"
+                           class="btn btn-info btn-sm me-1 text-white"
+                           title="Detalhes">
+
+                            <i class="fa-solid fa-circle-info"></i>
+
+                        </a>
+
+                        <a asp-action="Edit"
+                           asp-route-id="@item.Id"
+                           class="btn btn-warning btn-sm me-1"
+                           title="Editar">
+
+                            <i class="fa-solid fa-pen-to-square"></i>
+
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@item.Id"
+                           class="btn btn-danger btn-sm"
+                           title="Eliminar">
+
+                            <i class="fa-solid fa-trash"></i>
+
+                        </a>
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

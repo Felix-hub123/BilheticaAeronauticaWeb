@@ -1,52 +1,152 @@
-﻿@model BilheticaAeronauticaWeb.Data.Entities.Aviao
+﻿@model BilheticaAeronauticaWeb.Models.AvioesViewModel
 
 @{
     ViewData["Title"] = "Detalhes do Avião";
 }
 
 <h1 class="mb-4">
-    <i class="fa-solid fa-plane-circle-info text-primary"></i> Detalhes do Avião
+    <i class="fa-solid fa-plane-circle-info text-primary"></i>
+    Detalhes do Avião
 </h1>
 
 <div class="card shadow-sm mb-4">
+
     <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-4"><i class="fa-solid fa-industry text-secondary"></i> Marca</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.Marca)</dd>
 
-            <dt class="col-sm-4"><i class="fa-solid fa-plane text-secondary"></i> Modelo</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.Modelo)</dd>
+        <div class="row">
 
-            <dt class="col-sm-4"><i class="fa-solid fa-chair text-secondary"></i> Lugares Económica</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.LugaresEconomica)</dd>
+            <div class="col-md-7">
 
-            <dt class="col-sm-4"><i class="fa-solid fa-couch text-secondary"></i> Lugares Executiva</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(model => model.LugaresExecutiva)</dd>
+                <dl class="row">
 
-            <dt class="col-sm-4"><i class="fa-solid fa-toggle-on text-secondary"></i> Disponível</dt>
-            <dd class="col-sm-8">
-                @if (Model.Disponivel)
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-industry text-secondary"></i>
+                        Marca
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Marca
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-plane text-secondary"></i>
+                        Modelo
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Modelo
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-chair text-secondary"></i>
+                        Lugares Económica
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.LugaresEconomica
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-couch text-secondary"></i>
+                        Lugares Executiva
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.LugaresExecutiva
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-users text-secondary"></i>
+                        Capacidade Total
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Capacidade
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-toggle-on text-secondary"></i>
+                        Disponível
+                    </dt>
+
+                    <dd class="col-sm-8">
+
+                        @if (Model.Disponivel)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fa-solid fa-check"></i>
+                                Sim
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">
+                                <i class="fa-solid fa-xmark"></i>
+                                Não
+                            </span>
+                        }
+
+                    </dd>
+
+                </dl>
+
+            </div>
+
+            <div class="col-md-5 text-center">
+
+                <div class="fw-bold mb-2">
+
+                    <i class="fa-solid fa-image"></i>
+                    Imagem
+
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
                 {
-                    <span class="badge bg-success"><i class="fa-solid fa-check"></i> Sim</span>
+                    <img src="@Model.ImageUrl"
+                         alt="@($"{Model.Marca} {Model.Modelo}")"
+                         class="img-thumbnail"
+                         style="
+                                max-width:300px;
+                                max-height:220px;
+                                object-fit:cover;" />
                 }
                 else
                 {
-                    <span class="badge bg-danger"><i class="fa-solid fa-xmark"></i> Não</span>
+                    <div class="text-muted">
+                        Sem imagem disponível.
+                    </div>
                 }
-            </dd>
 
-            <dt class="col-sm-4"><i class="fa-solid fa-image text-secondary"></i> Imagem</dt>
-            <dd class="col-sm-8">
-                <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do avião" class="img-thumbnail" style="max-width: 150px; height: auto;" />
-            </dd>
-        </dl>
-        <div class="d-flex gap-2 mt-4">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                <i class="fa-solid fa-pen-to-square"></i> Editar
-            </a>
-            <a asp-action="Index" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Voltar à Lista
-            </a>
+            </div>
+
         </div>
+
+        <div class="d-flex gap-2 mt-4">
+
+            @if (User.IsInRole("Admin") ||
+                        User.IsInRole("Funcionario"))
+            {
+                <a asp-action="Edit"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-warning">
+
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Editar
+
+                </a>
+            }
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+
+                <i class="fa-solid fa-arrow-left"></i>
+                Voltar à Lista
+
+            </a>
+
+        </div>
+
     </div>
+
 </div>

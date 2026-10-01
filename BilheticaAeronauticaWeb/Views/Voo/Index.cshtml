@@ -5,44 +5,96 @@
 }
 
 <h2 class="mb-4">
-    <i class="fa-solid fa-plane text-primary"></i> Lista de Voos
+    <i class="fa-solid fa-plane text-primary"></i>
+    Lista de Voos
 </h2>
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show"
+         role="alert">
+
         @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Fechar">
+        </button>
+
     </div>
 }
 
-@if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
+@if (User.IsInRole("Funcionario") ||
+     User.IsInRole("Admin"))
 {
-    <p>
-        <a asp-action="Create" class="btn btn-success">
-            <i class="fa-solid fa-plus"></i> Criar Novo Voo
+    <div class="mb-3">
+
+        <a asp-action="Create"
+           class="btn btn-success">
+
+            <i class="fa-solid fa-plus"></i>
+            Criar Novo Voo
+
         </a>
-    </p>
+
+    </div>
 }
 
 <div class="table-responsive">
+
     <table class="table table-striped table-hover align-middle">
+
         <thead class="table-dark sticky-top">
+
             <tr>
-                <th>Nº Voo</th>
-                <th>Origem</th>
-                <th>Destino</th>
-                <th>Avião</th>
-                <th>Partida</th>
-                <th>Chegada</th>
-                <th>Ações</th>
+
+                <th>
+                    Nº Voo
+                </th>
+
+                <th>
+                    Origem
+                </th>
+
+                <th>
+                    Destino
+                </th>
+
+                <th>
+                    Avião
+                </th>
+
+                <th>
+                    Partida
+                </th>
+
+                <th>
+                    Chegada
+                </th>
+
+                <th>
+                    Ações
+                </th>
+
             </tr>
+
         </thead>
+
         <tbody>
+
             @if (!Model.Any())
             {
                 <tr>
-                    <td colspan="7" class="text-center text-muted">Nenhum voo encontrado.</td>
+
+                    <td colspan="7"
+                        class="text-center text-muted py-4">
+
+                        <i class="fa-solid fa-plane-slash me-2"></i>
+                        Nenhum voo encontrado.
+
+                    </td>
+
                 </tr>
             }
             else
@@ -50,49 +102,130 @@
                 @foreach (var voo in Model)
                 {
                     <tr>
-                        <td>@voo.Numero</td>
+
                         <td>
-                            @if (!string.IsNullOrEmpty(voo.Origem?.ImageFullPath))
+
+                            <strong>
+                                @voo.Numero
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            @if (!string.IsNullOrEmpty(
+                                                voo.Origem?.ImageFullPath))
                             {
-                                <img src="@voo.Origem.ImageFullPath" alt="Bandeira" title="País" style="width:24px;height:16px;margin-right:5px;" />
+                                <img src="@voo.Origem.ImageFullPath"
+                                     alt="Origem"
+                                     style="
+                                                    width:24px;
+                                                    height:16px;
+                                                    margin-right:5px;
+                                                    object-fit:cover;" />
                             }
+
                             @voo.Origem?.Nome
+
                         </td>
+
                         <td>
-                            @if (!string.IsNullOrEmpty(voo.Destino?.ImageFullPath))
+
+                            @if (!string.IsNullOrEmpty(
+                                                voo.Destino?.ImageFullPath))
                             {
-                                <img src="@voo.Destino.ImageFullPath" alt="Bandeira" title="País" style="width:24px;height:16px;margin-right:5px;" />
+                                <img src="@voo.Destino.ImageFullPath"
+                                     alt="Destino"
+                                     style="
+                                                    width:24px;
+                                                    height:16px;
+                                                    margin-right:5px;
+                                                    object-fit:cover;" />
                             }
+
                             @voo.Destino?.Nome
+
                         </td>
+
                         <td>
-                            @if (!string.IsNullOrEmpty(voo.Aviao?.ImageFullPath))
-                            {
-                                <img src="@voo.Aviao.ImageFullPath" alt="Aviao" style="width:36px;height:24px;margin-right:7px;object-fit:cover;border-radius:4px;" />
-                            }
+
+                            <i class="fa-solid fa-plane
+                                              text-primary me-2">
+                            </i>
+
                             @voo.Aviao?.Modelo
+
                         </td>
-                        <td>@voo.DataHoraPartida.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@voo.DataHoraChegada.ToString("dd/MM/yyyy HH:mm")</td>
+
                         <td>
-                            <a asp-action="Details" asp-route-id="@voo.Id" class="btn btn-info btn-sm me-1" title="Detalhes">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </a>
-                            @if (User.IsInRole("Funcionario") || User.IsInRole("Admin"))
-                            {
-                                <a asp-action="Edit" asp-route-id="@voo.Id" class="btn btn-warning btn-sm me-1" title="Editar">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@voo.Id" class="btn btn-danger btn-sm" title="Eliminar">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-                            }
+
+                            <i class="fa-regular fa-calendar me-1
+                                              text-muted">
+                            </i>
+
+                            @voo.DataHoraPartida
+                            .ToString("dd/MM/yyyy HH:mm")
+
                         </td>
+
+                        <td>
+
+                            <i class="fa-regular fa-calendar-check me-1
+                                              text-muted">
+                            </i>
+
+                            @voo.DataHoraChegada
+                            .ToString("dd/MM/yyyy HH:mm")
+
+                        </td>
+
+                        <td>
+
+                            <div class="d-flex">
+
+                                <a asp-action="Details"
+                                   asp-route-id="@voo.Id"
+                                   class="btn btn-info btn-sm me-1"
+                                   title="Detalhes">
+
+                                    <i class="fa-solid fa-circle-info"></i>
+
+                                </a>
+
+                                @if (User.IsInRole("Funcionario") ||
+                                                        User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit"
+                                       asp-route-id="@voo.Id"
+                                       class="btn btn-warning btn-sm me-1"
+                                       title="Editar">
+
+                                        <i class="fa-solid fa-pen-to-square"></i>
+
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@voo.Id"
+                                       class="btn btn-danger btn-sm"
+                                       title="Eliminar">
+
+                                        <i class="fa-solid fa-trash"></i>
+
+                                    </a>
+                                }
+
+                            </div>
+
+                        </td>
+
                     </tr>
                 }
             }
+
         </tbody>
+
     </table>
+
 </div>
 
 

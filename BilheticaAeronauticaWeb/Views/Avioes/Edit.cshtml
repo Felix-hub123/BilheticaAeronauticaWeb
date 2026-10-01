@@ -5,70 +5,208 @@
 }
 
 <h1 class="mb-4">
-    <i class="fa-solid fa-plane-circle-check text-primary"></i> Editar Avião
+    <i class="fa-solid fa-plane-circle-check text-primary"></i>
+    Editar Avião
 </h1>
 
 <div class="row">
+
     <div class="col-md-6">
+
         <div class="card shadow-sm mb-4">
+
             <div class="card-body">
-                <form asp-action="Edit" enctype="multipart/form-data" autocomplete="off">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-                    <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="ImageId" />
+
+                <form asp-action="Edit"
+                      enctype="multipart/form-data"
+                      autocomplete="off">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger">
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="Id" />
+
+                    <input type="hidden"
+                           asp-for="ImageId" />
 
                     <div class="mb-3">
-                        <label asp-for="Marca" class="form-label"><i class="fa-solid fa-industry"></i> Marca</label>
-                        <input asp-for="Marca" class="form-control" placeholder="Marca do avião" />
-                        <span asp-validation-for="Marca" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Modelo" class="form-label"><i class="fa-solid fa-plane"></i> Modelo</label>
-                        <input asp-for="Modelo" class="form-control" placeholder="Modelo do avião" />
-                        <span asp-validation-for="Modelo" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="LugaresEconomica" class="form-label"><i class="fa-solid fa-chair"></i> Lugares Económica</label>
-                        <input asp-for="LugaresEconomica" class="form-control" placeholder="Nº de lugares em económica" />
-                        <span asp-validation-for="LugaresEconomica" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="LugaresExecutiva" class="form-label"><i class="fa-solid fa-couch"></i> Lugares Executiva</label>
-                        <input asp-for="LugaresExecutiva" class="form-control" placeholder="Nº de lugares em executiva" />
-                        <span asp-validation-for="LugaresExecutiva" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="ImageFile" class="form-label"><i class="fa-solid fa-image"></i> Nova Imagem</label>
-                        <input asp-for="ImageFile" class="form-control" type="file" />
-                        <span asp-validation-for="ImageFile" class="text-danger"></span>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" asp-for="Disponivel" />
-                        <label class="form-check-label" asp-for="Disponivel">
-                            <i class="fa-solid fa-toggle-on"></i> Disponível
+
+                        <label asp-for="Marca"
+                               class="form-label">
+
+                            <i class="fa-solid fa-industry"></i>
+                            Marca
+
                         </label>
+
+                        <input asp-for="Marca"
+                               class="form-control"
+                               placeholder="Marca do avião" />
+
+                        <span asp-validation-for="Marca"
+                              class="text-danger">
+                        </span>
+
                     </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Modelo"
+                               class="form-label">
+
+                            <i class="fa-solid fa-plane"></i>
+                            Modelo
+
+                        </label>
+
+                        <input asp-for="Modelo"
+                               class="form-control"
+                               placeholder="Modelo do avião" />
+
+                        <span asp-validation-for="Modelo"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="LugaresEconomica"
+                               class="form-label">
+
+                            <i class="fa-solid fa-chair"></i>
+                            Lugares Económica
+
+                        </label>
+
+                        <input asp-for="LugaresEconomica"
+                               class="form-control"
+                               placeholder="Nº de lugares em económica" />
+
+                        <span asp-validation-for="LugaresEconomica"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="LugaresExecutiva"
+                               class="form-label">
+
+                            <i class="fa-solid fa-couch"></i>
+                            Lugares Executiva
+
+                        </label>
+
+                        <input asp-for="LugaresExecutiva"
+                               class="form-control"
+                               placeholder="Nº de lugares em executiva" />
+
+                        <span asp-validation-for="LugaresExecutiva"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="ImageFile"
+                               class="form-label">
+
+                            <i class="fa-solid fa-image"></i>
+                            Nova Imagem
+
+                        </label>
+
+                        <input asp-for="ImageFile"
+                               class="form-control"
+                               type="file"
+                               accept=".jpg,.jpeg,.png,.webp" />
+
+                        <span asp-validation-for="ImageFile"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="form-check mb-3">
+
+                        <input asp-for="Disponivel"
+                               class="form-check-input" />
+
+                        <label asp-for="Disponivel"
+                               class="form-check-label">
+
+                            <i class="fa-solid fa-toggle-on"></i>
+                            Disponível
+
+                        </label>
+
+                    </div>
+
                     <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fa-solid fa-floppy-disk"></i> Guardar
+
+                        <button type="submit"
+                                class="btn btn-success">
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Guardar
+
                         </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left"></i> Voltar à Lista
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Voltar à Lista
+
                         </a>
+
                     </div>
+
                 </form>
+
             </div>
+
         </div>
+
     </div>
-    <div class="col-md-6 d-flex flex-column align-items-center">
-        <div class="mb-2 fw-bold">
-            <i class="fa-solid fa-image"></i> Imagem Atual
+
+    <div class="col-md-6 text-center">
+
+        <div class="fw-bold mb-2">
+
+            <i class="fa-solid fa-image"></i>
+            Imagem Atual
+
         </div>
-        <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do avião" class="img-thumbnail mb-3" style="max-width: 300px; height: auto;" />
+
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl"
+                 alt="Imagem do avião"
+                 class="img-thumbnail"
+                 style="
+                        max-width:300px;
+                        max-height:220px;
+                        object-fit:cover;" />
+        }
+        else
+        {
+            <div class="text-muted">
+                Sem imagem disponível.
+            </div>
+        }
+
     </div>
+
 </div>
 
-@section Scripts {
+@section Scripts
+{
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

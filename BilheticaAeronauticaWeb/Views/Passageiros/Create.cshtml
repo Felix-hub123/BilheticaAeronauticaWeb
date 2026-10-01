@@ -1,63 +1,291 @@
-﻿@model PassageiroViewModel
+﻿@model BilheticaAeronauticaWeb.Models.PassageiroViewModel
 
 @{
     var editando = Model.Id > 0;
+
+    ViewData["Title"] = editando
+        ? "Editar Passageiro"
+        : "Novo Passageiro";
 }
-<a asp-action="Historico" class="btn btn-info mb-2">Histórico de Viagens</a>
-<a asp-area="Identity" asp-page="/Account/Manage/ChangePassword" class="btn btn-warning mb-2">Alterar Password</a>
 
-<h2>@(editando ? "Editar" : "Novo") Passageiro</h2>
+<div class="d-flex flex-wrap gap-2 mb-4">
 
-<form asp-action="@ViewContext.RouteData.Values["action"]" method="post" enctype="multipart/form-data">
-    @if (editando)
-    {
-        <input type="hidden" asp-for="Id" />
-    }
-    <div class="mb-3">
-        <label asp-for="Nome"></label>
-        <input asp-for="Nome" class="form-control" />
-        <span asp-validation-for="Nome" class="text-danger" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="Apelido"></label>
-        <input asp-for="Apelido" class="form-control" />
-        <span asp-validation-for="Apelido" class="text-danger" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="DocumentoIdentificacao"></label>
-        <input asp-for="DocumentoIdentificacao" class="form-control" />
-        <span asp-validation-for="DocumentoIdentificacao" class="text-danger" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="NumeroDocumento"></label>
-        <input asp-for="NumeroDocumento" class="form-control" />
-        <span asp-validation-for="NumeroDocumento" class="text-danger" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="DataNascimento"></label>
-        <input asp-for="DataNascimento" type="date" class="form-control" />
-        <span asp-validation-for="DataNascimento" class="text-danger" />
-    </div>
-    <div class="mb-3">
-        <label>Foto</label>
-        <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
-        @if (Model.ImageId != Guid.Empty)
-        {
-            <img src="@Url.Content($"/images/users/{Model.ImageId}.jpg")" width="80" class="rounded mt-2" />
-        }
-        else
-        {
-            <img src="/images/users/noimage.png" width="80" class="rounded mt-2" />
-        }
-        <span asp-validation-for="ImageFile" class="text-danger" />
-    </div>
-    <button type="submit" class="btn btn-success">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Voltar</a>
-</form>
+    <a asp-action="Historico"
+       class="btn btn-info">
 
-@section Scripts {
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Histórico de Viagens
+
+    </a>
+
+    <a asp-area="Identity"
+       asp-page="/Account/Manage/ChangePassword"
+       class="btn btn-warning">
+
+        <i class="fa-solid fa-key"></i>
+        Alterar Password
+
+    </a>
+
+</div>
+
+<h2 class="mb-4">
+
+    <i class="fa-solid fa-user text-primary"></i>
+
+    @(editando ? "Editar Passageiro" : "Novo Passageiro")
+
+</h2>
+
+<div class="row">
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <form asp-action="@ViewContext.RouteData.Values["action"]"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="alert alert-danger">
+                    </div>
+
+                    @if (editando)
+                    {
+                        <input type="hidden"
+                               asp-for="Id" />
+
+                        <input type="hidden"
+                               asp-for="ImageId" />
+                    }
+
+                    <div class="mb-3">
+
+                        <label asp-for="Nome"
+                               class="form-label">
+
+                            <i class="fa-solid fa-user"></i>
+                            Nome
+
+                        </label>
+
+                        <input asp-for="Nome"
+                               class="form-control" />
+
+                        <span asp-validation-for="Nome"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Apelido"
+                               class="form-label">
+
+                            <i class="fa-solid fa-user"></i>
+                            Apelido
+
+                        </label>
+
+                        <input asp-for="Apelido"
+                               class="form-control" />
+
+                        <span asp-validation-for="Apelido"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="DocumentoIdentificacao"
+                               class="form-label">
+
+                            <i class="fa-solid fa-id-card"></i>
+                            Documento de Identificação
+
+                        </label>
+
+                        <input asp-for="DocumentoIdentificacao"
+                               class="form-control" />
+
+                        <span asp-validation-for="DocumentoIdentificacao"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="NumeroDocumento"
+                               class="form-label">
+
+                            <i class="fa-solid fa-address-card"></i>
+                            Número do Documento
+
+                        </label>
+
+                        <input asp-for="NumeroDocumento"
+                               class="form-control" />
+
+                        <span asp-validation-for="NumeroDocumento"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="DataNascimento"
+                               class="form-label">
+
+                            <i class="fa-solid fa-calendar-days"></i>
+                            Data de Nascimento
+
+                        </label>
+
+                        <input asp-for="DataNascimento"
+                               type="date"
+                               class="form-control" />
+
+                        <span asp-validation-for="DataNascimento"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="ImageFile"
+                               class="form-label">
+
+                            <i class="fa-solid fa-image"></i>
+                            Fotografia
+
+                        </label>
+
+                        <input asp-for="ImageFile"
+                               type="file"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp" />
+
+                        <span asp-validation-for="ImageFile"
+                              class="text-danger">
+                        </span>
+
+                        @if (editando)
+                        {
+                            <div class="form-text">
+                                Se não selecionar uma nova fotografia,
+                                a fotografia atual será mantida.
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+
+                        <button type="submit"
+                                class="btn btn-success">
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Guardar
+
+                        </button>
+
+                        @if (User.IsInRole("Passageiro"))
+                        {
+                            <a asp-action="Perfil"
+                               class="btn btn-outline-secondary">
+
+                                <i class="fa-solid fa-arrow-left"></i>
+                                Voltar
+
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary">
+
+                                <i class="fa-solid fa-arrow-left"></i>
+                                Voltar
+
+                            </a>
+                        }
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h5 class="card-title mb-3">
+
+                    <i class="fa-solid fa-camera"></i>
+                    Fotografia
+
+                </h5>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl"
+                         alt="Fotografia de @Model.Nome"
+                         class="img-thumbnail shadow"
+                         style="
+                                width:180px;
+                                height:180px;
+                                object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="d-flex
+                                    align-items-center
+                                    justify-content-center
+                                    mx-auto
+                                    bg-light
+                                    border
+                                    rounded"
+                         style="
+                                width:180px;
+                                height:180px;">
+
+                        <i class="fa-solid fa-user
+                                      text-secondary
+                                      display-3">
+                        </i>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
     @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial");
     }
 }
-

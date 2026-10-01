@@ -4,10 +4,7 @@ using BilheticaAeronauticaWeb.Helper;
 using BilheticaAeronauticaWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,325 +12,560 @@ namespace BilheticaAeronauticaWeb.Controllers
 {
     /// <summary>
     /// Controller responsável pela gestão dos passageiros.
-    /// Inclui operações de CRUD, perfil do usuário e histórico de bilhetes.
-    /// Aplica regras de autorização conforme roles e propriedade dos dados.
+    /// Inclui operações de CRUD, perfil e histórico de bilhetes.
     /// </summary>
-    [Authorize(Roles = "Passageiro")]
+    [Authorize]
     public class PassageirosController : Controller
     {
-       
         private readonly IPassageiroRepository _passageiroRepository;
         private readonly IUserHelper _userHelper;
         private readonly IConverterHelper _converterHelper;
-        private readonly IBlobHelper _blobHelper; 
+        private readonly IImageHelper _imageHelper;
         private readonly IBilheteRepository _bilheteRepository;
+
         public PassageirosController(
             IPassageiroRepository passageiroRepository,
-             IUserHelper userHelper,
-             IConverterHelper converterHelper,
-             IBlobHelper blobHelper,
-             IBilheteRepository bilheteRepository
-            )
+            IUserHelper userHelper,
+            IConverterHelper converterHelper,
+            IImageHelper imageHelper,
+            IBilheteRepository bilheteRepository)
         {
             _passageiroRepository = passageiroRepository;
             _userHelper = userHelper;
             _converterHelper = converterHelper;
-            _blobHelper = blobHelper;
+            _imageHelper = imageHelper;
             _bilheteRepository = bilheteRepository;
         }
 
+        // =========================================================
+        // INDEX
+        // =========================================================
 
-
-        /// <summary>
-        /// Lista todos os passageiros (apenas Admin e Funcionário).
-        /// </summary>
-        /// <returns>View com lista ordenada por nome dos passageiros.</returns>
-        // GET: Passageiros
         [Authorize(Roles = "Admin,Funcionario")]
         public IActionResult Index()
         {
-            return View(_passageiroRepository.GetAll().OrderBy(p => p.Nome));
-        }
+            var passageiros = _passageiroRepository
+                .GetAll()
+                .OrderBy(p => p.Nome)
+                .ToList();
 
+            var model = passageiros
+                .Select(p => CriarPassageiroViewModel(p))
+                .ToList();
 
-
-        /// <summary>
-        /// Exibe detalhes do passageiro específico.
-        /// Só pode ser visto pelo próprio passageiro, Admin ou Funcionário.
-        /// </summary>
-        /// <param name="id">ID do passageiro a consultar.</param>
-        /// <returns>View com detalhes ou página de not found / forbidden 
-        // GET: Passageiros/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-                return View("NotFound");
-            var passageiro = await _passageiroRepository.GetByIdAsync(id.Value);
-            if (passageiro == null)
-                return View("NotFound");
-            var userId = _userHelper.GetUserId(User);
-            if (passageiro.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Funcionario"))
-                return Forbid();
-            return View(passageiro);
-        }
-
-
-
-        /// <summary>
-        /// Exibe formulário para criação de novo passageiro.
-        /// Redireciona para perfil se já existir passageiro associado ao user.
-        /// </summary>
-        /// <returns>View do formulário ou redirecionamento para perfil.</returns>
-        // GET: Passageiros/Create
-        public IActionResult Create()
-        {
-            var userId = _userHelper.GetUserId(User);
-            var existente = _passageiroRepository.GetAll().FirstOrDefault(p => p.UserId == userId);
-            if (existente != null)
-                return RedirectToAction(nameof(Perfil));
-            return View();
-        }
-
-
-
-        /// <summary>
-        /// Cria um novo passageiro com dados submetidos, incluindo upload de imagem.
-        /// </summary>
-        /// <param name="model">ViewModel com dados do passageiro.</param>
-        /// <returns>Redireciona para perfil em sucesso, ou mostra formulário com erros.</returns>
-        /// 
-        // POST: Passageiros/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PassageiroViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var userId = _userHelper.GetUserId(User);
-            Guid imageId = Guid.Empty;
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
-            }
-            model.ImageId = imageId;
-
-            var passageiro = _converterHelper.ToPassageiro(model, userId, true);
-            await _passageiroRepository.CreateAsync(passageiro);
-            TempData["SuccessMessage"] = "Conta criada com sucesso!";
-            return RedirectToAction(nameof(Perfil));
-        }
-
-
-
-        /// <summary>
-        /// Cria um passageiro via API recebido no corpo da requisição.
-        /// Associa o passageiro ao utilizador logado.
-        /// </summary>
-        /// <param name="model">Modelo Passageiro enviado na request JSON.</param>
-        /// <returns>JSON com ID e nome do passageiro criado.</returns>
-        /// 
-        [HttpPost]
-        public async Task<IActionResult> CreateFromReserva([FromBody] Passageiro model)
-        {
-            var user = await _userHelper.GetUserAsync(User);
-            model.UserId = user.Id;
-            await _passageiroRepository.CreateAsync(model);
-          
-            return Json(new { id = model.Id, nome = model.Nome });
-        }
-
-
-
-        /// <summary>
-        /// Mostra o perfil do passageiro logado, redireciona para criação se não existir.
-        /// </summary>
-        /// <returns>View do perfil com dados do passageiro.</returns>
-        [Authorize(Roles = "Passageiro")]
-        public async Task<IActionResult> Perfil()
-        {
-            var passageiro = await ObterPassageiroAtual();
-            if (passageiro == null)
-                return RedirectToAction("Create");
-
-            var model = _converterHelper.ToPassageirosViewModel(passageiro);
             return View(model);
         }
 
+        // =========================================================
+        // DETAILS
+        // =========================================================
 
-
-        /// <summary>
-        /// Atualiza os dados do perfil do passageiro, incluindo upload de nova imagem.
-        /// </summary>
-        /// <param name="model">ViewModel com dados para atualização.</param>
-        /// <returns>Redireciona para perfil em sucesso ou retorna à view com erros.</returns>
-        [HttpPost]
-        [Authorize(Roles = "Passageiro")]
-        [ValidateAntiForgeryToken]
-       
-        public async Task<IActionResult> Perfil(PassageiroViewModel model)
+        [Authorize(Roles = "Passageiro,Admin,Funcionario")]
+        public async Task<IActionResult> Details(int? id)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var passageiro = await _passageiroRepository.GetByIdAsync(model.Id);
-            if (passageiro == null || !PodeEditar(passageiro))
-                return Forbid();
-
-            // Lógica explícita da imagem
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            if (id == null)
             {
-                passageiro.ImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
+                return View("NotFound");
             }
 
-            // Atualizar outros dados
-            AtualizaPassageiro(passageiro, model);
+            var passageiro =
+                await _passageiroRepository
+                    .GetByIdAsync(id.Value);
 
-            await _passageiroRepository.UpdateAsync(passageiro);
-            TempData["SuccessMessage"] = "Perfil atualizado!";
+            if (passageiro == null)
+            {
+                return View("NotFound");
+            }
+
+            var userId =
+                _userHelper.GetUserId(User);
+
+            if (passageiro.UserId != userId &&
+                !User.IsInRole("Admin") &&
+                !User.IsInRole("Funcionario"))
+            {
+                return Forbid();
+            }
+
+            var model =
+                CriarPassageiroViewModel(passageiro);
+
+            return View(model);
+        }
+
+        // =========================================================
+        // CREATE
+        // =========================================================
+
+        [Authorize(Roles = "Passageiro")]
+        public IActionResult Create()
+        {
+            var userId =
+                _userHelper.GetUserId(User);
+
+            var existente =
+                _passageiroRepository
+                    .GetAll()
+                    .FirstOrDefault(
+                        p => p.UserId == userId);
+
+            if (existente != null)
+            {
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            return View(new PassageiroViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Passageiro")]
+        public async Task<IActionResult> Create(
+            PassageiroViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                PrepararImagemViewModel(model);
+
+                return View(model);
+            }
+
+            var userId =
+                _userHelper.GetUserId(User);
+
+            Guid imageId = Guid.Empty;
+
+            if (model.ImageFile != null &&
+                model.ImageFile.Length > 0)
+            {
+                imageId =
+                    await _imageHelper
+                        .UploadImageAsync(
+                            model.ImageFile,
+                            "users");
+            }
+
+            model.ImageId = imageId;
+
+            var passageiro =
+                _converterHelper.ToPassageiro(
+                    model,
+                    userId,
+                    true);
+
+            await _passageiroRepository
+                .CreateAsync(passageiro);
+
+            TempData["SuccessMessage"] =
+                "Conta criada com sucesso!";
+
             return RedirectToAction(nameof(Perfil));
         }
 
+        // =========================================================
+        // CREATE FROM RESERVA
+        // =========================================================
 
-        /// <summary>
-        /// Exibe formulário para editar passageiro específico.
-        /// Permite edição apenas para o próprio, Admin ou Funcionário.
-        /// </summary>
-        /// <param name="id">ID do passageiro para editar.</param>
-        /// <returns>View do formulário ou páginas de erro.</returns>
-        // EDIT (Admin ou Funcionário, ou próprio passageiro)
+        [HttpPost]
+        [Authorize(Roles = "Passageiro")]
+        public async Task<IActionResult> CreateFromReserva(
+            [FromBody] Passageiro model)
+        {
+            var user =
+                await _userHelper
+                    .GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            model.UserId = user.Id;
+
+            await _passageiroRepository
+                .CreateAsync(model);
+
+            return Json(new
+            {
+                id = model.Id,
+                nome = model.Nome
+            });
+        }
+
+        // =========================================================
+        // PERFIL
+        // =========================================================
+
+        [Authorize(Roles = "Passageiro")]
+        public async Task<IActionResult> Perfil()
+        {
+            var passageiro =
+                await ObterPassageiroAtual();
+
+            if (passageiro == null)
+            {
+                return RedirectToAction(nameof(Create));
+            }
+
+            var model =
+                CriarPassageiroViewModel(passageiro);
+
+            /*
+             * No perfil do próprio utilizador,
+             * garantimos também que o email fica disponível,
+             * mesmo que a navegação User não tenha sido carregada
+             * pelo repositório.
+             */
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                var user =
+                    await _userHelper.GetUserAsync(User);
+
+                if (user != null)
+                {
+                    model.Email = user.Email;
+                }
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Passageiro")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Perfil(
+            PassageiroViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                PrepararImagemViewModel(model);
+
+                return View(model);
+            }
+
+            var passageiro =
+                await _passageiroRepository
+                    .GetByIdAsync(model.Id);
+
+            if (passageiro == null)
+            {
+                return View("NotFound");
+            }
+
+            if (!PodeEditar(passageiro))
+            {
+                return Forbid();
+            }
+
+            if (model.ImageFile != null &&
+                model.ImageFile.Length > 0)
+            {
+                if (passageiro.ImageId != Guid.Empty)
+                {
+                    await _imageHelper
+                        .DeleteImageAsync(
+                            passageiro.ImageId,
+                            "users");
+                }
+
+                passageiro.ImageId =
+                    await _imageHelper
+                        .UploadImageAsync(
+                            model.ImageFile,
+                            "users");
+            }
+
+            AtualizaPassageiro(
+                passageiro,
+                model);
+
+            await _passageiroRepository
+                .UpdateAsync(passageiro);
+
+            TempData["SuccessMessage"] =
+                "Perfil atualizado!";
+
+            return RedirectToAction(nameof(Perfil));
+        }
+
+        // =========================================================
+        // EDIT
+        // =========================================================
+
         [Authorize(Roles = "Passageiro,Admin,Funcionario")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
+            {
                 return View("NotFound");
+            }
 
-            var passageiro = await _passageiroRepository.GetByIdAsync(id.Value);
+            var passageiro =
+                await _passageiroRepository
+                    .GetByIdAsync(id.Value);
+
             if (passageiro == null)
+            {
                 return View("NotFound");
+            }
 
             if (!PodeEditar(passageiro))
+            {
                 return Forbid();
+            }
 
-            var model = _converterHelper.ToPassageirosViewModel(passageiro);
+            var model =
+                CriarPassageiroViewModel(passageiro);
+
             return View(model);
         }
 
-
-        /// <summary>
-        /// Atualiza passageiro após edição com validação e upload opcional de imagem.
-        /// </summary>
-        /// <param name="model">ViewModel com dados atualizados.</param>
-        /// <returns>Redireciona para perfil ou retorna ao formulário com erros.</returns>
-
-        // POST: Passageiros/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(PassageiroViewModel model)
+        [Authorize(Roles = "Passageiro,Admin,Funcionario")]
+        public async Task<IActionResult> Edit(
+            PassageiroViewModel model)
         {
-
-
             if (!ModelState.IsValid)
-                return View(model);
-
-            var passageiro = await _passageiroRepository.GetByIdAsync(model.Id);
-            if (passageiro == null)
-                return View("NotFound");
-            if (!PodeEditar(passageiro))
-                return Forbid();
-
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
-                passageiro.ImageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
+                PrepararImagemViewModel(model);
+
+                return View(model);
             }
 
-            AtualizaPassageiro(passageiro, model);
+            var passageiro =
+                await _passageiroRepository
+                    .GetByIdAsync(model.Id);
 
-            await _passageiroRepository.UpdateAsync(passageiro);
-            TempData["SuccessMessage"] = "Perfil atualizado!";
-            return RedirectToAction(nameof(Perfil));
+            if (passageiro == null)
+            {
+                return View("NotFound");
+            }
 
+            if (!PodeEditar(passageiro))
+            {
+                return Forbid();
+            }
+
+            if (model.ImageFile != null &&
+                model.ImageFile.Length > 0)
+            {
+                if (passageiro.ImageId != Guid.Empty)
+                {
+                    await _imageHelper
+                        .DeleteImageAsync(
+                            passageiro.ImageId,
+                            "users");
+                }
+
+                passageiro.ImageId =
+                    await _imageHelper
+                        .UploadImageAsync(
+                            model.ImageFile,
+                            "users");
+            }
+
+            AtualizaPassageiro(
+                passageiro,
+                model);
+
+            await _passageiroRepository
+                .UpdateAsync(passageiro);
+
+            TempData["SuccessMessage"] =
+                "Perfil atualizado!";
+
+            if (User.IsInRole("Passageiro"))
+            {
+                return RedirectToAction(nameof(Perfil));
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-
-
-        /// <summary>
-        /// Atualiza os dados básicos do passageiro a partir do ViewModel.
-        /// </summary>
-        /// <param name="entidade">Entidade Passageiro a atualizar.</param>
-        /// <param name="model">ViewModel com dados atualizados.</param>
-        private void AtualizaPassageiro(Passageiro entidade, PassageiroViewModel model)
-        {
-            entidade.Nome = model.Nome;
-            entidade.Apelido = model.Apelido;
-            entidade.DocumentoIdentificacao = model.DocumentoIdentificacao;
-            entidade.NumeroDocumento = model.NumeroDocumento;
-            entidade.DataNascimento = model.DataNascimento;
-            // entidade.ImageId já tratado acima na lógica de imagem
-        }
-
-
-        /// <summary>
-        /// Obtém o passageiro associado ao utilizador autenticado atual.
-        /// </summary>
-        /// <returns>Entidade Passageiro ou null se não existir.</returns>
-        private async Task<Passageiro> ObterPassageiroAtual()
-        {
-            var user = await _userHelper.GetUserAsync(User);
-            return await _passageiroRepository.GetByUserIdAsync(user.Id);
-        }
-
-        private bool PodeEditar(Passageiro passagem)
-        {
-            var userId = _userHelper.GetUserId(User);
-            return passagem.UserId == userId
-                || User.IsInRole("Admin")
-                || User.IsInRole("Funcionario");
-        }
-
+        // =========================================================
+        // HISTÓRICO
+        // =========================================================
 
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> Historico()
         {
-            var user = await _userHelper.GetUserAsync(User);
-            var bilhetes = await _bilheteRepository.GetBilhetesByUserAsync(user.Id);
-            return View(bilhetes); 
+            var user =
+                await _userHelper
+                    .GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var bilhetes =
+                await _bilheteRepository
+                    .GetBilhetesByUserAsync(user.Id);
+
+            return View(bilhetes);
         }
 
+        // =========================================================
+        // DELETE
+        // =========================================================
 
-        // Só Admins/fun podem apagar passageiros
         [Authorize(Roles = "Admin,Funcionario")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
+            {
                 return View("NotFound");
-            var passageiro = await _passageiroRepository.GetByIdAsync(id.Value);
-            if (passageiro == null)
-                return View("NotFound");
+            }
 
-            await _passageiroRepository.DeleteAsync(passageiro);
-            TempData["SuccessMessage"] = "Passageiro removido.";
-            return RedirectToAction(nameof(Index));
+            var passageiro =
+                await _passageiroRepository
+                    .GetByIdAsync(id.Value);
+
+            if (passageiro == null)
+            {
+                return View("NotFound");
+            }
+
+            /*
+             * Mantemos aqui a entidade Passageiro porque ainda
+             * não alterámos a tua View Delete.
+             */
+            return View(passageiro);
         }
 
-        // POST: Passageiros/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Funcionario")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(
+            int id)
         {
-            var passageiro = await _passageiroRepository.GetByIdAsync(id);
-            await _passageiroRepository.DeleteAsync(passageiro);
+            var passageiro =
+                await _passageiroRepository
+                    .GetByIdAsync(id);
+
+            if (passageiro == null)
+            {
+                return View("NotFound");
+            }
+
+            var imageId =
+                passageiro.ImageId;
+
+            await _passageiroRepository
+                .DeleteAsync(passageiro);
+
+            if (imageId != Guid.Empty)
+            {
+                await _imageHelper
+                    .DeleteImageAsync(
+                        imageId,
+                        "users");
+            }
+
+            TempData["SuccessMessage"] =
+                "Passageiro removido.";
+
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PassageiroExists(int id)
+        // =========================================================
+        // MÉTODOS AUXILIARES
+        // =========================================================
+
+        /// <summary>
+        /// Converte a entidade Passageiro para PassageiroViewModel
+        /// e prepara os dados necessários para apresentação.
+        /// </summary>
+        private PassageiroViewModel CriarPassageiroViewModel(
+            Passageiro passageiro)
         {
-            return _passageiroRepository.ExistsAsync(id).Result;
+            var model =
+                _converterHelper
+                    .ToPassageirosViewModel(passageiro);
+
+            model.ImageUrl =
+                _imageHelper.GetImageUrl(
+                    passageiro.ImageId,
+                    "users",
+                    "users/noimage");
+
+            model.Email =
+                passageiro.User?.Email;
+
+            return model;
+        }
+
+        /// <summary>
+        /// Volta a preparar a URL da imagem quando uma View
+        /// precisa de ser apresentada novamente após erro de validação.
+        /// </summary>
+        private void PrepararImagemViewModel(
+            PassageiroViewModel model)
+        {
+            model.ImageUrl =
+                _imageHelper.GetImageUrl(
+                    model.ImageId,
+                    "users",
+                    "users/noimage");
+        }
+
+        /// <summary>
+        /// Atualiza apenas os dados editáveis do passageiro.
+        /// A imagem é tratada separadamente.
+        /// </summary>
+        private void AtualizaPassageiro(
+            Passageiro entidade,
+            PassageiroViewModel model)
+        {
+            entidade.Nome =
+                model.Nome;
+
+            entidade.Apelido =
+                model.Apelido;
+
+            entidade.DocumentoIdentificacao =
+                model.DocumentoIdentificacao;
+
+            entidade.NumeroDocumento =
+                model.NumeroDocumento;
+
+            entidade.DataNascimento =
+                model.DataNascimento;
+        }
+
+        /// <summary>
+        /// Obtém o passageiro associado ao utilizador autenticado.
+        /// </summary>
+        private async Task<Passageiro>
+            ObterPassageiroAtual()
+        {
+            var user =
+                await _userHelper
+                    .GetUserAsync(User);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return await _passageiroRepository
+                .GetByUserIdAsync(user.Id);
+        }
+
+        /// <summary>
+        /// Verifica se o utilizador atual pode editar
+        /// o passageiro indicado.
+        /// </summary>
+        private bool PodeEditar(
+            Passageiro passageiro)
+        {
+            var userId =
+                _userHelper.GetUserId(User);
+
+            return passageiro.UserId == userId
+                   || User.IsInRole("Admin")
+                   || User.IsInRole("Funcionario");
         }
     }
 }

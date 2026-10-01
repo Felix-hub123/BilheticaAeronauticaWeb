@@ -1,22 +1,36 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Helper
-{ /// <summary>
-  /// Interface que define métodos para operações relacionadas com imagens,
-  /// como o upload assíncrono de ficheiros para uma determinada pasta ou armazenamento.
-  /// </summary>
+{
+    /// <summary>
+    /// Interface responsável pela gestão de imagens da aplicação.
+    /// </summary>
     public interface IImageHelper
     {
         /// <summary>
-        /// Faz o upload de uma imagem recebida via formulário HTTP para a pasta/contêiner especificada,
-        /// retornando a URI ou nome do ficheiro que foi gravado.
+        /// Faz upload de uma imagem.
+        /// Em desenvolvimento guarda localmente.
+        /// Em produção guarda no Supabase Storage.
         /// </summary>
-        /// <param name="imageFile">Ficheiro de imagem enviado pelo utilizador.</param>
-        /// <param name="folder">Nome da pasta ou container onde a imagem será armazenada.</param>
-        /// <returns>
-        /// Uma <see cref="string"/> contendo o caminho, URI ou identificador da imagem armazenada.
-        /// </returns>
-        Task<string> UploadImageAsync(IFormFile imageFile, string folder);
+        Task<Guid> UploadImageAsync(
+            IFormFile imageFile,
+            string folder);
+
+        /// <summary>
+        /// Elimina uma imagem.
+        /// </summary>
+        Task DeleteImageAsync(
+            Guid imageId,
+            string folder);
+
+        /// <summary>
+        /// Devolve o URL correto da imagem.
+        /// </summary>
+        string GetImageUrl(
+            Guid imageId,
+            string folder,
+            string placeholderName = "noimage");
     }
 }

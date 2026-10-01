@@ -12,17 +12,21 @@ namespace BilheticaAeronauticaWeb.Models
     {
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required]
+        [MaxLength(100)]
         public string Nome { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required]
+        [MaxLength(100)]
         public string Apelido { get; set; }
 
-        [Required, MaxLength(50)]
+        [Required]
+        [MaxLength(50)]
         [Display(Name = "Tipo de Documento")]
         public string DocumentoIdentificacao { get; set; }
 
-        [Required, MaxLength(50)]
+        [Required]
+        [MaxLength(50)]
         [Display(Name = "Número do Documento")]
         public string NumeroDocumento { get; set; }
 
@@ -30,9 +34,22 @@ namespace BilheticaAeronauticaWeb.Models
         [DataType(DataType.Date)]
         public DateTime? DataNascimento { get; set; }
 
-
-        [Display(Name = "Image")]
+        [Display(Name = "Imagem")]
         public IFormFile ImageFile { get; set; }
-        public Guid ImageId { get;  set; }
+
+        public Guid ImageId { get; set; }
+
+        /// <summary>
+        /// URL final da imagem.
+        /// Em desenvolvimento pode apontar para wwwroot.
+        /// Em produção pode apontar para o Supabase Storage.
+        /// </summary>
+        public string ImageUrl { get; set; }
+
+        /// <summary>
+        /// Email usado apenas para apresentação nas Views.
+        /// Não faz parte diretamente da entidade Passageiro.
+        /// </summary>
+        public string Email { get; set; }
     }
 }
