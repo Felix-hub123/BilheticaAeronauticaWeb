@@ -350,21 +350,33 @@ namespace BilheticaAeronauticaWeb.Data
                 if (!passageiroExiste)
                 {
                     var passageiro =
-                        new Passageiro
-                        {
-                            Nome = nome,
+                  new Passageiro
+                  {
+                      Nome = nome,
 
-                            Apelido = apelido,
+                      Apelido = apelido,
 
-                            UserId = user.Id,
+                      DocumentoIdentificacao = "Passaporte",
 
-                            DataRegisto =
-                                DateTime.UtcNow,
+                      NumeroDocumento = "SEED-PASS-001",
 
-                            WasDeleted = false,
+                      DataNascimento = new DateTime(
+                          1993,
+                          2,
+                          10,
+                          0,
+                          0,
+                          0,
+                          DateTimeKind.Utc),
 
-                            ImageId = Guid.Empty
-                        };
+                      UserId = user.Id,
+
+                      DataRegisto = DateTime.UtcNow,
+
+                      WasDeleted = false,
+
+                      ImageId = Guid.Empty
+                  };
 
                     _context.Passageiros.Add(
                         passageiro);
