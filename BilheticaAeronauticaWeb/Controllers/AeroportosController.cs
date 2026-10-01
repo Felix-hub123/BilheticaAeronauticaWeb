@@ -31,7 +31,10 @@ namespace BilheticaAeronauticaWeb.Controllers
             _imageHelper = imageHelper;
         }
 
-        // GET: Aeroportos
+        // =========================================================
+        // INDEX
+        // =========================================================
+
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
@@ -40,17 +43,37 @@ namespace BilheticaAeronauticaWeb.Controllers
                 .OrderBy(p => p.Cidade)
                 .ToList();
 
-            foreach (var aeroporto in aeroportos)
+            var model = aeroportos
+                .Select(a =>
+                {
+                    var vm =
+                        _converterHelper
+                            .ToAeroportosViewModel(a);
+
+                    vm.ImageUrl =
+                        _imageHelper.GetImageUrl(
+                            a.ImageId,
+                            "aeroportos",
+                            "aeroportos/noimage");
+
+                    return vm;
+                })
+                .ToList();
+
+            foreach (var item in model)
             {
-                aeroporto.FoiUsadoEmVoos =
+                item.FoiUsadoEmVoos =
                     await _aeroportoRepository
-                        .TemVoosAssociadosAsync(aeroporto.Id);
+                        .TemVoosAssociadosAsync(item.Id);
             }
 
-            return View(aeroportos);
+            return View(model);
         }
 
-        // GET: Aeroportos/Details/5
+        // =========================================================
+        // DETAILS
+        // =========================================================
+
         [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
@@ -70,55 +93,70 @@ namespace BilheticaAeronauticaWeb.Controllers
                     "AeroportoNotFound");
             }
 
-            return View(aeroporto);
+            var model =
+                _converterHelper
+                    .ToAeroportosViewModel(aeroporto);
+
+            model.ImageUrl =
+                _imageHelper.GetImageUrl(
+                    aeroporto.ImageId,
+                    "aeroportos",
+                    "aeroportos/noimage");
+
+            return View(model);
         }
 
-        // GET: Aeroportos/Create
+        // =========================================================
+        // CREATE
+        // =========================================================
+
         [Authorize(Roles = "Funcionario,Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Aeroportos/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Create(
             AeroportosViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                Guid imageId = Guid.Empty;
-
-                if (model.ImageFile != null &&
-                    model.ImageFile.Length > 0)
-                {
-                    imageId =
-                        await _imageHelper.UploadImageAsync(
-                            model.ImageFile,
-                            "aeroportos");
-                }
-
-                var aeroporto =
-                    _converterHelper.ToAeroporto(
-                        model,
-                        imageId,
-                        true);
-
-                await _aeroportoRepository
-                    .CreateAsync(aeroporto);
-
-                TempData["Success"] =
-                    "Aeroporto criado com sucesso.";
-
-                return RedirectToAction(nameof(Index));
+                return View(model);
             }
 
-            return View(model);
+            Guid imageId = Guid.Empty;
+
+            if (model.ImageFile != null &&
+                model.ImageFile.Length > 0)
+            {
+                imageId =
+                    await _imageHelper.UploadImageAsync(
+                        model.ImageFile,
+                        "aeroportos");
+            }
+
+            var aeroporto =
+                _converterHelper.ToAeroporto(
+                    model,
+                    imageId,
+                    true);
+
+            await _aeroportoRepository
+                .CreateAsync(aeroporto);
+
+            TempData["Success"] =
+                "Aeroporto criado com sucesso.";
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Aeroportos/Edit/5
+        // =========================================================
+        // EDIT
+        // =========================================================
+
         [HttpGet]
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -155,10 +193,15 @@ namespace BilheticaAeronauticaWeb.Controllers
                 _converterHelper
                     .ToAeroportosViewModel(aeroporto);
 
+            model.ImageUrl =
+                _imageHelper.GetImageUrl(
+                    aeroporto.ImageId,
+                    "aeroportos",
+                    "aeroportos/noimage");
+
             return View(model);
         }
 
-        // POST: Aeroportos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
@@ -167,6 +210,12 @@ namespace BilheticaAeronauticaWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
+                model.ImageUrl =
+                    _imageHelper.GetImageUrl(
+                        model.ImageId,
+                        "aeroportos",
+                        "aeroportos/noimage");
+
                 return View(model);
             }
 
@@ -177,17 +226,23 @@ namespace BilheticaAeronauticaWeb.Controllers
                     string.Empty,
                     "Este aeroporto não pode ser editado porque está associado a um voo ativo.");
 
+                model.ImageUrl =
+                    _imageHelper.GetImageUrl(
+                        model.ImageId,
+                        "aeroportos",
+                        "aeroportos/noimage");
+
                 return View(model);
             }
 
             try
             {
-                Guid imageId = model.ImageId;
+                Guid imageId =
+                    model.ImageId;
 
                 if (model.ImageFile != null &&
                     model.ImageFile.Length > 0)
                 {
-                    // Elimina a imagem antiga
                     if (imageId != Guid.Empty)
                     {
                         await _imageHelper.DeleteImageAsync(
@@ -195,7 +250,6 @@ namespace BilheticaAeronauticaWeb.Controllers
                             "aeroportos");
                     }
 
-                    // Faz upload da nova imagem
                     imageId =
                         await _imageHelper.UploadImageAsync(
                             model.ImageFile,
@@ -229,6 +283,10 @@ namespace BilheticaAeronauticaWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // =========================================================
+        // TAXA
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> ObterTaxa(int id)
         {
@@ -238,7 +296,10 @@ namespace BilheticaAeronauticaWeb.Controllers
 
             if (aeroporto == null)
             {
-                return Json(new { taxa = 0 });
+                return Json(new
+                {
+                    taxa = 0
+                });
             }
 
             return Json(new
@@ -247,7 +308,10 @@ namespace BilheticaAeronauticaWeb.Controllers
             });
         }
 
-        // GET: Aeroportos/Delete/5
+        // =========================================================
+        // DELETE
+        // =========================================================
+
         [Authorize(Roles = "Funcionario,Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -271,10 +335,15 @@ namespace BilheticaAeronauticaWeb.Controllers
                 _converterHelper
                     .ToAeroportosViewModel(aeroporto);
 
+            model.ImageUrl =
+                _imageHelper.GetImageUrl(
+                    aeroporto.ImageId,
+                    "aeroportos",
+                    "aeroportos/noimage");
+
             return View(model);
         }
 
-        // POST: Aeroportos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Funcionario,Admin")]
@@ -302,12 +371,19 @@ namespace BilheticaAeronauticaWeb.Controllers
                     _converterHelper
                         .ToAeroportosViewModel(aeroporto);
 
-                return View("Delete", model);
+                model.ImageUrl =
+                    _imageHelper.GetImageUrl(
+                        aeroporto.ImageId,
+                        "aeroportos",
+                        "aeroportos/noimage");
+
+                return View(
+                    "Delete",
+                    model);
             }
 
             try
             {
-                // Apaga a imagem antes de eliminar
                 if (aeroporto.ImageId != Guid.Empty)
                 {
                     await _imageHelper.DeleteImageAsync(
@@ -329,7 +405,15 @@ namespace BilheticaAeronauticaWeb.Controllers
                     _converterHelper
                         .ToAeroportosViewModel(aeroporto);
 
-                return View("Delete", model);
+                model.ImageUrl =
+                    _imageHelper.GetImageUrl(
+                        aeroporto.ImageId,
+                        "aeroportos",
+                        "aeroportos/noimage");
+
+                return View(
+                    "Delete",
+                    model);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -341,7 +425,15 @@ namespace BilheticaAeronauticaWeb.Controllers
                     _converterHelper
                         .ToAeroportosViewModel(aeroporto);
 
-                return View("Delete", model);
+                model.ImageUrl =
+                    _imageHelper.GetImageUrl(
+                        aeroporto.ImageId,
+                        "aeroportos",
+                        "aeroportos/noimage");
+
+                return View(
+                    "Delete",
+                    model);
             }
 
             TempData["Success"] =

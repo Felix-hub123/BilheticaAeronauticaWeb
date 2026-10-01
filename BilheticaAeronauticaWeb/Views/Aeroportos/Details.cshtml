@@ -1,41 +1,121 @@
-﻿@model BilheticaAeronauticaWeb.Data.Entities.Aeroporto
+﻿@model BilheticaAeronauticaWeb.Models.AeroportosViewModel
 
 @{
     ViewData["Title"] = "Detalhes do Aeroporto";
 }
 
 <h1 class="mb-4">
-    <i class="fa-solid fa-building-circle-exclamation text-primary"></i> Detalhes do Aeroporto
+    <i class="fa-solid fa-building-circle-exclamation text-primary"></i>
+    Detalhes do Aeroporto
 </h1>
 
 <div class="card shadow-sm mb-4">
+
     <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3"><i class="fa-solid fa-building text-secondary"></i> Nome</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Nome)</dd>
 
-            <dt class="col-sm-3"><i class="fa-solid fa-city text-secondary"></i> Cidade</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Cidade)</dd>
+        <div class="row">
 
-            <dt class="col-sm-3"><i class="fa-solid fa-earth-europe text-secondary"></i> País</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Pais)</dd>
+            <div class="col-md-8">
 
-            <dt class="col-sm-3"><i class="fa-solid fa-code text-secondary"></i> Código IATA</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.IATA)</dd>
+                <dl class="row">
 
-            <dt class="col-sm-3"><i class="fa-solid fa-image text-secondary"></i> Imagem</dt>
-            <dd class="col-sm-9">
-                <img src="@Url.Content(Model.ImageFullPath)" alt="Imagem do aeroporto" style="max-width:200px; height:auto;" class="img-thumbnail" />
-            </dd>
-        </dl>
-        <div class="d-flex gap-2 mt-4">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                <i class="fa-solid fa-pen-to-square"></i> Editar
-            </a>
-            <a asp-action="Index" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Voltar à Lista
-            </a>
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-building text-secondary"></i>
+                        Nome
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Nome
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-city text-secondary"></i>
+                        Cidade
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Cidade
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-earth-europe text-secondary"></i>
+                        País
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        @Model.Pais
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        <i class="fa-solid fa-code text-secondary"></i>
+                        Código IATA
+                    </dt>
+
+                    <dd class="col-sm-8">
+                        <span class="badge bg-primary">
+                            @Model.IATA
+                        </span>
+                    </dd>
+
+                </dl>
+
+            </div>
+
+            <div class="col-md-4 text-center">
+
+                <div class="fw-bold mb-3">
+
+                    <i class="fa-solid fa-image text-secondary"></i>
+                    Imagem
+
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl"
+                         alt="Imagem de @Model.Nome"
+                         class="img-thumbnail shadow-sm"
+                         style="
+                                max-width:220px;
+                                max-height:180px;
+                                object-fit:cover;" />
+                }
+                else
+                {
+                    <img src="/images/aeroportos/noimage.png"
+                         alt="Sem imagem"
+                         class="img-thumbnail"
+                         style="
+                                max-width:220px;
+                                max-height:180px;
+                                object-fit:cover;" />
+                }
+
+            </div>
+
         </div>
-    </div>
-</div>
 
+        <div class="d-flex gap-2 mt-4">
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+
+                <i class="fa-solid fa-pen-to-square"></i>
+                Editar
+
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+
+                <i class="fa-solid fa-arrow-left"></i>
+                Voltar à Lista
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

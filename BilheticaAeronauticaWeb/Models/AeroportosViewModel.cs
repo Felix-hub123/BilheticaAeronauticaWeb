@@ -5,15 +5,21 @@ using System.ComponentModel.DataAnnotations;
 namespace BilheticaAeronauticaWeb.Models
 {
     /// <summary>
-    /// ViewModel para a entidade <see cref="Aeroporto"/>, incluindo suporte ao upload de imagem.
+    /// ViewModel para a entidade Aeroporto,
+    /// incluindo suporte para upload e apresentação da imagem.
     /// </summary>
     public class AeroportosViewModel : Aeroporto
     {
+        /// <summary>
+        /// Ficheiro de imagem enviado pelo utilizador.
+        /// </summary>
+        [Display(Name = "Imagem")]
+        public IFormFile ImageFile { get; set; }
 
         /// <summary>
-        /// Ficheiro de imagem enviado pelo utilizador, usada para definir ou atualizar a imagem do aeroporto.
+        /// URL final da imagem usada nas Views.
+        /// É preenchida pelo controller através do IImageHelper.
         /// </summary>
-        [Display(Name = "Image")]
-        public IFormFile ImageFile { get; set; }
+        public string ImageUrl { get; set; }
     }
 }
