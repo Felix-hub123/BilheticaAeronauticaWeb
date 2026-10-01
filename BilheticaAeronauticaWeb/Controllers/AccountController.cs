@@ -4,7 +4,6 @@ using BilheticaAeronauticaWeb.Helper;
 using BilheticaAeronauticaWeb.Model;
 using BilheticaAeronauticaWeb.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -24,82 +23,170 @@ namespace SuperShop.Controllers
         private readonly IUserHelper _userHelper;
         private readonly IEMailHelper _mailHelper;
         private readonly IConfiguration _configuration;
-        private readonly IBlobHelper _blobHelper;
+        private readonly IImageHelper _imageHelper;
         private readonly IPassageiroRepository _passageiroRepository;
 
         public AccountController(
             IUserHelper userHelper,
             IEMailHelper mailHelper,
             IConfiguration configuration,
-            IBlobHelper blobHelper,
+            IImageHelper imageHelper,
             IPassageiroRepository passageiroRepository)
         {
             _userHelper = userHelper;
             _mailHelper = mailHelper;
             _configuration = configuration;
-            _blobHelper = blobHelper;
+            _imageHelper = imageHelper;
             _passageiroRepository = passageiroRepository;
         }
 
-        // GET: Login
+        // =========================================================
+        // LOGIN
+        // =========================================================
+
         [AllowAnonymous]
+        [HttpGet]
         public IActionResult Login()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null &&
+                User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToDashboard();
             }
+
             return View();
         }
 
-        // POST: Login
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(
+            LoginViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return View(model);
+            }
 
-            var result = await _userHelper.LoginAsync(model);
+            var result =
+                await _userHelper.LoginAsync(model);
 
             if (result.Succeeded)
             {
-                if (this.Request.Query.Keys.Contains("ReturnUrl"))
-                    return Redirect(this.Request.Query["ReturnUrl"].First());
-
-                return RedirectToAction("Index", "Home");
+                /*
+                 * Fazemos uma nova requisição para que o cookie
+                 * de autenticação e as roles já estejam disponíveis.
+                 */
+                return RedirectToAction(
+                    nameof(RedirectByRole));
             }
 
-            ModelState.AddModelError(string.Empty, "Failed to login!");
+            ModelState.AddModelError(
+                string.Empty,
+                "Email ou password incorretos.");
+
             return View(model);
         }
 
-        // Logout
+        // =========================================================
+        // REDIRECIONAMENTO POR ROLE
+        // =========================================================
+
+        [Authorize]
+        public IActionResult RedirectByRole()
+        {
+            return RedirectToDashboard();
+        }
+
+        /// <summary>
+        /// Envia cada utilizador diretamente para
+        /// a dashboard correspondente à sua role.
+        /// </summary>
+        private IActionResult RedirectToDashboard()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Admin");
+            }
+
+            if (User.IsInRole("Funcionario"))
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Funcionarios");
+            }
+
+            if (User.IsInRole("Passageiro"))
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Passageiro");
+            }
+
+            /*
+             * Fallback apenas para um utilizador autenticado
+             * que não tenha nenhuma das roles esperadas.
+             */
+            return RedirectToAction(
+                "Index",
+                "Home");
+        }
+
+        // =========================================================
+        // LOGOUT
+        // =========================================================
+
         [Authorize]
         public async Task<IActionResult> Logout()
         {
             await _userHelper.LogoutAsync();
-            return RedirectToAction("Index", "Home");
+
+            return RedirectToAction(
+                "Index",
+                "Home");
         }
 
+        // =========================================================
+        // REGISTER
+        // =========================================================
+
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Register()
         {
+            if (User.Identity != null &&
+                User.Identity.IsAuthenticated)
+            {
+                return RedirectToDashboard();
+            }
+
             return View();
         }
 
-        // POST: Register
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterNewUserViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(
+            RegisterNewUserViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return View(model);
+            }
 
-            var userExists = await _userHelper.GetUserByEmailAsync(model.Username);
+            var userExists =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        model.Username);
+
             if (userExists != null)
             {
-                ModelState.AddModelError("Username", "Email já está registado.");
+                ModelState.AddModelError(
+                    "Username",
+                    "Email já está registado.");
+
                 return View(model);
             }
 
@@ -112,158 +199,259 @@ namespace SuperShop.Controllers
                 PhoneNumber = model.PhoneNumber
             };
 
-            var result = await _userHelper.AddUserAsync(user, model.Password);
+            var result =
+                await _userHelper
+                    .AddUserAsync(
+                        user,
+                        model.Password);
+
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
                 }
+
                 return View(model);
             }
 
-            // Adicionar user à role Passageiro
-            await _userHelper.AddUserToRoleAsync(user, "Passageiro");
+            // Novo utilizador público é Passageiro.
+            await _userHelper
+                .AddUserToRoleAsync(
+                    user,
+                    "Passageiro");
 
-            // Criar e salvar a entidade Passageiro associada ao novo utilizador
-            var passageiro = new Passageiro
-            {
-                Nome = user.Nome,
-                Apelido = user.Apelido,
-                UserId = user.Id,
-                DataRegisto = DateTime.UtcNow,
-                WasDeleted = false
-                // Preencha outros campos obrigatórios se existirem
-            };
+            // Criar Passageiro associado à conta.
+            var passageiro =
+                new Passageiro
+                {
+                    Nome = user.Nome,
+                    Apelido = user.Apelido,
+                    UserId = user.Id,
+                    DataRegisto = DateTime.UtcNow,
+                    WasDeleted = false
+                };
 
-            await _passageiroRepository.AddAsync(passageiro);
+            await _passageiroRepository
+                .AddAsync(passageiro);
 
-            // Continuar com a geração do token e envio do email
-            var token = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
-            var encodedToken = System.Net.WebUtility.UrlEncode(token);
+            // Confirmação de email.
+            var token =
+                await _userHelper
+                    .GenerateEmailConfirmationTokenAsync(
+                        user);
 
-            var tokenLink = Url.Action("ConfirmEmail", "Account", new
-            {
-                userId = user.Id,
-                token = encodedToken
-            }, protocol: HttpContext.Request.Scheme);
+            var encodedToken =
+                System.Net.WebUtility
+                    .UrlEncode(token);
 
-            var response = await _mailHelper.SendEmailAsync(model.Username, "Confirmação de Email",
-               $"<h1>Confirmação de Email</h1> Para ativar sua conta, clique aqui: <a href='{tokenLink}'>Confirmar Email</a>");
+            var tokenLink =
+                Url.Action(
+                    "ConfirmEmail",
+                    "Account",
+                    new
+                    {
+                        userId = user.Id,
+                        token = encodedToken
+                    },
+                    protocol:
+                        HttpContext.Request.Scheme);
+
+            var response =
+                await _mailHelper.SendEmailAsync(
+                    model.Username,
+                    "Confirmação de Email",
+                    $@"
+                        <h1>Confirmação de Email</h1>
+                        Para ativar a sua conta,
+                        clique aqui:
+                        <a href='{tokenLink}'>
+                            Confirmar Email
+                        </a>");
+
             if (response.IsSuccess)
             {
-                TempData["SuccessMessage"] = "Utilizador criado com sucesso! Verifique o seu email para confirmar a conta.";
-                return RedirectToAction("Register");
+                TempData["SuccessMessage"] =
+                    "Utilizador criado com sucesso! Verifique o seu email para confirmar a conta.";
+
+                return RedirectToAction(
+                    nameof(Login));
             }
 
-            ModelState.AddModelError(string.Empty, "Não foi possível enviar o email de confirmação.");
+            ModelState.AddModelError(
+                string.Empty,
+                "Não foi possível enviar o email de confirmação.");
+
             return View(model);
         }
 
+        // =========================================================
+        // EDIT PROFILE
+        // =========================================================
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            if (user == null)
-                return NotFound();
+            var user =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        User.Identity.Name);
 
-            var model = new EditProfileViewModel
+            if (user == null)
             {
-                Nome = user.Nome,
-                Apelido = user.Apelido,
-                PhoneNumber = user.PhoneNumber,
-                Email = user.Email,
-                ImageId = user.ImageId
-            };
+                return NotFound();
+            }
+
+            var model =
+                new EditProfileViewModel
+                {
+                    Nome = user.Nome,
+                    Apelido = user.Apelido,
+                    PhoneNumber = user.PhoneNumber,
+                    Email = user.Email,
+                    ImageId = user.ImageId
+                };
 
             return View(model);
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(
+            EditProfileViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            if (user == null)
-                return NotFound();
-
-            user.Nome = model.Nome;
-            user.Apelido = model.Apelido;
-            user.PhoneNumber = model.PhoneNumber;
-
-            if (model.ImageFile != null)
             {
-                var imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
-                user.ImageId = imageId;
+                return View(model);
             }
 
-            var result = await _userHelper.UpdateUserAsync(user);
+            var user =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        User.Identity.Name);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Nome =
+                model.Nome;
+
+            user.Apelido =
+                model.Apelido;
+
+            user.PhoneNumber =
+                model.PhoneNumber;
+
+            if (model.ImageFile != null &&
+                model.ImageFile.Length > 0)
+            {
+                if (user.ImageId != Guid.Empty)
+                {
+                    await _imageHelper
+                        .DeleteImageAsync(
+                            user.ImageId,
+                            "users");
+                }
+
+                user.ImageId =
+                    await _imageHelper
+                        .UploadImageAsync(
+                            model.ImageFile,
+                            "users");
+            }
+
+            var result =
+                await _userHelper
+                    .UpdateUserAsync(user);
+
             if (result.Succeeded)
             {
-                ViewBag.Message = "Perfil atualizado com sucesso.";
-                model.ImageId = user.ImageId;
+                ViewBag.Message =
+                    "Perfil atualizado com sucesso.";
+
+                model.ImageId =
+                    user.ImageId;
+
                 return View(model);
             }
+
             foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
+            }
 
             return View(model);
         }
 
+        // =========================================================
+        // CONFIRM EMAIL
+        // =========================================================
 
-
-
-        // GET: ConfirmEmail
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(
+            string userId,
+            string token)
         {
-          
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(userId) ||
+                string.IsNullOrEmpty(token))
             {
-                return NotFound();  
+                return NotFound();
             }
 
-      
-            var user = await _userHelper.GetUserByIdAsync(userId);
+            var user =
+                await _userHelper
+                    .GetUserByIdAsync(userId);
+
             if (user == null)
             {
-      
-                ViewBag.Message = "Utilizador não encontrado.";
-                return View(); 
+                ViewBag.Message =
+                    "Utilizador não encontrado.";
+
+                return View();
             }
 
-   
-            var decodedToken = System.Net.WebUtility.UrlDecode(token);
+            var decodedToken =
+                System.Net.WebUtility
+                    .UrlDecode(token);
 
-         
-            var result = await _userHelper.ConfirmEmailAsync(user, decodedToken);
+            var result =
+                await _userHelper
+                    .ConfirmEmailAsync(
+                        user,
+                        decodedToken);
 
             if (result.Succeeded)
             {
-             
                 await _userHelper.LogoutAsync();
 
-                TempData["SuccessMessage"] = "Email confirmado com sucesso. Pode agora iniciar sessão.";
+                TempData["SuccessMessage"] =
+                    "Email confirmado com sucesso. Pode agora iniciar sessão.";
 
-             
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    nameof(Login));
             }
-            else
-            {
-               
-                ViewBag.Message = "Erro ao confirmar o email. O token pode ser inválido ou expirado.";
-                return View();  
-            }
+
+            ViewBag.Message =
+                "Erro ao confirmar o email. O token pode ser inválido ou expirado.";
+
+            return View();
         }
 
+        // =========================================================
+        // RECOVER PASSWORD
+        // =========================================================
 
-        // GET: RecoverPassword
         [AllowAnonymous]
+        [HttpGet]
         public IActionResult RecoverPassword()
         {
             return View();
@@ -271,178 +459,306 @@ namespace SuperShop.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> RecoverPassword(RecoverPasswordViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RecoverPassword(
+            RecoverPasswordViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return View(model);
+            }
 
-            var user = await _userHelper.GetUserByEmailAsync(model.Email);
+            var user =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        model.Email);
 
-            
             if (user != null)
             {
-                var token = await _userHelper.GeneratePasswordResetTokenAsync(user);
-                var encodedToken = System.Net.WebUtility.UrlEncode(token);
+                var token =
+                    await _userHelper
+                        .GeneratePasswordResetTokenAsync(
+                            user);
 
-                var link = Url.Action("ResetPassword", "Account", new
-                {
-                    userId = user.Id,
-                    token = encodedToken,
-                    email = user.Email
-                }, protocol: HttpContext.Request.Scheme);
+                var encodedToken =
+                    System.Net.WebUtility
+                        .UrlEncode(token);
 
-                var emailResponse = await _mailHelper.SendEmailAsync(model.Email, "Password Reset",
-                    $"To reset your password, click here: <a href='{link}'>Reset Password</a>");
+                var link =
+                    Url.Action(
+                        "ResetPassword",
+                        "Account",
+                        new
+                        {
+                            userId = user.Id,
+                            token = encodedToken,
+                            email = user.Email
+                        },
+                        protocol:
+                            HttpContext.Request.Scheme);
+
+                var emailResponse =
+                    await _mailHelper.SendEmailAsync(
+                        model.Email,
+                        "Recuperação de Password",
+                        $@"
+                            Para redefinir a sua password,
+                            clique aqui:
+                            <a href='{link}'>
+                                Redefinir Password
+                            </a>");
 
                 if (!emailResponse.IsSuccess)
                 {
-                    ModelState.AddModelError(string.Empty, "Falha ao enviar o e-mail. Por favor, tente novamente mais tarde.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Falha ao enviar o email. Por favor, tente novamente mais tarde.");
+
                     return View(model);
                 }
             }
 
-           
-            TempData["SuccessMessage"] = "Instruções para recuperar sua senha foram enviadas, caso o e-mail exista em nosso sistema.";
-            return RedirectToAction(nameof(RecoverPassword));
+            TempData["SuccessMessage"] =
+                "As instruções foram enviadas caso o email exista no sistema.";
+
+            return RedirectToAction(
+                nameof(RecoverPassword));
         }
+
+        // =========================================================
+        // RESET PASSWORD
+        // =========================================================
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(string userId, string token, string email)
+        public IActionResult ResetPassword(
+            string userId,
+            string token,
+            string email)
         {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(userId) ||
+                string.IsNullOrEmpty(token) ||
+                string.IsNullOrEmpty(email))
             {
-                return RedirectToAction("Login");
+                return RedirectToAction(
+                    nameof(Login));
             }
 
-            var model = new ResetPasswordViewModel
-            {
-                UserId = userId,
-                Token = token,
-                Email = email
-            };
+            var model =
+                new ResetPasswordViewModel
+                {
+                    UserId = userId,
+                    Token = token,
+                    Email = email
+                };
 
             return View(model);
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(
+            ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userHelper.GetUserByEmailAsync(model.Email);
-
-            if (user == null || user.Id != model.UserId)
             {
-                // Para não expor se usuário existe
-                return View("ResetPasswordConfirmation");
+                return View(model);
             }
 
-            var decodedToken = System.Net.WebUtility.UrlDecode(model.Token);
-            var result = await _userHelper.ResetPasswordAsync(user, decodedToken, model.NewPassword);
+            var user =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        model.Email);
+
+            if (user == null ||
+                user.Id != model.UserId)
+            {
+                return View(
+                    "ResetPasswordConfirmation");
+            }
+
+            var decodedToken =
+                System.Net.WebUtility
+                    .UrlDecode(model.Token);
+
+            var result =
+                await _userHelper
+                    .ResetPasswordAsync(
+                        user,
+                        decodedToken,
+                        model.NewPassword);
 
             if (result.Succeeded)
             {
                 user.PasswordInicialDefinida = true;
-                await _userHelper.UpdateUserAsync(user);
 
-                return View("ResetPasswordConfirmation");
+                await _userHelper
+                    .UpdateUserAsync(user);
+
+                return View(
+                    "ResetPasswordConfirmation");
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
             }
 
             return View(model);
         }
 
+        // =========================================================
+        // CHANGE PASSWORD
+        // =========================================================
 
-     
-
-
-        // GET: ChangePassword
         [Authorize]
+        [HttpGet]
         public IActionResult ChangePassword()
         {
             return View();
         }
 
-        // POST: ChangePassword
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(
+            ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "User not found.");
                 return View(model);
             }
 
-            var result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+            var user =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        User.Identity.Name);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Utilizador não encontrado.");
+
+                return View(model);
+            }
+
+            var result =
+                await _userHelper
+                    .ChangePasswordAsync(
+                        user,
+                        model.OldPassword,
+                        model.NewPassword);
 
             if (result.Succeeded)
             {
-                return RedirectToAction("ChangeUser");
+                TempData["SuccessMessage"] =
+                    "Password alterada com sucesso.";
+
+                return RedirectToAction(
+                    nameof(RedirectByRole));
             }
-            else
+
+            foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault()?.Description);
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
             }
 
             return View(model);
         }
 
-        // POST: CreateToken (JWT Token API)
+        // =========================================================
+        // JWT API TOKEN
+        // =========================================================
+
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> CreateToken([FromBody] LoginViewModel model)
+        public async Task<IActionResult> CreateToken(
+            [FromBody] LoginViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return BadRequest();
+            }
 
-            var user = await _userHelper.GetUserByEmailAsync(model.Email);
+            var user =
+                await _userHelper
+                    .GetUserByEmailAsync(
+                        model.Email);
+
             if (user == null)
+            {
                 return BadRequest();
+            }
 
-            var result = await _userHelper.ValidatePasswordAsync(user, model.Password);
+            var result =
+                await _userHelper
+                    .ValidatePasswordAsync(
+                        user,
+                        model.Password);
 
             if (!result.Succeeded)
+            {
                 return BadRequest();
+            }
 
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+            var claims =
+                new[]
+                {
+                    new Claim(
+                        JwtRegisteredClaimNames.Sub,
+                        user.Email),
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                    new Claim(
+                        JwtRegisteredClaimNames.Jti,
+                        Guid.NewGuid().ToString())
+                };
 
-            var token = new JwtSecurityToken(
-                _configuration["Tokens:Issuer"],
-                _configuration["Tokens:Audience"],
-                claims,
-                expires: DateTime.UtcNow.AddDays(15),
-                signingCredentials: credentials);
+            var key =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(
+                        _configuration["Tokens:Key"]));
 
-            var results = new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            };
+            var credentials =
+                new SigningCredentials(
+                    key,
+                    SecurityAlgorithms.HmacSha256);
 
-            return Created(string.Empty, results);
+            var token =
+                new JwtSecurityToken(
+                    _configuration["Tokens:Issuer"],
+                    _configuration["Tokens:Audience"],
+                    claims,
+                    expires:
+                        DateTime.UtcNow.AddDays(15),
+                    signingCredentials:
+                        credentials);
+
+            var results =
+                new
+                {
+                    token =
+                        new JwtSecurityTokenHandler()
+                            .WriteToken(token),
+
+                    expiration =
+                        token.ValidTo
+                };
+
+            return Created(
+                string.Empty,
+                results);
         }
 
+        // =========================================================
+        // NOT AUTHORIZED
+        // =========================================================
 
-        // GET: NotAuthorized
         [AllowAnonymous]
         public IActionResult NotAuthorized()
         {
@@ -450,4 +766,3 @@ namespace SuperShop.Controllers
         }
     }
 }
-
