@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BilheticaAeronauticaWeb.Data
 {
     /// <summary>
-    /// Classe responsável por popular a base de dados com dados iniciais.
+    /// Responsável pela criação dos dados iniciais da aplicação.
     /// </summary>
     public class SeedDb
     {
@@ -30,29 +30,31 @@ namespace BilheticaAeronauticaWeb.Data
         public async Task SeedAsync()
         {
             // =========================================================
-            // CRIAÇÃO DA BASE DE DADOS
+            // BASE DE DADOS
             // =========================================================
+
             if (_context.Database.IsNpgsql())
             {
                 await EnsurePostgreSqlTablesAsync();
             }
             else
             {
-                // SQL Server local
                 await _context.Database.EnsureCreatedAsync();
             }
 
             // =========================================================
             // ROLES
             // =========================================================
+
             await EnsureRoleAsync("Admin");
             await EnsureRoleAsync("Funcionario");
             await EnsureRoleAsync("Passageiro");
 
             // =========================================================
-            // UTILIZADORES INICIAIS
+            // UTILIZADORES
             // =========================================================
-            var adminUser = await EnsureUserWithRoleAsync(
+
+            await EnsureUserWithRoleAsync(
                 "admin1@yopmail.com",
                 "Admin123!",
                 "Admin",
@@ -60,7 +62,7 @@ namespace BilheticaAeronauticaWeb.Data
                 "Completo",
                 false);
 
-            var funcUser = await EnsureUserWithRoleAsync(
+            await EnsureUserWithRoleAsync(
                 "funcionario@yopmail.com",
                 "Funcionario123!",
                 "Funcionario",
@@ -68,7 +70,7 @@ namespace BilheticaAeronauticaWeb.Data
                 "Funcionario",
                 false);
 
-            var passageiroUser = await EnsureUserWithRoleAsync(
+            await EnsureUserWithRoleAsync(
                 "passageiro@aero.com",
                 "Passageiro123!",
                 "Passageiro",
@@ -76,10 +78,22 @@ namespace BilheticaAeronauticaWeb.Data
                 "Henrique",
                 true);
 
+            /*
+             * IMPORTANTE:
+             *
+             * Guardamos já o Passageiro.
+             *
+             * Assim, mesmo que exista algum problema posteriormente
+             * nos aeroportos, aviões ou lugares, o passageiro não fica
+             * por criar.
+             */
+            await _context.SaveChangesAsync();
+
             // =========================================================
             // AEROPORTOS
             // =========================================================
-            if (!_context.Aeroportos.Any())
+
+            if (!await _context.Aeroportos.AnyAsync())
             {
                 _context.Aeroportos.AddRange(
                     new Aeroporto
@@ -104,42 +118,117 @@ namespace BilheticaAeronauticaWeb.Data
                         IATA = "FAO"
                     }
                 );
+
+                await _context.SaveChangesAsync();
+            }
+
+            // =========================================================
+            // AVIÃO DE TESTE
+            // =========================================================
+
+            var aviao =
+                await _context.Avioes
+                    .FirstOrDefaultAsync();
+
+            if (aviao == null)
+            {
+                aviao = new Aviao
+                {
+                    Marca = "Airbus",
+                    Modelo = "A320-200",
+
+                    LugaresEconomica = 6,
+                    LugaresExecutiva = 0,
+
+                    Disponivel = true,
+                    WasDeleted = false,
+
+                    ImageId = Guid.Empty
+                };
+
+                _context.Avioes.Add(aviao);
+
+                /*
+                 * Precisamos guardar o avião antes de criar lugares,
+                 * porque os lugares precisam do AviaoId.
+                 */
+                await _context.SaveChangesAsync();
             }
 
             // =========================================================
             // LUGARES
             // =========================================================
-            if (!_context.Lugares.Any())
+
+            /*
+             * Antes:
+             *
+             * Lugar
+             *   AviaoId = 0
+             *
+             * PostgreSQL:
+             * FK_Lugares_Avioes_AviaoId ❌
+             *
+             *
+             * Agora:
+             *
+             * Lugar
+             *   AviaoId = aviao.Id
+             *
+             * PostgreSQL:
+             * FK válida ✅
+             */
+
+            var existemLugaresDoAviao =
+                await _context.Lugares
+                    .AnyAsync(
+                        l => l.AviaoId == aviao.Id);
+
+            if (!existemLugaresDoAviao)
             {
                 for (int i = 1; i <= 6; i++)
                 {
-                    _context.Lugares.Add(new Lugar
-                    {
-                        Codigo = $"A{i}",
-                        Disponivel = true,
-                        WasDeleted = false
-                    });
-                }
-            }
+                    _context.Lugares.Add(
+                        new Lugar
+                        {
+                            Codigo = $"A{i}",
 
-            await _context.SaveChangesAsync();
+                            AviaoId = aviao.Id,
+
+                            Disponivel = true,
+
+                            WasDeleted = false
+                        });
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
 
+        // =========================================================
+        // POSTGRESQL
+        // =========================================================
+
         /// <summary>
-        /// No Supabase já existem tabelas internas.
-        /// Por isso EnsureCreated pode não criar as tabelas da aplicação.
-        /// Verificamos especificamente se a tabela Voos existe.
+        /// No Supabase existem tabelas internas.
+        ///
+        /// Por isso, EnsureCreated pode entender incorretamente que
+        /// a base de dados já foi criada.
+        ///
+        /// Verificamos especificamente uma tabela da aplicação.
         /// </summary>
         private async Task EnsurePostgreSqlTablesAsync()
         {
-            var connection = _context.Database.GetDbConnection();
+            var connection =
+                _context.Database.GetDbConnection();
 
-            if (connection.State != System.Data.ConnectionState.Open)
+            if (connection.State !=
+                System.Data.ConnectionState.Open)
             {
                 await connection.OpenAsync();
             }
 
-            await using var command = connection.CreateCommand();
+            await using var command =
+                connection.CreateCommand();
 
             command.CommandText = @"
                 SELECT EXISTS (
@@ -150,7 +239,8 @@ namespace BilheticaAeronauticaWeb.Data
                 );
             ";
 
-            var result = await command.ExecuteScalarAsync();
+            var result =
+                await command.ExecuteScalarAsync();
 
             var voosTableExists =
                 result != null &&
@@ -160,15 +250,24 @@ namespace BilheticaAeronauticaWeb.Data
             if (!voosTableExists)
             {
                 var createScript =
-                    _context.Database.GenerateCreateScript();
+                    _context.Database
+                        .GenerateCreateScript();
 
-                await _context.Database.ExecuteSqlRawAsync(
-                    createScript);
+                await _context.Database
+                    .ExecuteSqlRawAsync(
+                        createScript);
             }
         }
 
+        // =========================================================
+        // UTILIZADORES
+        // =========================================================
+
         /// <summary>
-        /// Cria utilizador, atribui role e cria passageiro quando necessário.
+        /// Garante que o utilizador existe,
+        /// possui a role correta e,
+        /// quando necessário,
+        /// possui também uma entidade Passageiro.
         /// </summary>
         private async Task<User> EnsureUserWithRoleAsync(
             string email,
@@ -179,23 +278,33 @@ namespace BilheticaAeronauticaWeb.Data
             bool criarPassageiro)
         {
             var user =
-                await _userHelper.GetUserByEmailAsync(email);
+                await _userHelper
+                    .GetUserByEmailAsync(email);
+
+            // =====================================================
+            // CRIAR USER
+            // =====================================================
 
             if (user == null)
             {
                 user = new User
                 {
                     UserName = email,
+
                     Email = email,
+
                     EmailConfirmed = true,
+
                     Nome = nome,
+
                     Apelido = apelido
                 };
 
                 var result =
-                    await _userHelper.AddUserAsync(
-                        user,
-                        password);
+                    await _userHelper
+                        .AddUserAsync(
+                            user,
+                            password);
 
                 if (!result.Succeeded)
                 {
@@ -203,54 +312,99 @@ namespace BilheticaAeronauticaWeb.Data
                         $"Erro ao criar utilizador {email}: " +
                         string.Join(
                             ", ",
-                            result.Errors.Select(
-                                e => e.Description)));
+                            result.Errors
+                                .Select(
+                                    e =>
+                                        e.Description)));
                 }
-
-                await _userHelper.AddUserToRoleAsync(
-                    user,
-                    role);
             }
-            else if (
-                !await _userHelper.IsUserInRoleAsync(
+
+            // =====================================================
+            // GARANTIR ROLE
+            // =====================================================
+
+            if (!await _userHelper
+                .IsUserInRoleAsync(
                     user,
                     role))
             {
-                await _userHelper.AddUserToRoleAsync(
-                    user,
-                    role);
+                await _userHelper
+                    .AddUserToRoleAsync(
+                        user,
+                        role);
             }
+
+            // =====================================================
+            // GARANTIR PASSAGEIRO
+            // =====================================================
 
             if (criarPassageiro)
             {
-                if (!_context.Passageiros.Any(
-                    p => p.UserId == user.Id))
+                var passageiroExiste =
+                    await _context.Passageiros
+                        .AnyAsync(
+                            p =>
+                                p.UserId ==
+                                user.Id);
+
+                if (!passageiroExiste)
                 {
-                    _context.Passageiros.Add(
+                    var passageiro =
                         new Passageiro
                         {
                             Nome = nome,
+
                             Apelido = apelido,
-                            DataRegisto = DateTime.UtcNow,
-                            UserId = user.Id
-                        });
+
+                            UserId = user.Id,
+
+                            DataRegisto =
+                                DateTime.UtcNow,
+
+                            WasDeleted = false,
+
+                            ImageId = Guid.Empty
+                        };
+
+                    _context.Passageiros.Add(
+                        passageiro);
                 }
             }
 
             return user;
         }
 
+        // =========================================================
+        // ROLES
+        // =========================================================
+
         /// <summary>
-        /// Garante que determinada role existe.
+        /// Garante que uma role existe.
         /// </summary>
         private async Task EnsureRoleAsync(
             string roleName)
         {
-            if (!await _roleManager.RoleExistsAsync(
+            if (!await _roleManager
+                .RoleExistsAsync(
                     roleName))
             {
-                await _roleManager.CreateAsync(
-                    new IdentityRole(roleName));
+                var result =
+                    await _roleManager
+                        .CreateAsync(
+                            new IdentityRole(
+                                roleName));
+
+                if (!result.Succeeded)
+                {
+                    throw new Exception(
+                        $"Erro ao criar role {roleName}: " +
+                        string.Join(
+                            ", ",
+                            result.Errors
+                                .Select(
+                                    e =>
+                                        e.Description)));
+                }
             }
         }
     }
