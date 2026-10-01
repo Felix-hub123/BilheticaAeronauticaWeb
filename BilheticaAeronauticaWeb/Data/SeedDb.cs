@@ -1,17 +1,15 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
 using BilheticaAeronauticaWeb.Helper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-
 namespace BilheticaAeronauticaWeb.Data
 {
     /// <summary>
-    /// Classe responsável por popular a base de dados com dados iniciais,
-    /// incluindo roles, utilizadores padrão, aeroportos e lugares.
+    /// Classe responsável por popular a base de dados com dados iniciais.
     /// </summary>
     public class SeedDb
     {
@@ -19,55 +17,98 @@ namespace BilheticaAeronauticaWeb.Data
         private readonly IUserHelper _userHelper;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-
-        /// <summary>
-        /// Construtor que recebe as dependências para manipulação do contexto,
-        /// gestão de utilizadores e roles.
-        /// </summary>
-        /// <param name="context">Contexto da base dados.</param>
-        /// <param name="userHelper">Helper para operação com utilizadores.</param>
-        /// <param name="roleManager">Gestor das roles do Identity.</param>
-        public SeedDb(DataContext context,IUserHelper userHelper, RoleManager<IdentityRole> roleManager  )
+        public SeedDb(
+            DataContext context,
+            IUserHelper userHelper,
+            RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userHelper = userHelper;
             _roleManager = roleManager;
-
         }
 
-
-        /// <summary>
-        /// Método principal para executar o seed da base de dados.
-        /// Garante que a base existe, cria roles, utilizadores padrão, aeroportos e lugares.
-        /// </summary>
         public async Task SeedAsync()
         {
-            await _context.Database.EnsureCreatedAsync();
+            // =========================================================
+            // CRIAÇÃO DA BASE DE DADOS
+            // =========================================================
+            if (_context.Database.IsNpgsql())
+            {
+                await EnsurePostgreSqlTablesAsync();
+            }
+            else
+            {
+                // SQL Server local
+                await _context.Database.EnsureCreatedAsync();
+            }
 
-
+            // =========================================================
+            // ROLES
+            // =========================================================
             await EnsureRoleAsync("Admin");
             await EnsureRoleAsync("Funcionario");
             await EnsureRoleAsync("Passageiro");
 
+            // =========================================================
+            // UTILIZADORES INICIAIS
+            // =========================================================
+            var adminUser = await EnsureUserWithRoleAsync(
+                "admin1@yopmail.com",
+                "Admin123!",
+                "Admin",
+                "Administrador",
+                "Completo",
+                false);
 
+            var funcUser = await EnsureUserWithRoleAsync(
+                "funcionario@yopmail.com",
+                "Funcionario123!",
+                "Funcionario",
+                "Dário",
+                "Funcionario",
+                false);
 
+            var passageiroUser = await EnsureUserWithRoleAsync(
+                "passageiro@aero.com",
+                "Passageiro123!",
+                "Passageiro",
+                "Paulo",
+                "Henrique",
+                true);
 
-            var adminUser = await EnsureUserWithRoleAsync("admin1@yopmail.com", "Admin123!", "Admin", "Administrador", "Completo", false);
-            var funcUser = await EnsureUserWithRoleAsync("funcionario@yopmail.com", "Funcionario123!", "Funcionario", "Dário", "Funcionario", false);
-            var passageiroUser = await EnsureUserWithRoleAsync("passageiro@aero.com", "Passageiro123!", "Passageiro", "Paulo", "Henrique", true);
-
-
+            // =========================================================
+            // AEROPORTOS
+            // =========================================================
             if (!_context.Aeroportos.Any())
             {
                 _context.Aeroportos.AddRange(
-                    new Aeroporto { Nome = "Lisboa", Cidade = "Lisboa", Pais = "Portugal", IATA = "LIS" },
-                    new Aeroporto { Nome = "Porto", Cidade = "Porto", Pais = "Portugal", IATA = "OPO" },
-                    new Aeroporto { Nome = "Faro", Cidade = "Faro", Pais = "Portugal", IATA = "FAO" }
+                    new Aeroporto
+                    {
+                        Nome = "Lisboa",
+                        Cidade = "Lisboa",
+                        Pais = "Portugal",
+                        IATA = "LIS"
+                    },
+                    new Aeroporto
+                    {
+                        Nome = "Porto",
+                        Cidade = "Porto",
+                        Pais = "Portugal",
+                        IATA = "OPO"
+                    },
+                    new Aeroporto
+                    {
+                        Nome = "Faro",
+                        Cidade = "Faro",
+                        Pais = "Portugal",
+                        IATA = "FAO"
+                    }
                 );
             }
 
-           
-
+            // =========================================================
+            // LUGARES
+            // =========================================================
             if (!_context.Lugares.Any())
             {
                 for (int i = 1; i <= 6; i++)
@@ -79,22 +120,66 @@ namespace BilheticaAeronauticaWeb.Data
                         WasDeleted = false
                     });
                 }
-
-               
             }
 
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// No Supabase já existem tabelas internas.
+        /// Por isso EnsureCreated pode não criar as tabelas da aplicação.
+        /// Verificamos especificamente se a tabela Voos existe.
+        /// </summary>
+        private async Task EnsurePostgreSqlTablesAsync()
+        {
+            var connection = _context.Database.GetDbConnection();
 
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
 
+            await using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                    AND table_name = 'Voos'
+                );
+            ";
+
+            var result = await command.ExecuteScalarAsync();
+
+            var voosTableExists =
+                result != null &&
+                result != DBNull.Value &&
+                Convert.ToBoolean(result);
+
+            if (!voosTableExists)
+            {
+                var createScript =
+                    _context.Database.GenerateCreateScript();
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    createScript);
+            }
+        }
 
         /// <summary>
-        /// Cria user, atribui role e, se for passageiro, cria registo na tabela Passageiros.
+        /// Cria utilizador, atribui role e cria passageiro quando necessário.
         /// </summary>
-        private async Task<User> EnsureUserWithRoleAsync(string email, string password, string role, string nome, string apelido, bool criarPassageiro)
+        private async Task<User> EnsureUserWithRoleAsync(
+            string email,
+            string password,
+            string role,
+            string nome,
+            string apelido,
+            bool criarPassageiro)
         {
-            var user = await _userHelper.GetUserByEmailAsync(email);
+            var user =
+                await _userHelper.GetUserByEmailAsync(email);
 
             if (user == null)
             {
@@ -107,48 +192,66 @@ namespace BilheticaAeronauticaWeb.Data
                     Apelido = apelido
                 };
 
-                var result = await _userHelper.AddUserAsync(user, password);
+                var result =
+                    await _userHelper.AddUserAsync(
+                        user,
+                        password);
+
                 if (!result.Succeeded)
                 {
-                    throw new Exception($"Erro ao criar utilizador {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    throw new Exception(
+                        $"Erro ao criar utilizador {email}: " +
+                        string.Join(
+                            ", ",
+                            result.Errors.Select(
+                                e => e.Description)));
                 }
-                await _userHelper.AddUserToRoleAsync(user, role);
+
+                await _userHelper.AddUserToRoleAsync(
+                    user,
+                    role);
             }
-            else if (!await _userHelper.IsUserInRoleAsync(user, role))
+            else if (
+                !await _userHelper.IsUserInRoleAsync(
+                    user,
+                    role))
             {
-                await _userHelper.AddUserToRoleAsync(user, role);
+                await _userHelper.AddUserToRoleAsync(
+                    user,
+                    role);
             }
 
-            // Adiciona registo de Passageiro se pedido
             if (criarPassageiro)
             {
-                if (!_context.Passageiros.Any(p => p.UserId == user.Id))
+                if (!_context.Passageiros.Any(
+                    p => p.UserId == user.Id))
                 {
-                    _context.Passageiros.Add(new Passageiro
-                    {
-                        Nome = nome,
-                        Apelido = apelido,
-                        DataRegisto = DateTime.UtcNow,
-                        UserId = user.Id
-                    });
+                    _context.Passageiros.Add(
+                        new Passageiro
+                        {
+                            Nome = nome,
+                            Apelido = apelido,
+                            DataRegisto = DateTime.UtcNow,
+                            UserId = user.Id
+                        });
                 }
             }
 
             return user;
         }
 
-
         /// <summary>
-        /// Garante a existência de uma role, criando-a se necessário.
+        /// Garante que determinada role existe.
         /// </summary>
-        /// <param name="roleName">Nome da role a criar.</param>
-        private async Task EnsureRoleAsync(string roleName)
+        private async Task EnsureRoleAsync(
+            string roleName)
         {
-            if (!await _roleManager.RoleExistsAsync(roleName))
-                await _roleManager.CreateAsync(new IdentityRole(roleName));
+            if (!await _roleManager.RoleExistsAsync(
+                    roleName))
+            {
+                await _roleManager.CreateAsync(
+                    new IdentityRole(roleName));
+            }
         }
-
-         
-
     }
 }
