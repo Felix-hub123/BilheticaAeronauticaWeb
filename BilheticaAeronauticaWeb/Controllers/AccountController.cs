@@ -360,65 +360,7 @@ namespace SuperShop.Controllers
         }
 
 
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> EditProfile()
-        {
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            if (user == null)
-                return NotFound();
-
-            var model = new EditProfileViewModel
-            {
-                Nome = user.Nome,
-                Apelido = user.Apelido,
-                PhoneNumber = user.PhoneNumber,
-                Email = user.Email,
-                ImageId = user.ImageId // Assumindo que ApplicationUser tem essa propriedade
-            };
-
-            return View(model);
-        }
-
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userHelper.GetUserByEmailAsync(User.Identity.Name);
-            if (user == null)
-                return NotFound();
-
-            user.Nome = model.Nome;
-            user.Apelido = model.Apelido;
-            user.PhoneNumber = model.PhoneNumber;
-
-            // Tratar upload de imagem
-            if (model.ImageFile != null)
-            {
-                var imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "users");
-                user.ImageId = imageId;
-            }
-
-            var result = await _userHelper.UpdateUserAsync(user);
-
-            if (result.Succeeded)
-            {
-                ViewBag.Message = "Perfil atualizado com sucesso.";
-                model.ImageId = user.ImageId; // Atualiza para exibir a nova imagem
-                return View(model);
-            }
-            else
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return View(model);
-            }
-        }
+     
 
 
         // GET: ChangePassword
