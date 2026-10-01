@@ -144,33 +144,73 @@ namespace BilheticaAeronauticaWeb.Controllers
         [Authorize(Roles = "Passageiro")]
         public async Task<IActionResult> AdicionarReserva()
         {
-            var user = await _userHelper.GetUserAsync(User);
-            var passageiro = await _passageiroRepository.GetByUserIdAsync(user.Id);
+            var user =
+                await _userHelper.GetUserAsync(User);
 
+            if (user == null)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Account");
+            }
+
+            var passageiro =
+                await _passageiroRepository
+                    .GetByUserIdAsync(user.Id);
+
+            /*
+             * Se a conta existe mas ainda não possui
+             * perfil Passageiro, não mandamos para Home.
+             *
+             * Mandamos diretamente para criação/completação
+             * do perfil.
+             */
             if (passageiro == null)
             {
-                TempData["ErrorMessage"] = "Não existe passageiro associado a este utilizador.";
-                return RedirectToAction("Index", "Home");
+                TempData["InfoMessage"] =
+                    "Complete primeiro os seus dados de passageiro.";
+
+                return RedirectToAction(
+                    "Create",
+                    "Passageiros");
             }
 
-            var voos = await _bilheteService.GetVoosSelectListAsync();
-            if (voos == null || !voos.Any())
+            var voos =
+                await _bilheteService
+                    .GetVoosSelectListAsync();
+
+            if (voos == null ||
+                !voos.Any())
             {
-                TempData["ErrorMessage"] = "Não existem voos disponíveis para reserva neste momento.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErrorMessage"] =
+                    "Não existem voos disponíveis para reserva neste momento.";
+
+                return RedirectToAction(
+                    "Index",
+                    "Passageiro");
             }
 
-            var model = new BilheteViewModel
-            {
-                NomeCliente = user.FullName ?? user.UserName,
-                PassageiroId = passageiro.Id,
-                Voos = voos,
-                Lugares = new List<SelectListItem>()
-            };
+            var model =
+                new BilheteViewModel
+                {
+                    NomeCliente =
+                        user.FullName ??
+                        user.UserName,
+
+                    PassageiroId =
+                        passageiro.Id,
+
+                    Voos =
+                        voos,
+
+                    Lugares =
+                        new List<SelectListItem>()
+                };
+
             return View(model);
         }
 
-              
+
 
         /// <summary>
         /// Edita um bilhete existente (apenas para Admin).
