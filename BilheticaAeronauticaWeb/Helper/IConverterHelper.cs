@@ -2,6 +2,7 @@
 using BilheticaAeronauticaWeb.Models;
 using SuperShop.Models;
 using System;
+using System.Collections.Generic;
 
 namespace BilheticaAeronauticaWeb.Helper
 {
@@ -9,6 +10,8 @@ namespace BilheticaAeronauticaWeb.Helper
     /// Interface que define métodos para converter entre entidades do domínio e respetivos ViewModels,
     /// facilitando o mapeamento bidirecional entre modelos e view models da aplicação.
     /// </summary>
+    /// 
+
     public interface IConverterHelper
     {
         // <summary>
@@ -136,5 +139,10 @@ namespace BilheticaAeronauticaWeb.Helper
         Bilhete UpdateBilheteFromViewModel(Bilhete bilhete, BilheteViewModel model);
 
         public RegisterNewUserViewModel ToRegisterNewUserViewModel(RegisterFuncionarioViewModel funcModel);
+
+
+        VooIndexViewModel ToVooIndexViewModel(Voo voo);
+
+        List<VooIndexViewModel> ToVooIndexViewModels(IEnumerable<Voo> voos);
     }
 }

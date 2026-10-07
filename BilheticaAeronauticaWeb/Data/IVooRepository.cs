@@ -69,6 +69,8 @@ namespace BilheticaAeronauticaWeb.Data
 
         Task<IEnumerable<Bilhete>> GetBilhetesByVooIdAsync(int vooId);
 
+     
+
 
 
     }

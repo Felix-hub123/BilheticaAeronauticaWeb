@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SuperShop.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BilheticaAeronauticaWeb.Helper
 {
@@ -14,6 +15,13 @@ namespace BilheticaAeronauticaWeb.Helper
     /// </summary>
     public class ConverterHelper : IConverterHelper
     {
+        private readonly IImageHelper _imageHelper;
+
+        public ConverterHelper(IImageHelper imageHelper)
+        {
+            _imageHelper = imageHelper;
+        }
+
         /// <summary>
         /// Converte um <see cref="AvioesViewModel"/> em entidade <see cref="Aviao"/>.
         /// </summary>
@@ -352,6 +360,63 @@ namespace BilheticaAeronauticaWeb.Helper
                 Password = null,
                 ConfirmPassword = null
             };
+        }
+
+
+        /// <summary>
+        /// Converte uma entidade Voo no ViewModel utilizado
+        /// na listagem pública de voos.
+        /// </summary>
+        public VooIndexViewModel ToVooIndexViewModel(Voo voo)
+        {
+            return new VooIndexViewModel
+            {
+                Id = voo.Id,
+
+                Numero = voo.Numero,
+
+                OrigemNome =
+                    voo.Origem?.Nome ?? string.Empty,
+
+                DestinoNome =
+                    voo.Destino?.Nome ?? string.Empty,
+
+                OrigemImageUrl =
+                    voo.Origem != null
+                        ? _imageHelper.GetImageUrl(
+                            voo.Origem.ImageId,
+                            "aeroportos")
+                        : string.Empty,
+
+                DestinoImageUrl =
+                    voo.Destino != null
+                        ? _imageHelper.GetImageUrl(
+                            voo.Destino.ImageId,
+                            "aeroportos")
+                        : string.Empty,
+
+                AviaoModelo =
+                    voo.Aviao?.Modelo ?? string.Empty,
+
+                DataHoraPartida =
+                    voo.DataHoraPartida,
+
+                DataHoraChegada =
+                    voo.DataHoraChegada
+            };
+        }
+
+
+        /// <summary>
+        /// Converte uma coleção de voos para a coleção
+        /// utilizada pela página de listagem.
+        /// </summary>
+        public List<VooIndexViewModel> ToVooIndexViewModels(
+            IEnumerable<Voo> voos)
+        {
+            return voos
+                .Select(ToVooIndexViewModel)
+                .ToList();
         }
 
     }

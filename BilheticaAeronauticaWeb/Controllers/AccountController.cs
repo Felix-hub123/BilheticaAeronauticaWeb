@@ -233,14 +233,24 @@ namespace SuperShop.Controllers
 
             // Criar Passageiro associado à conta.
             var passageiro =
-                new Passageiro
-                {
-                    Nome = user.Nome,
-                    Apelido = user.Apelido,
-                    UserId = user.Id,
-                    DataRegisto = DateTime.UtcNow,
-                    WasDeleted = false
-                };
+            new Passageiro
+            {
+                Nome = user.Nome,
+                Apelido = user.Apelido,
+
+                DataNascimento =
+                    model.DataNascimento,
+
+                DocumentoIdentificacao =
+                    model.DocumentoIdentificacao,
+
+                NumeroDocumento =
+                    model.NumeroDocumento,
+
+                UserId = user.Id,
+                DataRegisto = DateTime.UtcNow,
+                WasDeleted = false
+            };
 
             await _passageiroRepository
                 .AddAsync(passageiro);

@@ -47,5 +47,18 @@ namespace SuperShop.Models
 
         [Display(Name = "Foto de Perfil")]
         public IFormFile ImageFile { get; set; }
+
+        [Required(ErrorMessage = "Selecione o tipo de documento.")]
+        [Display(Name = "Tipo de documento")]
+        public string DocumentoIdentificacao { get; set; }
+
+        [Required(ErrorMessage = "Introduza o número do documento.")]
+        [Display(Name = "Número do documento")]
+        public string NumeroDocumento { get; set; }
+
+        [Required(ErrorMessage = "Introduza a data de nascimento.")]
+        [Display(Name = "Data de nascimento")]
+        [DataType(DataType.Date)]
+        public DateTime DataNascimento { get; set; }
     }
 }

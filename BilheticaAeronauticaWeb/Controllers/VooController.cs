@@ -24,19 +24,22 @@ namespace BilheticaAeronauticaWeb.Controllers
         private readonly IAviaoRepository _aviaoRepository;
         private readonly IVooRepository _vooRepository;
         private readonly IImageHelper _imageHelper;
+        private readonly IConverterHelper _converterHelper;
 
         public VooController(
-            IVooService vooService,
-            IAeroportoRepository aeroportoRepository,
-            IAviaoRepository aviaoRepository,
-            IVooRepository vooRepository,
-            IImageHelper imageHelper)
+              IVooService vooService,
+              IAeroportoRepository aeroportoRepository,
+              IAviaoRepository aviaoRepository,
+              IVooRepository vooRepository,
+              IImageHelper imageHelper,
+              IConverterHelper converterHelper)
         {
             _vooService = vooService;
             _aeroportoRepository = aeroportoRepository;
             _aviaoRepository = aviaoRepository;
             _vooRepository = vooRepository;
             _imageHelper = imageHelper;
+            _converterHelper = converterHelper;
         }
 
         // =========================================================
@@ -46,39 +49,11 @@ namespace BilheticaAeronauticaWeb.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            var voos = await _vooService.ObterVoosDisponiveisAsync();
+            var voos =
+                await _vooRepository.GetVoosFuturosAsync();
 
-            var model = voos
-                .OrderBy(v => v.DataHoraPartida)
-                .Select(v => new VooIndexViewModel
-                {
-                    Id = v.Id,
-
-                    Numero = v.Numero,
-
-                    OrigemNome = v.Origem?.Nome ?? string.Empty,
-
-                    DestinoNome = v.Destino?.Nome ?? string.Empty,
-
-                    OrigemImageUrl = v.Origem != null
-                        ? _imageHelper.GetImageUrl(
-                            v.Origem.ImageId,
-                            "aeroportos")
-                        : string.Empty,
-
-                    DestinoImageUrl = v.Destino != null
-                        ? _imageHelper.GetImageUrl(
-                            v.Destino.ImageId,
-                            "aeroportos")
-                        : string.Empty,
-
-                    AviaoModelo = v.Aviao?.Modelo ?? string.Empty,
-
-                    DataHoraPartida = v.DataHoraPartida,
-
-                    DataHoraChegada = v.DataHoraChegada
-                })
-                .ToList();
+            var model =
+                _converterHelper.ToVooIndexViewModels(voos);
 
             return View(model);
         }

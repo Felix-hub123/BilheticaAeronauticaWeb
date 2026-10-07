@@ -76,6 +76,7 @@ namespace BilheticaAeronauticaWeb.Data
                 .Include(v => v.Destino)
                 .Include(v => v.Aviao)
                 .Where(v => v.DataHoraPartida >= DateTime.Now)
+                .OrderBy(v => v.DataHoraPartida)
                 .ToListAsync();
         }
 

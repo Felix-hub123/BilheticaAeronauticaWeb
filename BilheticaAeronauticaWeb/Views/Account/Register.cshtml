@@ -53,6 +53,58 @@
     </div>
 
     <div class="form-group mb-3">
+        <label asp-for="DataNascimento" class="form-label"></label>
+
+        <input asp-for="DataNascimento"
+               type="date"
+               class="form-control" />
+
+        <span asp-validation-for="DataNascimento"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="DocumentoIdentificacao" class="form-label"></label>
+
+        <select asp-for="DocumentoIdentificacao"
+                class="form-select">
+
+            <option value="">
+                -- Selecione o tipo de documento --
+            </option>
+
+            <option value="Passaporte">
+                Passaporte
+            </option>
+
+            <option value="Cartão de Cidadão">
+                Cartão de Cidadão
+            </option>
+
+            <option value="Cartão de Residência">
+                Cartão de Residência
+            </option>
+        </select>
+
+        <span asp-validation-for="DocumentoIdentificacao"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="NumeroDocumento" class="form-label"></label>
+
+        <input asp-for="NumeroDocumento"
+               class="form-control"
+               placeholder="Número do documento" />
+
+        <span asp-validation-for="NumeroDocumento"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="form-group mb-3">
         <label asp-for="Password"></label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
