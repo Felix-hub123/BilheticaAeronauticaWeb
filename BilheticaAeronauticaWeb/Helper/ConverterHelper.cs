@@ -102,7 +102,10 @@ namespace BilheticaAeronauticaWeb.Helper
 
         }
 
-        public Passageiro ToPassageiro(PassageiroViewModel model, string userId, bool isNew)
+        public Passageiro ToPassageiro(
+             PassageiroViewModel model,
+             string userId,
+             bool isNew)
         {
             return new Passageiro
             {
@@ -111,7 +114,13 @@ namespace BilheticaAeronauticaWeb.Helper
                 Apelido = model.Apelido,
                 DocumentoIdentificacao = model.DocumentoIdentificacao,
                 NumeroDocumento = model.NumeroDocumento,
-                DataNascimento = model.DataNascimento,
+
+                DataNascimento = model.DataNascimento.HasValue
+                    ? DateTime.SpecifyKind(
+                        model.DataNascimento.Value,
+                        DateTimeKind.Utc)
+                    : null,
+
                 DataRegisto = DateTime.UtcNow,
                 ImageId = model.ImageId,
                 UserId = userId,
@@ -332,6 +341,7 @@ namespace BilheticaAeronauticaWeb.Helper
                 WasDeleted = false
             };
         }
+
 
 
         /// <summary>
