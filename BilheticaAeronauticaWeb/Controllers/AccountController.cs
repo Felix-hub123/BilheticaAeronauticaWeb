@@ -294,20 +294,120 @@ namespace SuperShop.Controllers
             if (response.IsSuccess)
             {
                 TempData["SuccessMessage"] =
-                    "Utilizador criado com sucesso! Verifique o seu email para confirmar a conta.";
+                    "Conta criada com sucesso. Foi enviado um email de confirmação. Verifique a sua caixa de entrada.";
+
+                return RedirectToAction(
+                    nameof(Login));
+            }
+
+            // O utilizador e o Passageiro já foram criados.
+            // Uma falha temporária do SMTP não deve fazer parecer
+            // que o registo inteiro falhou.
+            Console.WriteLine(
+     $"ERRO AO ENVIAR EMAIL: {response.Message}");
+
+            TempData["WarningMessage"] =
+                "A sua conta foi criada com sucesso, mas não foi possível enviar o email de confirmação neste momento.";
+
+            TempData["PendingConfirmationEmail"] =
+                model.Username;
+
+            return RedirectToAction(nameof(Register));
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ResendConfirmationEmail()
+        {
+            return View();
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendConfirmationEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Introduza o seu email.");
+
+                return View();
+            }
+
+            var user =
+                await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Não foi encontrada nenhuma conta com este email.");
+
+                return View();
+            }
+
+            if (user.EmailConfirmed)
+            {
+                TempData["SuccessMessage"] =
+                    "Este email já se encontra confirmado.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            var token =
+                await _userHelper
+                    .GenerateEmailConfirmationTokenAsync(user);
+
+            var encodedToken =
+                System.Net.WebUtility
+                    .UrlEncode(token);
+
+            var tokenLink =
+                Url.Action(
+                    "ConfirmEmail",
+                    "Account",
+                    new
+                    {
+                        userId = user.Id,
+                        token = encodedToken
+                    },
+                    protocol: HttpContext.Request.Scheme);
+
+            var response =
+                await _mailHelper.SendEmailAsync(
+                    email,
+                    "Confirmação de Email",
+                    $@"
+                <h1>Confirmação de Email</h1>
+                Para ativar a sua conta,
+                clique aqui:
+                <a href='{tokenLink}'>
+                    Confirmar Email
+                </a>");
+
+            if (response.IsSuccess)
+            {
+                TempData["SuccessMessage"] =
+                    "Email de confirmação reenviado com sucesso.";
 
                 return RedirectToAction(nameof(Login));
             }
 
             Console.WriteLine(
-                $"ERRO AO ENVIAR EMAIL: {response.Message}");
+                $"ERRO AO REENVIAR EMAIL: {response.Message}");
 
             ModelState.AddModelError(
                 string.Empty,
-                "Não foi possível enviar o email de confirmação.");
+                "Não foi possível reenviar o email neste momento. Tente novamente.");
 
-            return View(model);
+            return View();
         }
+
+
+
 
         // =========================================================
         // EDIT PROFILE

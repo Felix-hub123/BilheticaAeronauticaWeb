@@ -3,148 +3,390 @@
 
 @{
     ViewData["Title"] = "Registar";
+
+    var warningMessage = TempData["WarningMessage"] as string;
+    var pendingEmail = TempData["PendingConfirmationEmail"] as string;
+
+    var contaCriadaSemEmail =
+        !string.IsNullOrWhiteSpace(warningMessage) &&
+        !string.IsNullOrWhiteSpace(pendingEmail);
 }
 
-<h2 class="mb-3">Registar Novo Utilizador</h2>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow p-4" style="max-width: 650px; width: 100%;">
 
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @ViewBag.Message
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+        <div class="card-header bg-primary text-white text-center mb-3">
+            <i class="fa-solid fa-user-plus fa-2x"></i>
+            <h4 class="mt-2">Criar Conta</h4>
+        </div>
 
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        @if (TempData["SuccessMessage"] != null)
         {
-            <div>@modelError.ErrorMessage</div>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Fechar">
+                </button>
+            </div>
         }
+
+        @if (contaCriadaSemEmail)
+        {
+            <div class="alert alert-warning" role="alert">
+
+                <h5 class="alert-heading">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    Conta criada com sucesso
+                </h5>
+
+                <p class="mb-2">
+                    @warningMessage
+                </p>
+
+                <p class="mb-2">
+                    <strong>
+                        Não volte a preencher o formulário de registo.
+                    </strong>
+                </p>
+
+                <p class="mb-3">
+                    O próximo passo é reenviar o email de confirmação para:
+                </p>
+
+                <div class="alert alert-light border">
+                    <i class="fa-solid fa-envelope me-2"></i>
+                    <strong>@pendingEmail</strong>
+                </div>
+
+                <form asp-controller="Account"
+                      asp-action="ResendConfirmationEmail"
+                      method="post"
+                      class="mb-2">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="email"
+                           value="@pendingEmail" />
+
+                    <button type="submit"
+                            class="btn btn-warning w-100">
+
+                        <i class="fa-solid fa-paper-plane me-2"></i>
+                        Reenviar email de confirmação
+
+                    </button>
+                </form>
+
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   class="btn btn-outline-secondary w-100">
+
+                    <i class="fa-solid fa-right-to-bracket me-2"></i>
+                    Ir para o Login
+
+                </a>
+            </div>
+        }
+        else
+        {
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show"
+                     role="alert">
+
+                    @ViewBag.Message
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Fechar">
+                    </button>
+                </div>
+            }
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show"
+                     role="alert">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    @foreach (var modelError in
+                                ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@modelError.ErrorMessage</div>
+                    }
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Fechar">
+                    </button>
+                </div>
+            }
+
+            <form id="registerForm"
+                  asp-action="Register"
+                  method="post"
+                  autocomplete="off"
+                  class="needs-validation"
+                  novalidate>
+
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Nome" class="form-label">
+                            <i class="fa-solid fa-user me-2"></i>
+                            Nome
+                        </label>
+
+                        <input asp-for="Nome"
+                               class="form-control" />
+
+                        <span asp-validation-for="Nome"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Apelido" class="form-label">
+                            <i class="fa-solid fa-user me-2"></i>
+                            Apelido
+                        </label>
+
+                        <input asp-for="Apelido"
+                               class="form-control" />
+
+                        <span asp-validation-for="Apelido"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label">
+                        <i class="fa-solid fa-envelope me-2"></i>
+                        Email
+                    </label>
+
+                    <input asp-for="Username"
+                           class="form-control"
+                           autocomplete="email" />
+
+                    <span asp-validation-for="Username"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label">
+                        <i class="fa-solid fa-phone me-2"></i>
+                        Telemóvel
+                    </label>
+
+                    <input asp-for="PhoneNumber"
+                           class="form-control" />
+
+                    <span asp-validation-for="PhoneNumber"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DataNascimento"
+                           class="form-label">
+
+                        <i class="fa-solid fa-calendar-days me-2"></i>
+                        Data de nascimento
+
+                    </label>
+
+                    <input asp-for="DataNascimento"
+                           type="date"
+                           class="form-control" />
+
+                    <span asp-validation-for="DataNascimento"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DocumentoIdentificacao"
+                           class="form-label">
+
+                        <i class="fa-solid fa-id-card me-2"></i>
+                        Documento de identificação
+
+                    </label>
+
+                    <select asp-for="DocumentoIdentificacao"
+                            class="form-select">
+
+                        <option value="">
+                            -- Selecione o tipo de documento --
+                        </option>
+
+                        <option value="Passaporte">
+                            Passaporte
+                        </option>
+
+                        <option value="Cartão de Cidadão">
+                            Cartão de Cidadão
+                        </option>
+
+                        <option value="Cartão de Residência">
+                            Cartão de Residência
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="DocumentoIdentificacao"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NumeroDocumento"
+                           class="form-label">
+
+                        <i class="fa-solid fa-address-card me-2"></i>
+                        Número do documento
+
+                    </label>
+
+                    <input asp-for="NumeroDocumento"
+                           class="form-control"
+                           placeholder="Número do documento" />
+
+                    <span asp-validation-for="NumeroDocumento"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">
+                        <i class="fa-solid fa-key me-2"></i>
+                        Password
+                    </label>
+
+                    <input asp-for="Password"
+                           type="password"
+                           class="form-control"
+                           autocomplete="new-password" />
+
+                    <span asp-validation-for="Password"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword"
+                           class="form-label">
+
+                        <i class="fa-solid fa-key me-2"></i>
+                        Confirmar Password
+
+                    </label>
+
+                    <input asp-for="ConfirmPassword"
+                           type="password"
+                           class="form-control"
+                           autocomplete="new-password" />
+
+                    <span asp-validation-for="ConfirmPassword"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <button id="registerBtn"
+                        type="submit"
+                        class="btn btn-primary w-100">
+
+                    <span class="spinner-border spinner-border-sm me-2 d-none"
+                          role="status"
+                          aria-hidden="true">
+                    </span>
+
+                    <span class="btn-text">
+                        Registar
+                    </span>
+
+                </button>
+
+                <div class="text-center mt-3">
+
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="small">
+
+                        <i class="fa-solid fa-right-to-bracket me-1"></i>
+                        Já tenho conta
+
+                    </a>
+
+                </div>
+
+                <div class="text-center mt-2">
+
+                    <a asp-controller="Account"
+                       asp-action="ResendConfirmationEmail"
+                       class="small">
+
+                        Não recebeu o email de confirmação?
+
+                    </a>
+
+                </div>
+
+            </form>
+        }
+
     </div>
-}
-
-<form id="registerForm" asp-action="Register" method="post" autocomplete="off">
-    @Html.AntiForgeryToken()
-
-    <div class="form-group mb-3">
-        <label asp-for="Nome"></label>
-        <input asp-for="Nome" class="form-control" />
-        <span asp-validation-for="Nome" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Apelido"></label>
-        <input asp-for="Apelido" class="form-control" />
-        <span asp-validation-for="Apelido" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Username"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="PhoneNumber"></label>
-        <input asp-for="PhoneNumber" class="form-control" />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="DataNascimento" class="form-label"></label>
-
-        <input asp-for="DataNascimento"
-               type="date"
-               class="form-control" />
-
-        <span asp-validation-for="DataNascimento"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="DocumentoIdentificacao" class="form-label"></label>
-
-        <select asp-for="DocumentoIdentificacao"
-                class="form-select">
-
-            <option value="">
-                -- Selecione o tipo de documento --
-            </option>
-
-            <option value="Passaporte">
-                Passaporte
-            </option>
-
-            <option value="Cartão de Cidadão">
-                Cartão de Cidadão
-            </option>
-
-            <option value="Cartão de Residência">
-                Cartão de Residência
-            </option>
-        </select>
-
-        <span asp-validation-for="DocumentoIdentificacao"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="NumeroDocumento" class="form-label"></label>
-
-        <input asp-for="NumeroDocumento"
-               class="form-control"
-               placeholder="Número do documento" />
-
-        <span asp-validation-for="NumeroDocumento"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="ConfirmPassword"></label>
-        <input asp-for="ConfirmPassword" type="password" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Registar</button>
-</form>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+</div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            var showModal = '@(TempData["ShowSuccessModal"] != null && (bool)TempData["ShowSuccessModal"] ? "true" : "false")';
 
-            if (showModal === "true") {
-                var modal = new bootstrap.Modal(document.getElementById('successModal'));
-                modal.show();
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const form = document.getElementById('registerForm');
+
+            if (!form) {
+                return;
             }
+
+            const button =
+                document.getElementById('registerBtn');
+
+            const spinner =
+                button.querySelector('.spinner-border');
+
+            const btnText =
+                button.querySelector('.btn-text');
+
+            form.addEventListener('submit', function () {
+
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                button.disabled = true;
+
+                spinner.classList.remove('d-none');
+
+                btnText.textContent =
+                    'A criar conta...';
+            });
         });
     </script>
 }
-
-
-
-
-
-
-
-
-
