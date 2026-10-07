@@ -6,6 +6,7 @@ using BilheticaAeronauticaWeb.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -58,6 +59,11 @@ namespace BilheticaAeronauticaWeb
                     options.UseNpgsql(connectionString);
                 }
             });
+
+
+            services.AddDataProtection()
+            .PersistKeysToDbContext<DataContext>()
+            .SetApplicationName("BilheticaAeronauticaWeb");
 
 
             // =========================================================

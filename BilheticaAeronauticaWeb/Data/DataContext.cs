@@ -1,16 +1,19 @@
 ﻿using BilheticaAeronauticaWeb.Data.Entities;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BilheticaAeronauticaWeb.Data
 {
-    public class DataContext : IdentityDbContext<User>
+    public class DataContext :
+    IdentityDbContext<User>,
+    IDataProtectionKeyContext
     {
+
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<Aviao> Avioes { get; set; }
         public DbSet<Aeroporto> Aeroportos { get; set; }
         public DbSet<Lugar> Lugares { get; set; }
@@ -56,7 +59,7 @@ namespace BilheticaAeronauticaWeb.Data
             #endregion
 
             #region Filtros Globais para Soft Delete
-           
+
             modelBuilder.Entity<Aeroporto>().HasQueryFilter(a => !a.WasDeleted);
             modelBuilder.Entity<Aviao>().HasQueryFilter(a => !a.WasDeleted);
             modelBuilder.Entity<Lugar>().HasQueryFilter(l => !l.WasDeleted);
@@ -173,7 +176,7 @@ namespace BilheticaAeronauticaWeb.Data
 
             foreach (var entry in entries)
             {
-               
+
                 var wasDeletedProp = entry.Entity.GetType().GetProperty("WasDeleted");
 
                 if (wasDeletedProp != null)
