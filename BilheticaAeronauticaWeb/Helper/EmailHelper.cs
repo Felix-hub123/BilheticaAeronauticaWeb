@@ -1,6 +1,5 @@
 ﻿using BilheticaAeronauticaWeb.Helper;
 using MailKit.Security;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using System;
@@ -8,17 +7,11 @@ using System.Threading.Tasks;
 
 namespace SuperShop.Helpers
 {
-
     /// <summary>
-    /// Helper para envio de email via SMTP usando a biblioteca MailKit.
+    /// Helper para envio de emails através de SMTP utilizando MailKit.
     /// </summary>
     public class EMailHelper : IEMailHelper
     {
-
-        /// <summary>
-        /// Inicializa uma nova instância do <see cref="EMailHelper"/> com as configurações necessárias para envio de email.
-        /// </summary>
-        /// <param name="configuration">Interface para obter configurações da aplicação.</param>
         private readonly IConfiguration _configuration;
 
         public EMailHelper(IConfiguration configuration)
@@ -26,46 +19,142 @@ namespace SuperShop.Helpers
             _configuration = configuration;
         }
 
-
         /// <summary>
-        /// Envia um email assíncrono para o destinatário especificado com o assunto e corpo em HTML.
+        /// Envia um email HTML para o destinatário indicado.
         /// </summary>
-        /// <param name="email">Endereço de email do destinatário.</param>
-        /// <param name="subject">Assunto do email.</param>
-        /// <param name="htmlMessage">Conteúdo HTML do corpo do email.</param>
-        /// <returns>
-        /// Um objeto <see cref="Response"/> indicando sucesso ou falha, e mensagem detalhada em caso de erro.
-        /// </returns>
-        public async Task<Response> SendEmailAsync(string email, string subject, string htmlMessage) 
+        public async Task<Response> SendEmailAsync(
+            string email,
+            string subject,
+            string htmlMessage)
         {
-            var nameFrom = _configuration["Mail:NameFrom"];
-            var from = _configuration["Mail:From"];
-            var smtp = _configuration["Mail:Smtp"];
-            var port = _configuration["Mail:Port"];
-            var password = _configuration["Mail:Password"];
-
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(nameFrom ?? from, from));
-            message.To.Add(new MailboxAddress(email, email));
-            message.Subject = subject;
-
-            var bodybuilder = new BodyBuilder
-            {
-                HtmlBody = htmlMessage,
-            };
-            message.Body = bodybuilder.ToMessageBody();
-
             try
             {
-                using (var client = new MailKit.Net.Smtp.SmtpClient())
-                {
-                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                var nameFrom =
+                    _configuration["Mail:NameFrom"];
 
-                    await client.ConnectAsync(smtp, int.Parse(port), SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync(from, password);
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
+                var from =
+                    _configuration["Mail:From"];
+
+                var username =
+                    _configuration["Mail:Username"];
+
+                var smtp =
+                    _configuration["Mail:Smtp"];
+
+                var portString =
+                    _configuration["Mail:Port"];
+
+                var password =
+                    _configuration["Mail:Password"];
+
+                // =====================================================
+                // VALIDAR CONFIGURAÇÕES
+                // =====================================================
+
+                if (string.IsNullOrWhiteSpace(from))
+                {
+                    return new Response
+                    {
+                        IsSuccess = false,
+                        Message = "Mail:From não está configurado."
+                    };
                 }
+
+                if (string.IsNullOrWhiteSpace(smtp))
+                {
+                    return new Response
+                    {
+                        IsSuccess = false,
+                        Message = "Mail:Smtp não está configurado."
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(portString) ||
+                    !int.TryParse(portString, out var port))
+                {
+                    return new Response
+                    {
+                        IsSuccess = false,
+                        Message = "Mail:Port não está configurado corretamente."
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    return new Response
+                    {
+                        IsSuccess = false,
+                        Message = "Mail:Password não está configurado."
+                    };
+                }
+
+                /*
+                 * Caso não exista Mail:Username,
+                 * utiliza o próprio endereço From.
+                 */
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    username = from;
+                }
+
+                // =====================================================
+                // CRIAR MENSAGEM
+                // =====================================================
+
+                var message = new MimeMessage();
+
+                message.From.Add(
+                    new MailboxAddress(
+                        nameFrom ?? from,
+                        from));
+
+                message.To.Add(
+                    MailboxAddress.Parse(email));
+
+                message.Subject = subject;
+
+                var bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = htmlMessage
+                };
+
+                message.Body =
+                    bodyBuilder.ToMessageBody();
+
+                // =====================================================
+                // SMTP
+                // =====================================================
+
+                using var client =
+                    new MailKit.Net.Smtp.SmtpClient();
+
+                /*
+                 * Porta 465 normalmente utiliza SSL diretamente.
+                 * Porta 587 normalmente utiliza STARTTLS.
+                 */
+                var socketOptions =
+                    port == 465
+                        ? SecureSocketOptions.SslOnConnect
+                        : SecureSocketOptions.StartTls;
+
+                await client.ConnectAsync(
+                    smtp,
+                    port,
+                    socketOptions);
+
+                await client.AuthenticateAsync(
+                    username,
+                    password);
+
+                await client.SendAsync(message);
+
+                await client.DisconnectAsync(true);
+
+                return new Response
+                {
+                    IsSuccess = true,
+                    Message = "Email enviado com sucesso."
+                };
             }
             catch (Exception ex)
             {
@@ -75,11 +164,6 @@ namespace SuperShop.Helpers
                     Message = ex.ToString()
                 };
             }
-
-            return new Response
-            {
-                IsSuccess = true
-            };
         }
     }
 }

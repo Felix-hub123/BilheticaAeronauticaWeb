@@ -232,23 +232,25 @@ namespace SuperShop.Controllers
                     "Passageiro");
 
             // Criar Passageiro associado à conta.
-            var passageiro =
-            new Passageiro
+            var passageiro = new Passageiro
             {
                 Nome = user.Nome,
                 Apelido = user.Apelido,
 
-                DataNascimento =
-                    model.DataNascimento,
+                DataNascimento = DateTime.SpecifyKind(
+          model.DataNascimento,
+          DateTimeKind.Utc),
 
                 DocumentoIdentificacao =
-                    model.DocumentoIdentificacao,
+          model.DocumentoIdentificacao,
 
                 NumeroDocumento =
-                    model.NumeroDocumento,
+          model.NumeroDocumento,
 
                 UserId = user.Id,
+
                 DataRegisto = DateTime.UtcNow,
+
                 WasDeleted = false
             };
 
@@ -294,9 +296,11 @@ namespace SuperShop.Controllers
                 TempData["SuccessMessage"] =
                     "Utilizador criado com sucesso! Verifique o seu email para confirmar a conta.";
 
-                return RedirectToAction(
-                    nameof(Login));
+                return RedirectToAction(nameof(Login));
             }
+
+            Console.WriteLine(
+                $"ERRO AO ENVIAR EMAIL: {response.Message}");
 
             ModelState.AddModelError(
                 string.Empty,
