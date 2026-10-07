@@ -35,7 +35,9 @@ namespace BilheticaAeronauticaWeb.Data
         /// <param name="bilheteTemp">Bilhete temporário a adicionar.</param>
         /// <param name="userId">ID do utilizador que adiciona o bilhete temporário.</param>
         /// <returns>True se adicionado com sucesso; False se já existir bilhete igual.</returns>
-        public async Task<bool> AddBilheteTempAsync(BilheteTemp bilheteTemp, string userId)
+        public async Task<bool> AddBilheteTempAsync(
+      BilheteTemp bilheteTemp,
+      string userId)
         {
             bool existeTemp = await _context.BilhetesTemp.AnyAsync(b =>
                 b.VooId == bilheteTemp.VooId &&
@@ -43,7 +45,6 @@ namespace BilheticaAeronauticaWeb.Data
                 b.PassageiroId == bilheteTemp.PassageiroId &&
                 !b.WasDeleted);
 
-           
             bool existeDefinitivo = await _context.Bilhetes.AnyAsync(b =>
                 b.VooId == bilheteTemp.VooId &&
                 b.LugarId == bilheteTemp.LugarId &&
@@ -51,11 +52,47 @@ namespace BilheticaAeronauticaWeb.Data
                 !b.WasDeleted);
 
             if (existeTemp || existeDefinitivo)
-                return false; // Já existe, não adiciona
+                return false;
 
             bilheteTemp.CriadoPorUserId = userId;
+
+            // PostgreSQL/Npgsql exige UTC para "timestamp with time zone".
+            bilheteTemp.DataCriacao =
+                NormalizarParaUtc(
+                    bilheteTemp.DataCriacao,
+                    DateTime.UtcNow);
+
+            bilheteTemp.DataReserva =
+                NormalizarParaUtc(
+                    bilheteTemp.DataReserva,
+                    DateTime.UtcNow);
+
             _context.BilhetesTemp.Add(bilheteTemp);
+
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        private static DateTime NormalizarParaUtc(
+            DateTime data,
+            DateTime valorPadrao)
+        {
+            if (data == default)
+                return valorPadrao;
+
+            return data.Kind switch
+            {
+                DateTimeKind.Utc => data,
+
+                DateTimeKind.Local =>
+                    data.ToUniversalTime(),
+
+                DateTimeKind.Unspecified =>
+                    DateTime.SpecifyKind(
+                        data,
+                        DateTimeKind.Utc),
+
+                _ => data
+            };
         }
 
 

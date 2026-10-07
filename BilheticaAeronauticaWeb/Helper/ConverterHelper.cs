@@ -246,16 +246,33 @@ namespace BilheticaAeronauticaWeb.Helper
                 Id = isNew ? 0 : model.Id,
                 VooId = model.VooId,
                 LugarId = model.LugarId,
-                PassageiroId = model.PassageiroId, 
+                PassageiroId = model.PassageiroId,
                 Valor = model.Valor,
                 BagagemExtra = model.BagagemExtra,
                 Refeicao = model.Refeicao,
-                DataReserva = model.DataCompra ?? DateTime.Now,
+
+                DataReserva = model.DataCompra.HasValue
+                    ? GarantirUtc(model.DataCompra.Value)
+                    : DateTime.UtcNow,
+
                 WasDeleted = model.WasDeleted
-        
             };
         }
 
+
+        private static DateTime GarantirUtc(DateTime data)
+        {
+            return data.Kind switch
+            {
+                DateTimeKind.Utc => data,
+                DateTimeKind.Local => data.ToUniversalTime(),
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(
+                    data,
+                    DateTimeKind.Utc),
+
+                _ => data
+            };
+        }
 
         /// <summary>
         /// Converte uma entidade <see cref="Bilhete"/> em <see cref="BilheteViewModel"/>.
@@ -285,6 +302,9 @@ namespace BilheticaAeronauticaWeb.Helper
         }
 
 
+
+
+
         /// <summary>
         /// Converte um <see cref="BilheteViewModel"/> em entidade temporária <see cref="BilheteTemp"/>.
         /// </summary>
@@ -293,16 +313,23 @@ namespace BilheticaAeronauticaWeb.Helper
         /// <returns>Nova instância de <see cref="BilheteTemp"/>.</returns>
         public BilheteTemp ToBilheteTemp(BilheteViewModel model, string userId)
         {
+            var agoraUtc = DateTime.UtcNow;
+
             return new BilheteTemp
             {
-                PassageiroId = model.PassageiroId, 
+                PassageiroId = model.PassageiroId,
                 VooId = model.VooId,
                 LugarId = model.LugarId,
                 Preco = model.Valor,
+                Quantidade = 1,
                 BagagemExtra = model.BagagemExtra,
                 Refeicao = model.Refeicao,
                 CriadoPorUserId = userId,
-                DataCriacao = DateTime.Now
+
+                DataCriacao = agoraUtc,
+                DataReserva = agoraUtc,
+
+                WasDeleted = false
             };
         }
 
