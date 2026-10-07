@@ -5,11 +5,11 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 {
 #nullable enable
 
-
     /// <summary>
     /// Representa um bilhete de voo reservado ou comprado por um passageiro,
-    /// contendo informações sobre o voo, lugar, preço, opções adicionais (bagagem extra, refeição),
-    /// estado da reserva/pagamento, datas relevantes e histórico de criação e soft delete.
+    /// contendo informações sobre o voo, lugar, preço, opções adicionais
+    /// (bagagem extra, refeição), estado da reserva/pagamento,
+    /// datas relevantes e histórico de criação e soft delete.
     /// </summary>
     public class Bilhete : IEntity
     {
@@ -20,6 +20,7 @@ namespace BilheticaAeronauticaWeb.Data.Entities
 
         /// <summary>
         /// Data e hora em que a transação de compra do bilhete foi finalizada.
+        /// Armazenada em UTC.
         /// </summary>
         public DateTime DataCompra { get; set; }
 
@@ -60,45 +61,46 @@ namespace BilheticaAeronauticaWeb.Data.Entities
         public decimal Valor { get; set; }
 
         /// <summary>
-        /// Indica se o passageiro contratou o serviço adicional de franquia de bagagem extra.
+        /// Indica se o passageiro contratou bagagem extra.
         /// </summary>
         public bool BagagemExtra { get; set; }
 
         /// <summary>
-        /// Indica se o passageiro contratou serviço de bordo ou refeição especial para o voo.
+        /// Indica se o passageiro contratou refeição a bordo.
         /// </summary>
         public bool Refeicao { get; set; }
 
         /// <summary>
-        /// Data e hora em que a reserva de lugar no voo foi iniciada no sistema.
+        /// Data e hora em que a reserva foi criada.
+        /// Armazenada em UTC para compatibilidade com PostgreSQL.
         /// </summary>
-        public DateTime DataReserva { get; set; } = DateTime.Now;
+        public DateTime DataReserva { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Identificador do utilizador ou operador do sistema que efetuou a emissão da reserva.
+        /// Identificador do utilizador responsável pela criação do bilhete.
         /// </summary>
         public string? CriadoPorUserId { get; set; }
 
         /// <summary>
-        /// Flag que indica se o registo foi logicamente eliminado (Soft Delete).
+        /// Indica se o registo foi eliminado logicamente.
         /// </summary>
         public bool WasDeleted { get; set; }
 
         /// <summary>
-        /// Sinaliza se a transação financeira ligada ao bilhete foi deferida com sucesso.
+        /// Indica se o pagamento foi confirmado.
         /// </summary>
         public bool PagamentoConfirmado { get; set; } = false;
 
         /// <summary>
-        /// Data e hora de efetivação e emissão formal do cartão de embarque/bilhete líquido.
+        /// Data e hora da emissão formal do bilhete.
+        /// Deve ser preenchida em UTC quando o bilhete for emitido.
         /// </summary>
         public DateTime? DataEmissao { get; set; }
 
         /// <summary>
-        /// Estado atual em que a reserva se encontra (Ex: "Reservado", "Pago", "Cancelado").
+        /// Estado atual da reserva.
         /// </summary>
         public string Estado { get; set; } = "Reservado";
     }
 }
-
 

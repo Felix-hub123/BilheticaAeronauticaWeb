@@ -265,35 +265,46 @@ namespace BilheticaAeronauticaWeb.Data
         /// <param name="userId">ID do utilizador dono do bilhete temporário.</param>
         /// <param name="idBilheteTemp">ID do bilhete temporário a confirmar.</param>
         /// <returns>True se confirmado com sucesso; False se o bilhete temporário não existir.</returns>
-        public async Task<bool> ConfirmBilheteTempAsync(string userId, int idBilheteTemp)
+        public async Task<bool> ConfirmBilheteTempAsync(
+        string userId,
+        int idBilheteTemp)
         {
-           
             var bilheteTemp = await _context.BilhetesTemp
-                .FirstOrDefaultAsync(b => b.Id == idBilheteTemp && b.CriadoPorUserId == userId);
+                .FirstOrDefaultAsync(b =>
+                    b.Id == idBilheteTemp &&
+                    b.CriadoPorUserId == userId);
 
             if (bilheteTemp == null)
                 return false;
 
-            
+            var agoraUtc = DateTime.UtcNow;
+
             var bilhete = new Bilhete
             {
                 VooId = bilheteTemp.VooId,
                 PassageiroId = bilheteTemp.PassageiroId,
                 LugarId = bilheteTemp.LugarId,
+
                 Valor = bilheteTemp.Preco,
+
                 BagagemExtra = bilheteTemp.BagagemExtra,
                 Refeicao = bilheteTemp.Refeicao,
-                DataCompra = DateTime.UtcNow
-               
+
+                CriadoPorUserId = userId,
+
+                DataCompra = agoraUtc,
+                DataReserva = agoraUtc,
+
+                PagamentoConfirmado = true,
+                DataEmissao = agoraUtc,
+                Estado = "Emitido",
+
+                WasDeleted = false
             };
 
-     
             _context.Bilhetes.Add(bilhete);
-
-           
             _context.BilhetesTemp.Remove(bilheteTemp);
 
-        
             await _context.SaveChangesAsync();
 
             return true;
