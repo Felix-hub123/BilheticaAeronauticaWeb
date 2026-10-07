@@ -246,50 +246,202 @@ namespace BilheticaAeronauticaWeb.Controllers
         /// <param name="model">Dados da reserva pretendida</param>
         /// <returns>Redirect ao carrinho ou view com erros</returns>
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Passageiro")]
-        public async Task<IActionResult> AdicionarReserva(BilheteViewModel model)
+        public async Task<IActionResult> AdicionarReserva(
+       BilheteViewModel model)
         {
+            /*
+             * O preço NÃO deve vir do browser.
+             *
+             * Mesmo que uma versão antiga da View,
+             * cache do browser ou alguém manualmente
+             * envie:
+             *
+             * Valor = "100.00"
+             *
+             * ignoramos completamente esse valor.
+             *
+             * O preço será calculado novamente
+             * no servidor.
+             */
+            ModelState.Remove(nameof(BilheteViewModel.Valor));
+
             if (!ModelState.IsValid)
             {
-                var erros = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
+                var erros =
+                    ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
                 ViewBag.ErrosValidacao = erros;
+
                 await PreencherSelectLists(model);
+
                 return View(model);
             }
 
-            var user = await _userHelper.GetUserAsync(User);
-            var lugar = await _bilheteService.GetLugarByIdAsync(model.LugarId);
-            var voo = await _bilheteService.GetVooByIdAsync(model.VooId);
+            // =========================================================
+            // UTILIZADOR
+            // =========================================================
 
-            
-            if (voo == null || voo.DataHoraPartida <= DateTime.Now)
+            var user =
+                await _userHelper.GetUserAsync(User);
+
+            if (user == null)
             {
-                ModelState.AddModelError("", "Não é possível reservar lugar em voos que já partiram.");
-                await PreencherSelectLists(model);
-                return View(model);
+                return RedirectToAction(
+                    "Login",
+                    "Account");
             }
 
-            var lugarOcupado = !await _bilheteService.LugarDisponivelAsync(model.VooId, model.LugarId);
-            if (lugarOcupado)
+            // =========================================================
+            // PASSAGEIRO
+            // =========================================================
+
+            var passageiro =
+                await _passageiroRepository
+                    .GetByUserIdAsync(user.Id);
+
+            if (passageiro == null)
             {
-                ModelState.AddModelError("", "Este lugar já foi reservado por outro utilizador. Por favor escolha outro lugar.");
+                TempData["InfoMessage"] =
+                    "Complete primeiro os seus dados de passageiro.";
+
+                return RedirectToAction(
+                    "Create",
+                    "Passageiros");
+            }
+
+            /*
+             * Não confiamos no PassageiroId que veio
+             * do formulário.
+             *
+             * Usamos sempre o passageiro associado
+             * ao utilizador autenticado.
+             */
+            model.PassageiroId =
+                passageiro.Id;
+
+            // =========================================================
+            // VOO E LUGAR
+            // =========================================================
+
+            var voo =
+                await _bilheteService
+                    .GetVooByIdAsync(
+                        model.VooId);
+
+            if (voo == null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "O voo selecionado não foi encontrado.");
+
                 await PreencherSelectLists(model);
+
                 return View(model);
             }
 
-            model.Valor = _bilheteService.CalcularPrecoBilhete(lugar, voo, model.BagagemExtra, model.Refeicao);
+            var lugar =
+                await _bilheteService
+                    .GetLugarByIdAsync(
+                        model.LugarId);
 
-            var bilheteTemp = _converterHelper.ToBilheteTemp(model, user.Id);
-            var result = await _bilheteRepository.AddBilheteTempAsync(bilheteTemp, user.Id);
+            if (lugar == null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "O lugar selecionado não foi encontrado.");
+
+                await PreencherSelectLists(model);
+
+                return View(model);
+            }
+
+            // =========================================================
+            // VALIDAR DATA DO VOO
+            // =========================================================
+
+            /*
+             * Os voos estão agora armazenados em UTC.
+             */
+            if (voo.DataHoraPartida <= DateTime.UtcNow)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Não é possível reservar lugar em voos que já partiram.");
+
+                await PreencherSelectLists(model);
+
+                return View(model);
+            }
+
+            // =========================================================
+            // DISPONIBILIDADE DO LUGAR
+            // =========================================================
+
+            var lugarDisponivel =
+                await _bilheteService
+                    .LugarDisponivelAsync(
+                        model.VooId,
+                        model.LugarId);
+
+            if (!lugarDisponivel)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Este lugar já foi reservado por outro utilizador. Por favor escolha outro lugar.");
+
+                await PreencherSelectLists(model);
+
+                return View(model);
+            }
+
+            model.Valor =
+                _bilheteService
+                    .CalcularPrecoBilhete(
+                        lugar,
+                        voo,
+                        model.BagagemExtra,
+                        model.Refeicao);
+
+            // =========================================================
+            // CRIAR RESERVA TEMPORÁRIA
+            // =========================================================
+
+            var bilheteTemp =
+                _converterHelper
+                    .ToBilheteTemp(
+                        model,
+                        user.Id);
+
+            var result =
+                await _bilheteRepository
+                    .AddBilheteTempAsync(
+                        bilheteTemp,
+                        user.Id);
 
             if (result)
-                return RedirectToAction("Carrinho");
+            {
+                TempData["SuccessMessage"] =
+                    "Reserva adicionada ao carrinho.";
 
-            ModelState.AddModelError("", "Já existe uma reserva para este lugar neste voo.");
+                return RedirectToAction(
+                    nameof(Carrinho));
+            }
+
+            // =========================================================
+            // ERRO
+            // =========================================================
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Já existe uma reserva para este lugar neste voo.");
+
             await PreencherSelectLists(model);
+
             return View(model);
         }
 
