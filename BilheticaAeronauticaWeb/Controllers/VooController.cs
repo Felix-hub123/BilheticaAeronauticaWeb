@@ -1,5 +1,6 @@
 ﻿using BilheticaAeronauticaWeb.Data;
 using BilheticaAeronauticaWeb.Data.Entities;
+using BilheticaAeronauticaWeb.Helper;
 using BilheticaAeronauticaWeb.Models;
 using BilheticaAeronauticaWeb.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,17 +23,20 @@ namespace BilheticaAeronauticaWeb.Controllers
         private readonly IAeroportoRepository _aeroportoRepository;
         private readonly IAviaoRepository _aviaoRepository;
         private readonly IVooRepository _vooRepository;
+        private readonly IImageHelper _imageHelper;
 
         public VooController(
             IVooService vooService,
             IAeroportoRepository aeroportoRepository,
             IAviaoRepository aviaoRepository,
-            IVooRepository vooRepository)
+            IVooRepository vooRepository,
+            IImageHelper imageHelper)
         {
             _vooService = vooService;
             _aeroportoRepository = aeroportoRepository;
             _aviaoRepository = aviaoRepository;
             _vooRepository = vooRepository;
+            _imageHelper = imageHelper;
         }
 
         // =========================================================
@@ -40,13 +44,43 @@ namespace BilheticaAeronauticaWeb.Controllers
         // =========================================================
 
         [AllowAnonymous]
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            var voos =
-                await _vooService.ObterVoosDisponiveisAsync();
+            var voos = await _vooService.ObterVoosDisponiveisAsync();
 
-            return View(
-                voos.OrderBy(v => v.DataHoraPartida));
+            var model = voos
+                .OrderBy(v => v.DataHoraPartida)
+                .Select(v => new VooIndexViewModel
+                {
+                    Id = v.Id,
+
+                    Numero = v.Numero,
+
+                    OrigemNome = v.Origem?.Nome ?? string.Empty,
+
+                    DestinoNome = v.Destino?.Nome ?? string.Empty,
+
+                    OrigemImageUrl = v.Origem != null
+                        ? _imageHelper.GetImageUrl(
+                            v.Origem.ImageId,
+                            "aeroportos")
+                        : string.Empty,
+
+                    DestinoImageUrl = v.Destino != null
+                        ? _imageHelper.GetImageUrl(
+                            v.Destino.ImageId,
+                            "aeroportos")
+                        : string.Empty,
+
+                    AviaoModelo = v.Aviao?.Modelo ?? string.Empty,
+
+                    DataHoraPartida = v.DataHoraPartida,
+
+                    DataHoraChegada = v.DataHoraChegada
+                })
+                .ToList();
+
+            return View(model);
         }
 
         // =========================================================
